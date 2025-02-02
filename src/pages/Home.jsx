@@ -1,37 +1,160 @@
-import React from 'react'
-import Items from '../components/Items'
-import HeroSection from '../components/HeroSection'
-import Footer from '../components/Footer'
+import React, { useState } from 'react';
+import bgImage from '../assets/images/bg.png';
+import iconImage from '../assets/images/icon.png';
+import IconEyeOff from '../assets/images/IconEyeOff.png';
+import IconEye from '../assets/images/IconEye.png';
+import fram1 from '../assets/images/fram1.png';
+import Frame from '../assets/images/Frame.png';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
-  return (
-    <>
-    <HeroSection/>
-    <Items title={'Products'} section={'all'}/>
-      <Items title={'Electronic'} section={'Electronic'}/>
-      <Items title={'Kitchen'} section={'Kitchen'}/>
-      {/* <div className="relative">
-      <img
-        src="https://static.toiimg.com/thumb/msid-109892261,width-1280,height-720,imgsize-74050,resizemode-6,overlay-toi_sw,pt-32,y_pad-40/photo.jpg"
-        alt="Workspace with a laptop, keyboard, and a notepad that says 'Never Settle'"
-        className="w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-black/50"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-center">
-        <h2 className="text-4xl font-bold">Workspace Collection</h2>
-        <p className="mt-4 text-lg">
-          Upgrade your desk with objects that keep you
-          organized and clear-minded.
-        </p>
-        <button className="mt-6 px-8 py-3 bg-blue-500 text-white font-bold rounded-md">
-          View the collection
-        </button>
-      </div>
-    </div> */}
-      <Items title={'Fashion'} section={'Clothing'}/>
-    <Footer/>
-    </>
-  )
-}
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-export default Home
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
+  const isFormValid = email !== '' && password !== '';
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible(!isPasswordVisible);
+  };
+
+  const validateForm = () => {
+    let valid = true;
+
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email');
+      valid = false;
+    } else {
+      setEmailError('');
+    }
+
+    if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      valid = false;
+    } else {
+      setPasswordError('');
+    }
+
+    return valid;
+  };
+
+  const handleLogin = () => {
+    if (validateForm()) {
+      console.log('Login successful');
+    } else {
+      console.log('Please fix the errors');
+    }
+  };
+const navigate = useNavigate()
+  const resetPassword = () => {
+    navigate('/reset-password');
+  };
+
+  return (
+    <div
+      className="h-screen w-full bg-cover bg-center flex justify-center items-center relative"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
+      <div className="w-full max-w-[722px] h-auto px-5 py-[30px] bg-white rounded-[10px] shadow-[0px_20px_60px_0px_rgba(255,255,255,0.25)] flex-col justify-start items-start gap-[30px] inline-flex overflow-hidden">
+        <div className="flex items-center gap-2.5 self-stretch px-3 py-1 bg-white rounded-[100px] justify-center">
+          <div className="w-[40.17px] h-[40.68px] relative">
+            <img src={iconImage} alt="Logo" className="w-full h-full object-cover" />
+          </div>
+          <div className="w-[1.86px] h-[38.40px] bg-[#024a63] rounded-sm" />
+          <div className="w-[88px] h-[48.96px] relative">
+            <div className="absolute text-[#ee6f69] text-[24.89px] font-bold font-['Cinzel']">CRAFT</div>
+            <div className="absolute text-[#024a63] text-[21.85px] font-bold font-['Cormorant Garamond'] tracking-[5.90px] top-[22.96px]">DELHI</div>
+          </div>
+        </div>
+
+        <div className="self-stretch h-[79px] flex-col justify-start items-center gap-[15px] flex">
+          <div className="text-center text-black text-xl sm:text-2xl font-bold font-['Montserrat'] leading-loose">
+            CRAFT DELHI ADMIN PLATFORM
+          </div>
+          <div className="text-center text-[#ee6f69] text-xl sm:text-2xl font-bold font-['Montserrat'] leading-loose">
+            LOGIN
+          </div>
+        </div>
+
+        <div className="self-stretch h-auto flex-col justify-start items-start gap-2.5 flex">
+          <div className="self-stretch flex flex-col gap-3">
+            <div className="text-black text-[10px] sm:text-xs font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Email Address</div>
+            <div className={`h-14 px-3 bg-white rounded border ${emailError ? 'border-[#fe0000]' : 'border-[#e0e4f4]'} flex items-center`}>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                autoComplete="off"
+                autoFocus="off"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="grow text-black text-sm sm:text-base font-normal font-['Montserrat'] leading-tight bg-transparent border-none outline-none focus:outline-none"
+              />
+            </div>
+            {emailError && <div className="text-[#fe0000] text-xs">{emailError}</div>}
+          </div>
+
+          <div className="self-stretch flex flex-col gap-3">
+            <div className="text-black text-[10px] sm:text-xs font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Password</div>
+            <div className={`h-14 px-3 bg-white rounded border ${passwordError ? 'border-[#fe0000]' : 'border-[#e0e4f4]'} flex items-center`}>
+              <input
+                type={isPasswordVisible ? 'text' : 'password'}
+                placeholder="Enter your password"
+                autoComplete="off"
+                autoFocus="off"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="grow text-black text-sm sm:text-base font-normal font-['Montserrat'] leading-tight bg-transparent border-none outline-none focus:outline-none"
+              />
+              <div className="w-4 h-4 relative cursor-pointer" onClick={togglePasswordVisibility}>
+                <img src={isPasswordVisible ? IconEye : IconEyeOff} alt="Toggle Visibility" className="w-full h-full object-cover" />
+              </div>
+            </div>
+            {passwordError && <div className="text-[#fe0000] text-xs">{passwordError}</div>}
+          </div>
+        </div>
+
+        <div className="self-stretch h-[83px] flex-col justify-start items-start gap-[15px] flex">
+          <div
+            className={`p-5 rounded justify-center items-center gap-3 inline-flex overflow-hidden w-full ${isFormValid ? 'bg-[#456eff]' : 'bg-[#cbd2ec]'}`}
+            onClick={isFormValid ? handleLogin : null}
+          >
+            <div className="text-center text-white text-lg sm:text-xl font-medium font-['Montserrat'] leading-none">
+              Login
+            </div>
+          </div>
+          <div className="self-stretch flex justify-end">
+            <button
+              onClick={resetPassword}
+              className="text-[#456eff] text-sm sm:text-base font-bold font-['Montserrat'] leading-tight"
+            >
+              Reset password
+            </button>
+          </div>
+        </div>
+      </div>
+
+    <div className="absolute bottom-0 left-0 sm:block">
+  <img
+    src={Frame}
+    alt="Bottom Left"
+    className="w-[120px] md:w-[200px] lg:w-[318px] h-[90px] md:h-[150px] lg:h-[224.30px] object-fill"
+  />
+</div>
+
+<div className="absolute bottom-0 right-0 sm:block">
+  <img
+    src={fram1}
+    alt="Bottom Right"
+    className="w-[120px] md:w-[200px] lg:w-[318px] h-[90px] md:h-[150px] lg:h-[224.30px] object-fill"
+  />
+</div>
+
+    </div>
+  );
+};
+
+export default Home;
