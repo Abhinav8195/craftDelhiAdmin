@@ -14,6 +14,9 @@ import ECommerce from './pages/Dashboard/ECommerce';
 import TotalUsers from './components/DashBoardData/UserTable';
 import BuyerManagement from './pages/Buyermanagement/BuyerManagement';
 import SellerManagement from './pages/SellerManagement/SellerManagement';
+import ProductManagement from './pages/Product/ProductManagement';
+import OrderManagement from './pages/Order/OrderManagement';
+import PaymentManagement from './pages/payment/PaymentManagement';
 
 
 const ProtectedRoute = ({ user, children }) => {
@@ -62,6 +65,31 @@ function App() {
         element={
           <ProtectedRoute user={user}>
             <SellerManagement />
+          </ProtectedRoute>
+        }
+      />
+
+<Route
+        path="/product-management"
+        element={
+          <ProtectedRoute user={user}>
+            <ProductManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/order-management"
+        element={
+          <ProtectedRoute user={user}>
+            <OrderManagement />
+          </ProtectedRoute>
+        }
+      />
+       <Route
+        path="//payment-management"
+        element={
+          <ProtectedRoute user={user}>
+            <PaymentManagement />
           </ProtectedRoute>
         }
       />
