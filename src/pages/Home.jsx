@@ -121,6 +121,7 @@ const navigate = useNavigate()
           <div
             className={`p-5 rounded justify-center items-center gap-3 inline-flex overflow-hidden w-full ${isFormValid ? 'bg-[#456eff]' : 'bg-[#cbd2ec]'}`}
             onClick={isFormValid ? handleLogin : null}
+            style={{cursor:'pointer'}}
           >
             <div className="text-center text-white text-lg sm:text-xl font-medium font-['Montserrat'] leading-none">
               Login

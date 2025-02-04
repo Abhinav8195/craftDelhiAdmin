@@ -4,14 +4,15 @@ import iconImage from '../assets/images/icon.png';
 import fram1 from '../assets/images/fram1.png';
 import Frame from '../assets/images/Frame.png';
 import IconCheckVerified_03 from '../assets/images/IconCheckVerified_03.png'
+import { useNavigate } from 'react-router-dom';
 
 const ResetPassword = () => {
   const [email, setEmail] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [fadeIn, setFadeIn] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false); // New state for success message
-
+  const [isSuccess, setIsSuccess] = useState(false); 
+  const navigate = useNavigate()
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
   const isFormValid = email !== '';
@@ -38,8 +39,8 @@ const ResetPassword = () => {
     }
   };
 
-  const resetPassword = () => {
-    console.log('Redirecting to reset password page...');
+  const handleContinue = () => {
+    navigate('/otp');
   };
 
   // Trigger fade-in effect on mount
@@ -69,7 +70,7 @@ const ResetPassword = () => {
               {email}
             </div>
           </div>
-          <div className="self-stretch p-4 bg-[#456eff] rounded justify-center items-center gap-3 inline-flex overflow-hidden">
+          <div className="self-stretch p-4 bg-[#456eff] rounded justify-center items-center gap-3 inline-flex overflow-hidden" onClick={handleContinue} style={{cursor:'pointer'}}>
             <div className="text-center text-white text-sm font-medium font-['Montserrat'] leading-none">
               Continue
             </div>
@@ -115,10 +116,11 @@ const ResetPassword = () => {
             </div>
           </div>
 
-          <div className="self-stretch h-[63px] flex-col justify-start items-start gap-[15px] flex">
+          <div className="self-stretch h-[63px] flex-col justify-start items-start gap-[15px] flex"  style={{cursor:'pointer'}}>
             <div
               className={`p-4 rounded justify-center items-center gap-3 inline-flex overflow-hidden w-full ${isFormValid ? 'bg-[#456eff]' : 'bg-[#cbd2ec]'}`}
               onClick={isFormValid ? handleLogin : null}
+              
             >
               <div className="text-center text-white text-base sm:text-lg font-medium font-['Montserrat'] leading-none">
                 Login
