@@ -169,27 +169,13 @@ const ProductTable = () => {
     
                     
                     {dropdownOpen === index && (
-                      <div className="absolute bg-white border border-[#e0e4f4] mt-2 rounded w-24">
-                        <div 
-                          className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
-                          onClick={() => handleSelectStatus(index, 'Approved')}
-                        >
-                          Approved
-                        </div>
-                        <div 
-                          className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
-                          onClick={() => handleSelectStatus(index, 'Rejected')}
-                        >
-                          Rejected
-                        </div>
-                        <div 
-                          className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
-                          onClick={() => handleSelectStatus(index, 'Pending')}
-                        >
-                          Pending
-                        </div>
-                      </div>
-                    )}
+  <div className="absolute right-0 bg-white border border-gray-300 rounded w-24 z-50 shadow-md">
+    <div className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => handleSelectStatus(index, 'Approved')}>Approved</div>
+    <div className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => handleSelectStatus(index, 'Rejected')}>Rejected</div>
+    <div className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => handleSelectStatus(index, 'Pending')}>Pending</div>
+  </div>
+)}
+
                   </div>
                 ))}
               </div>
@@ -199,116 +185,6 @@ const ProductTable = () => {
         </div>
 
     </>
-
-    //   <div className="h-[589px] flex-col justify-start items-start gap-3 inline-flex overflow-hidden mt-5 w-[99%]">
-    //     <div className="self-stretch justify-end items-center gap-[21px] inline-flex">
-    //       <div className="grow shrink basis-0 text-black text-2xl font-bold font-['Montserrat'] leading-loose">
-    //         Products Pending Approval
-    //       </div>
-    //       <div className="justify-start items-center gap-2 flex">
-          
-
-    //         {/* Input Field for Customer Name */}
-    //         <div className="w-[339px] flex-col justify-start items-start inline-flex">
-    //           <div className="self-stretch h-14 bg-white rounded border border-[#e0e4f4] justify-start items-center inline-flex relative">
-    //             <input
-    //               placeholder="Search"
-    //               className="w-full h-full text-black border-none text-xs font-normal font-['Montserrat'] leading-tight pr-10"
-    //             />
-    //             <img
-    //               src={IconSearchRefraction}
-    //               alt="Search Icon"
-    //               className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
-    //             />
-    //           </div>
-    //         </div>
-    //       </div>
-    //     </div>
-
-    //     {/* Table Headers */}
-    //     <div className="w-[1185px] justify-start items-start gap-px inline-flex">
-    //       {/* Product ID Column */}
-    //       <div className="w-[130px] flex-col justify-start items-start gap-px inline-flex">
-    //         <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-    //           <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRODUCT ID</div>
-    //         </div>
-    //         {products.map((product, index) => (
-    //           <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-    //             <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{product.userId}</div>
-    //           </div>
-    //         ))}
-    //       </div>
-
-    //       {/* Product Name Column */}
-    //       <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-    //         <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-    //           <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRODUCT NAME</div>
-    //         </div>
-    //         {products.map((product, index) => (
-    //           <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-    //             <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{product.name}</div>
-    //           </div>
-    //         ))}
-    //       </div>
-
-    //       {/* Product Image Column */}
-    //       <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-    //         <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-    //           <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRODUCT IMAGE</div>
-    //         </div>
-    //         {products.map((product, index) => (
-    //           <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-    //             <div className="w-16 h-16 justify-center items-center flex">
-    //               <img
-    //                 src={product.productImage}
-    //                 alt={product.name}
-    //                 className="w-16 h-16 rounded-full"
-    //               />
-    //             </div>
-    //           </div>
-    //         ))}
-    //       </div>
-
-    //       {/* Seller Name Column */}
-    //       <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-    //         <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-    //           <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">SELLER NAME</div>
-    //         </div>
-    //         {products.map((product, index) => (
-    //           <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-    //             <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{product.seller}</div>
-    //           </div>
-    //         ))}
-    //       </div>
-
-    //       {/* Status Column */}
-    //       <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-    //         <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-    //           <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">STATUS</div>
-    //         </div>
-    //         {products.map((product, index) => (
-    //             <div key={index} className="h-[88px]  p-3 bg-white justify-start items-center gap-3 inline-flex">
-    //             <div 
-                  
-    //               className="rounded-sm justify-center items-center gap-2.5 flex "
-    //             >
-    //               <select
-    //                 value={product.status}
-    //                 onChange={(e) => handleStatusChange(index, e.target.value)}
-    //                 className="text-black text-[10px] font-medium font-['Montserrat'] leading-3 border-none outline-none rounded-sm"
-    //                 style={{ backgroundColor: statusColors[product.status] }} 
-    //               >
-    //                 <option value="Approved">Approved</option>
-    //                 <option value="Rejected">Rejected</option>
-    //                 <option value="Pending">Pending</option>
-    //               </select>
-    //             </div>
-    //           </div>
-    //         ))}
-    //       </div>
-    //     </div>
-    //   </div>
-   
   );
 };
 
