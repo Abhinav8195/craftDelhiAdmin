@@ -5,7 +5,7 @@ import { IoMdCloudUpload } from "react-icons/io";
 const SellerBank = ({card1}) => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-white p-3 ">
-    <div className="w-full max-w-[980px] mx-auto p-5 bg-white rounded-xl  mt-[-120px] ">
+    <div className="w-full max-w-[980px] mx-auto p-5 bg-white rounded-xl">
       {/* Header */}
       <div className="flex flex-col gap-3">
         <h2 className="text-black text-2xl font-bold font-['Montserrat'] leading-loose">

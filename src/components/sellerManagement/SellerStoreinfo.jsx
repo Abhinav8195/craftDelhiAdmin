@@ -42,7 +42,7 @@ const SellerStoreinfo = ({card1}) => {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-white p-3">
-      <div className="w-full max-w-[980px]  p-5 bg-white rounded-xl mt-[-80px] ">
+      <div className="w-full max-w-[980px]  p-5 bg-white rounded-xl  ">
         {/* Header */}
         <div className="self-stretch flex flex-col gap-3">
           <h2 className="text-black text-2xl font-bold font-['Montserrat'] leading-loose">
