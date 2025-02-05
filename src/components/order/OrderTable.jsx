@@ -113,8 +113,8 @@ const OrderTable = ({card1}) => {
 
           </div>
       {/* Dropdown */}
-      <div className="w-full sm:w-[206px]">
-        <select className="w-full h-10 text-xs bg-white border border-gray-300 rounded px-2">
+      <div className="w-full sm:w-[180px]">
+        <select className="w-full h-10 text-[10px] bg-white border border-gray-300 rounded px-2">
           <option value="1">Payment Status</option>
           <option value="Paid">Paid</option>
           <option value="Cancelled">Cancelled</option>
@@ -218,33 +218,34 @@ const OrderTable = ({card1}) => {
                              <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex `} style={{ backgroundColor: statusColors[user.status] }} >
                                <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.status}</div>
                              </div>
-                             <div className="w-4 h-4 relative overflow-hidden">
+                             <div className="w-4 h-4 relative ">
                                <IoIosArrowDown onClick={() => toggleDropdown(index)} />
-                             </div>
+                            
              
                              
                              {dropdownOpen === index && (
-                               <div className="absolute bg-white border border-[#e0e4f4] mt-2 rounded w-24">
-                                 <div 
-                                   className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
-                                   onClick={() => handleSelectStatus(index, 'Paid')}
-                                 >
+                               <div className="absolute left-0 right-0 top-full z-50 bg-white border border-[#e0e4f4] mt-1 rounded w-24 shadow-md">
+                               <div 
+                                 className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-sm"
+                                 onClick={() => handleSelectStatus(index, 'Paid')}
+                               >
                                    Paid
                                  </div>
                                  <div 
-                                   className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
+                                    className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-sm"
                                    onClick={() => handleSelectStatus(index, 'Cancelled')}
                                  >
                                    Cancelled
                                  </div>
                                  <div 
-                                   className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
+                                    className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-sm"
                                    onClick={() => handleSelectStatus(index, 'Refunded')}
                                  >
                                    Refunded
                                  </div>
                                </div>
                              )}
+                             </div>
                            </div>
                          ))}
                        </div>

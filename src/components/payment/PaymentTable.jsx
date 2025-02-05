@@ -135,7 +135,7 @@ const closeEditModal = () => {
   return (
     <div className="px-4 md:px-8 lg:px-1 mt-0 lg:mt-[-30px]">
       {/* Table Section */}
-      <div className="h-[589px] flex flex-col gap-3 overflow-auto w-full">
+      <div className="flex flex-col gap-3 overflow-auto w-full min-h-screen">
  <div className="w-full flex flex-wrap justify-between items-center gap-3">
   <div className="text-black text-2xl font-bold w-full sm:w-auto">Payment List's</div>
   </div>
@@ -255,33 +255,34 @@ const closeEditModal = () => {
                                         <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex `} style={{ backgroundColor: statusColors[user.status] }} >
                                           <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.status}</div>
                                         </div>
-                                        <div className="w-4 h-4 relative overflow-hidden">
+                                        <div className="w-4 h-4 relative ">
                                           <IoIosArrowDown onClick={() => toggleDropdown(index)} />
-                                        </div>
+                                       
                         
                                         
                                         {dropdownOpen === index && (
-                                          <div className="absolute bg-white border border-[#e0e4f4] mt-2 rounded w-24">
-                                            <div 
-                                              className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
-                                              onClick={() => handleSelectStatus(index, 'Paid')}
-                                            >
+                                          <div className="absolute left-0 right-0 top-full z-50 bg-white border border-[#e0e4f4] mt-1 rounded w-24 shadow-md">
+                                          <div 
+                                            className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-sm"
+                                            onClick={() => handleSelectStatus(index, 'Paid')}
+                                          >
                                               Paid
                                             </div>
                                             <div 
-                                              className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
+                                              className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-sm" 
                                               onClick={() => handleSelectStatus(index, 'Unpaid')}
                                             >
                                               Unpaid
                                             </div>
                                             <div 
-                                              className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
+                                              className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-sm" 
                                               onClick={() => handleSelectStatus(index, 'Refunded')}
                                             >
                                               Refunded
                                             </div>
                                           </div>
                                         )}
+                                         </div>
                                       </div>
                                     ))}
           </div>

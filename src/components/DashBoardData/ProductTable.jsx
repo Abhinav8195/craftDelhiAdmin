@@ -163,18 +163,27 @@ const ProductTable = () => {
                     <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex `} style={{ backgroundColor: statusColors[user.status] }} >
                       <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.status}</div>
                     </div>
-                    <div className="w-4 h-4 relative overflow-hidden">
-                      <IoIosArrowDown onClick={() => toggleDropdown(index)} />
-                    </div>
-    
-                    
-                    {dropdownOpen === index && (
-  <div className="absolute right-0 bg-white border border-gray-300 rounded w-24 z-50 shadow-md">
-    <div className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => handleSelectStatus(index, 'Approved')}>Approved</div>
-    <div className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => handleSelectStatus(index, 'Rejected')}>Rejected</div>
-    <div className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => handleSelectStatus(index, 'Pending')}>Pending</div>
-  </div>
-)}
+                    <div className="relative w-4 h-4">
+  <IoIosArrowDown onClick={() => toggleDropdown(index)} />
+
+  {dropdownOpen === index && (
+    <div className="absolute right-0 sm:right-auto sm:left-0 top-full mt-1 bg-white border border-gray-300 rounded w-24 z-50 shadow-md">
+      <div className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-[10px] sm:text-sm"
+        onClick={() => handleSelectStatus(index, 'Approved')}>
+        Approved
+      </div>
+      <div className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-[10px] sm:text-sm"
+        onClick={() => handleSelectStatus(index, 'Rejected')}>
+        Rejected
+      </div>
+      <div className="px-4 py-2 cursor-pointer hover:bg-gray-100 text-[10px] sm:text-sm"
+        onClick={() => handleSelectStatus(index, 'Pending')}>
+        Pending
+      </div>
+    </div>
+  )}
+</div>
+
 
                   </div>
                 ))}

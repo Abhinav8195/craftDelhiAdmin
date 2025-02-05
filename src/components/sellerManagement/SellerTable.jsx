@@ -91,12 +91,13 @@ const SellerTable = ({card1}) => {
           </div>
       {/* Dropdown */}
       <div className="w-full sm:w-[206px]">
-        <select className="w-full h-10 text-xs bg-white border border-gray-300 rounded px-2">
-          <option value="1">Trash/Approved</option>
-          <option value="Approved">Approved</option>
-          <option value="Trash">Trash</option>
-        </select>
-      </div>
+  <select className="w-full h-10 text-[10px] sm:text-xs bg-white border border-gray-300 rounded px-2">
+    <option value="1">Trash/Approved</option>
+    <option value="Approved">Approved</option>
+    <option value="Trash">Trash</option>
+  </select>
+</div>
+
 
       {/* Search Box */}
       <div className="relative w-full sm:w-[239px]">
@@ -179,27 +180,28 @@ const SellerTable = ({card1}) => {
                 <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex ${user.status === 'Approved' ? 'bg-[#69d297]' : 'bg-[#fe0000]'}`}>
                   <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.status}</div>
                 </div>
-                <div className="w-4 h-4 relative overflow-hidden">
-                  <IoIosArrowDown onClick={() => toggleDropdown(index)} />
-                </div>
+                <div className="relative w-4 h-4">
+  <IoIosArrowDown onClick={() => toggleDropdown(index)} />
+  
+  {/* Dropdown */}
+  {dropdownOpen === index && (
+    <div className="absolute left-0 right-0 top-full z-50 bg-white border border-[#e0e4f4] mt-1 rounded w-24 shadow-md">
+      <div 
+        className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-xs"
+        onClick={() => handleSelectStatus(index, 'Approved')}
+      >
+        Approved
+      </div>
+      <div 
+        className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-xs"
+        onClick={() => handleSelectStatus(index, 'Rejected')}
+      >
+        Rejected
+      </div>
+    </div>
+  )}
+</div>
 
-                {/* Dropdown */}
-                {dropdownOpen === index && (
-                  <div className="absolute bg-white border border-[#e0e4f4] mt-2 rounded w-24">
-                    <div 
-                      className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
-                      onClick={() => handleSelectStatus(index, 'Approved')}
-                    >
-                      Approved
-                    </div>
-                    <div 
-                      className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4]" 
-                      onClick={() => handleSelectStatus(index, 'Rejected')}
-                    >
-                      Rejected
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </div>
