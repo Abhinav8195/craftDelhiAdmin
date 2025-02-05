@@ -140,9 +140,11 @@ const OrderTable = ({card1}) => {
         {/* Table Headers */}
         <div className="w-full justify-start items-start gap-px inline-flex overflow-auto">
           <div className="w-[130px] flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Order id</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    ORDER ID
+  </div>
+</div>
             {/* Table Rows */}
             {dummyData.map((user, index) => (
             <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
@@ -152,9 +154,11 @@ const OrderTable = ({card1}) => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRODUCT ID</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Product ID
+  </div>
+</div>
             {dummyData.map((user, index) => (
               <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.productid}</div>
@@ -163,9 +167,11 @@ const OrderTable = ({card1}) => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRODUCT NAME</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Product Name
+  </div>
+</div>
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.productname}</div>
@@ -173,9 +179,11 @@ const OrderTable = ({card1}) => {
             ))}
           </div>
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-                <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-                  <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRODUCT IMAGE</div>
-                </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Product Image
+  </div>
+</div>
                 {dummyData.map((product, index) => (
                  <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
                    <div className="w-16 h-16 justify-center items-center flex">
@@ -190,9 +198,11 @@ const OrderTable = ({card1}) => {
               </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Date</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Date
+  </div>
+</div>
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.date}</div>
@@ -200,9 +210,11 @@ const OrderTable = ({card1}) => {
             ))}
           </div>
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRICE</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Price
+  </div>
+</div>
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.price}</div>
@@ -210,9 +222,11 @@ const OrderTable = ({card1}) => {
             ))}
           </div>
          <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-                         <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-                           <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">STATUS</div>
-                         </div>
+         <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Status
+  </div>
+</div>
                          {updatedUsers.map((user, index) => (
                            <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
                              <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex `} style={{ backgroundColor: statusColors[user.status] }} >
@@ -250,9 +264,11 @@ const OrderTable = ({card1}) => {
                          ))}
                        </div>
           <div className="grow shrink basis-0 flex-col justify-center items-center gap-px inline-flex">
-  <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-    <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">ACTIONS</div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Actions
   </div>
+</div>
   {dummyData.map((product, index) => (
     <div key={index} className="h-[88px] gap-5 p-3 bg-white justify-center items-center inline-flex">
       <button className="w-4 h-4 relative overflow-hidden" onClick={() => card1(1)}>

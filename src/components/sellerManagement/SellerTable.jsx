@@ -117,9 +117,12 @@ const SellerTable = ({card1}) => {
         {/* Table Headers */}
         <div className="w-full justify-start items-start gap-px inline-flex overflow-auto">
           <div className="w-[130px] flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">USER ID</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    User ID
+  </div>
+</div>
+
             {/* Table Rows */}
             {dummyData.map((user, index) => (
             <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
@@ -129,9 +132,12 @@ const SellerTable = ({card1}) => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">NAME</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+   Name
+  </div>
+</div>
+
             {dummyData.map((user, index) => (
               <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.name}</div>
@@ -140,9 +146,12 @@ const SellerTable = ({card1}) => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">EMAIL ADDRESS</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Email Address
+  </div>
+</div>
+
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.email}</div>
@@ -150,9 +159,12 @@ const SellerTable = ({card1}) => {
             ))}
           </div>
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PHONE NUMBER</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+   Phone Number
+  </div>
+</div>
+
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.phone}</div>
@@ -161,9 +173,12 @@ const SellerTable = ({card1}) => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">CITY</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+   City
+  </div>
+</div>
+
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.city}</div>
@@ -172,9 +187,12 @@ const SellerTable = ({card1}) => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">STATUS</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Status
+  </div>
+</div>
+
             {updatedUsers.map((user, index) => (
               <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
                 <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex ${user.status === 'Approved' ? 'bg-[#69d297]' : 'bg-[#fe0000]'}`}>
@@ -206,9 +224,12 @@ const SellerTable = ({card1}) => {
             ))}
           </div>
           <div className="grow shrink basis-0 flex-col justify-center items-center gap-px inline-flex">
-  <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-    <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">ACTIONS</div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+   Actions
   </div>
+</div>
+
   {dummyData.map((user, index) => (
     <div key={index} className="h-[88px] gap-5 p-3 bg-white justify-center items-center inline-flex">
       <button className="w-4 h-4 relative overflow-hidden" onClick={() => card1(1)}>

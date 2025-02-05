@@ -87,9 +87,12 @@ const RevenueTable = () => {
         {/* Table Headers */}
         <div className="w-full justify-start items-start gap-px inline-flex overflow-auto">
           <div className="w-[130px] flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">TRANSACTION ID</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Transaction id
+  </div>
+</div>
+
             {/* Table Rows */}
             {dummyData.map((user, index) => (
             <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
@@ -99,9 +102,12 @@ const RevenueTable = () => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">SELLER NAME</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Seller Name
+  </div>
+</div>
+
             {dummyData.map((user, index) => (
               <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.name}</div>
@@ -110,9 +116,12 @@ const RevenueTable = () => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">AMOUNT</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Amount
+  </div>
+</div>
+
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.amount}</div>
@@ -120,9 +129,12 @@ const RevenueTable = () => {
             ))}
           </div>
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-      <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-        <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">DATE</div>
-      </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Date
+  </div>
+</div>
+
       {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.date}</div>

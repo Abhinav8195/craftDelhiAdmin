@@ -192,9 +192,11 @@ const closeEditModal = () => {
         {/* Table Headers */}
         <div className="w-full justify-start items-start gap-px inline-flex overflow-auto">
           <div className="w-[130px] flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Payment id</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Payment ID
+  </div>
+</div>
             {/* Table Rows */}
             {dummyData.map((user, index) => (
             <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
@@ -204,9 +206,11 @@ const closeEditModal = () => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Order id</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    ORDER ID
+  </div>
+</div>
             {dummyData.map((user, index) => (
               <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.orderId}</div>
@@ -215,9 +219,11 @@ const closeEditModal = () => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Seller name</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+   Seller Name
+  </div>
+</div>
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.seller}</div>
@@ -225,9 +231,11 @@ const closeEditModal = () => {
             ))}
           </div>
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Total Price</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+   Total Price
+  </div>
+</div>
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.price}</div>
@@ -236,9 +244,11 @@ const closeEditModal = () => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Date</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Date
+  </div>
+</div>
             {dummyData.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.date}</div>
@@ -247,9 +257,11 @@ const closeEditModal = () => {
           </div>
 
           <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-              <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Payment STATUS</div>
-            </div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Payment Status
+  </div>
+</div>
            {updatedUsers.map((user, index) => (
                                       <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
                                         <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex `} style={{ backgroundColor: statusColors[user.status] }} >
@@ -287,9 +299,12 @@ const closeEditModal = () => {
                                     ))}
           </div>
           <div className="grow shrink basis-0 flex-col justify-center items-center gap-px inline-flex">
-  <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-    <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">ACTIONS</div>
+          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+  Actions
   </div>
+</div>
+
   {dummyData.map((user, index) => (
     <div key={index} className="h-[88px] gap-5 p-3 bg-white justify-center items-center inline-flex">
       <button className="w-4 h-4 relative overflow-hidden" onClick={() => openEditPayment(user)}>

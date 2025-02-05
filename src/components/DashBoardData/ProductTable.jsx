@@ -105,9 +105,12 @@ const ProductTable = () => {
             {/* Table Headers */}
             <div className="w-full justify-start items-start gap-px inline-flex overflow-auto">
               <div className="w-[130px] flex-col justify-start items-start gap-px inline-flex">
-                <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-                  <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRODUCT ID</div>
-                </div>
+              <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Product ID
+  </div>
+</div>
+
                 {/* Table Rows */}
                 {products.map((user, index) => (
                 <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
@@ -117,9 +120,12 @@ const ProductTable = () => {
               </div>
     
               <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-                <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-                  <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRODUCT NAME</div>
-                </div>
+              <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Product Name
+  </div>
+</div>
+
                 {products.map((user, index) => (
                   <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
     <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.name}</div>
@@ -128,9 +134,12 @@ const ProductTable = () => {
               </div>
     
               <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-                <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-                  <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">PRODUCT IMAGE</div>
-                </div>
+              <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Product image
+  </div>
+</div>
+
                 {products.map((product, index) => (
                  <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
                    <div className="w-16 h-16 justify-center items-center flex">
@@ -144,9 +153,12 @@ const ProductTable = () => {
                ))}
               </div>
               <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-                <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-                  <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">SELLER NAME</div>
-                </div>
+              <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+    Seller Name
+  </div>
+</div>
+
                 {products.map((user, index) => (
                  <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
     <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.seller}</div>
@@ -155,9 +167,12 @@ const ProductTable = () => {
               </div>
     
               <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-                <div className="self-stretch p-3 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-                  <div className="text-white text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">STATUS</div>
-                </div>
+              <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
+  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
+   Status
+  </div>
+</div>
+
                 {updatedUsers.map((user, index) => (
                   <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
                     <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex `} style={{ backgroundColor: statusColors[user.status] }} >
