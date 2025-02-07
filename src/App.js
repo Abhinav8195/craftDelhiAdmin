@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import OTPPage from './pages/OTPPage';
 import CreatePassword from './pages/CreatePassword';
 import ResetPassword from './pages/ResetPassword';
-
+import ProtectedRoute from "./ProtectedRoute";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Loader from './Loader';
@@ -17,14 +17,14 @@ import SellerManagement from './pages/SellerManagement/SellerManagement';
 import ProductManagement from './pages/Product/ProductManagement';
 import OrderManagement from './pages/Order/OrderManagement';
 import PaymentManagement from './pages/payment/PaymentManagement';
+import { AuthContext } from './AuthContext';
+import NotFound from './pages/NotFound';
 
 
-const ProtectedRoute = ({ user, children }) => {
-  return user ? children : <Navigate to="/otp" />;
-};
+
 
 function App() {
-  const [user, setUser] = useState(true); 
+  const { user } = useContext(AuthContext); 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -86,13 +86,18 @@ function App() {
         }
       />
        <Route
-        path="//payment-management"
+        path="/payment-management"
         element={
           <ProtectedRoute user={user}>
             <PaymentManagement />
           </ProtectedRoute>
         }
       />
+
+<Route path="/reset-password" element={<Navigate to="/" />} />
+        <Route path="/otp" element={<Navigate to="/" />} />
+        <Route path="/create-password" element={<Navigate to="/" />} />
+        <Route path="*" element={<NotFound />} />
     </Routes>
     <ToastContainer />
   </DefaultLayout>
@@ -104,7 +109,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/otp" element={<OTPPage />} />
           <Route path="/create-password" element={<CreatePassword />} />
-          
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <ToastContainer />
      

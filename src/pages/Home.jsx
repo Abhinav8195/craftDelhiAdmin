@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import bgImage from '../assets/images/bg.png';
 import iconImage from '../assets/images/icon.png';
 import IconEyeOff from '../assets/images/IconEyeOff.png';
@@ -6,6 +6,8 @@ import IconEye from '../assets/images/IconEye.png';
 import fram1 from '../assets/images/fram1.png';
 import Frame from '../assets/images/Frame.png';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../AuthContext';
+import axios from 'axios';
 
 const Home = () => {
   const [email, setEmail] = useState('');
@@ -13,6 +15,8 @@ const Home = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+
+const { login } = useContext(AuthContext);
 
   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
@@ -42,13 +46,33 @@ const Home = () => {
     return valid;
   };
 
-  const handleLogin = () => {
-    if (validateForm()) {
-      console.log('Login successful');
+
+
+const handleLogin = async () => {
+  if (!validateForm()) {
+    console.log("Please fix the errors");
+    return;
+  }
+
+  try {
+    const response = await axios.post("https://craftdelhibackend.onrender.com/api/auth/login", { email, password });
+
+    
+
+    if (response.data?.user?.role === "admin") {
+      console.log("Admin Login Successful");
+      login(response.data.token, response.data.user); // ✅ Token & User को Save करो
+      navigate("/");
     } else {
-      console.log('Please fix the errors');
+      console.log("Access Denied! Only Admins can login.");
+      alert("Only Admins are allowed to login!");
     }
-  };
+  } catch (error) {
+    console.error("Login Error:", error.response?.data?.msg || "Server Error");
+    alert(error.response?.data?.msg || "Invalid credentials");
+  }
+};
+
 const navigate = useNavigate()
   const resetPassword = () => {
     navigate('/reset-password');
@@ -83,7 +107,7 @@ const navigate = useNavigate()
         <div className="self-stretch h-auto flex-col justify-start items-start gap-2.5 flex">
           <div className="self-stretch flex flex-col gap-3">
             <div className="text-black text-[10px] sm:text-xs font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Email Address</div>
-            <div className={`h-14 px-3 bg-white rounded border ${emailError ? 'border-[#fe0000]' : 'border-[#e0e4f4]'} flex items-center`}>
+            <div className={`h-14  bg-white rounded border ${emailError ? 'border-[#fe0000]' : 'border-[#e0e4f4]'} flex items-center`}>
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -91,7 +115,7 @@ const navigate = useNavigate()
                 autoFocus="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="grow text-black text-sm sm:text-base font-normal font-['Montserrat'] leading-tight bg-transparent border-none outline-none focus:outline-none"
+                className="grow h-14 text-black text-sm sm:text-base font-normal font-['Montserrat'] leading-tight bg-transparent border-none outline-none focus:outline-none"
               />
             </div>
             {emailError && <div className="text-[#fe0000] text-xs">{emailError}</div>}
@@ -99,7 +123,7 @@ const navigate = useNavigate()
 
           <div className="self-stretch flex flex-col gap-3">
             <div className="text-black text-[10px] sm:text-xs font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Password</div>
-            <div className={`h-14 px-3 bg-white rounded border ${passwordError ? 'border-[#fe0000]' : 'border-[#e0e4f4]'} flex items-center`}>
+            <div className={`h-14  bg-white rounded border ${passwordError ? 'border-[#fe0000]' : 'border-[#e0e4f4]'} flex items-center`}>
               <input
                 type={isPasswordVisible ? 'text' : 'password'}
                 placeholder="Enter your password"
@@ -107,7 +131,7 @@ const navigate = useNavigate()
                 autoFocus="off"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="grow text-black text-sm sm:text-base font-normal font-['Montserrat'] leading-tight bg-transparent border-none outline-none focus:outline-none"
+                className="grow h-14 text-black text-sm sm:text-base font-normal font-['Montserrat'] leading-tight bg-transparent border-none outline-none focus:outline-none"
               />
               <div className="w-4 h-4 relative cursor-pointer" onClick={togglePasswordVisibility}>
                 <img src={isPasswordVisible ? IconEye : IconEyeOff} alt="Toggle Visibility" className="w-full h-full object-cover" />

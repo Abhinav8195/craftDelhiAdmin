@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import iconImage from '../../assets/images/icon.png';
 import IconPresentationChart_01 from '../../assets/images/IconPresentationChart_01.png'
@@ -13,13 +13,13 @@ import selleractive from '../../assets/images/selleractive.png'
 import payactive from '../../assets/images/payactive.png'
 import orderactive from '../../assets/images/orderactive.png'
 import packactive from '../../assets/images/packactive.png';
-import user from '../../assets/images/user.png';
-import rrow from '../../assets/images/rrow.png'
-
+import users from '../../assets/images/user.png';
+import { IoIosArrowForward } from "react-icons/io";
+import { AuthContext } from '../../AuthContext';
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
   const { pathname } = location;
-
+  const { user, logout } = useContext(AuthContext);
   const trigger = useRef(null);
   const sidebar = useRef(null);
 
@@ -217,17 +217,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </div>
 
           {/* Profile */}
-          <div className="self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex">
+          <div  onClick={logout} className="self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex">
             <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
               <div className="w-5 h-5 relative overflow-hidden">
-              <img src={user} alt="Payment Management Icon" className="w-full h-full object-cover" />
+              <img src={users} alt="Payment Management Icon" className="w-full h-full object-cover" />
               </div>
-              <div className="grow shrink basis-0 text-[#36234e] text-xs font-medium font-['Montserrat'] leading-none">Abhinav Admin</div>
+              <div className="grow shrink basis-0 text-[#36234e] text-xs font-medium font-['Montserrat'] leading-none">Welcome {user?.name || "Admin"}</div>
             </div>
             <div className="w-5 h-5 p-2.5 justify-center items-center gap-2 rounded-full inline-flex">
               <div className="w-5 h-5 rounded-full relative">
                 <div className="w-5 h-5 absolute rounded-full ">
-                <img src={rrow} alt="Payment Management Icon" className="w-full h-full object-cover" />
+                <IoIosArrowForward />
                 </div>
                 
               </div>
