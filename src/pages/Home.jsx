@@ -61,7 +61,7 @@ const handleLogin = async () => {
 
     if (response.data?.user?.role === "admin") {
       console.log("Admin Login Successful");
-      login(response.data.token, response.data.user); // ✅ Token & User को Save करो
+      login(response.data.token, response.data.user); 
       navigate("/");
     } else {
       console.log("Access Denied! Only Admins can login.");
