@@ -70,7 +70,7 @@ const ResetPassword = () => {
               {email}
             </div>
           </div>
-          <div className="self-stretch p-4 bg-[#456eff] rounded justify-center items-center gap-3 inline-flex overflow-hidden" onClick={handleContinue} style={{cursor:'pointer'}}>
+          <div className="self-stretch p-4 bg-[#024a63] rounded justify-center items-center gap-3 inline-flex overflow-hidden" onClick={handleContinue} style={{cursor:'pointer'}}>
             <div className="text-center text-white text-sm font-medium font-['Montserrat'] leading-none">
               Continue
             </div>
@@ -100,25 +100,24 @@ const ResetPassword = () => {
 
           <div className="self-stretch h-auto flex-col justify-start items-start gap-2.5 flex">
             <div className="self-stretch flex flex-col gap-3">
-              <div className="text-black text-xs sm:text-sm font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Email Address</div>
-              <div className={`h-12 px-3 bg-white rounded border ${emailError ? 'border-[#fe0000]' : 'border-[#e0e4f4]'} flex items-center`}>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  autoComplete="off"
-                  autoFocus="off"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="grow text-black text-sm sm:text-base font-normal font-['Montserrat'] leading-tight bg-transparent border-none outline-none focus:outline-none"
-                />
-              </div>
+            
+              <div className="flex flex-col gap-3">
+          <label className="text-black text-[10px] font-bold uppercase tracking-widest">Email ADDRESS</label>
+          <input
+            type="email"
+            className="h-14 px-3 bg-white rounded outline outline-1 outline-slate-200 w-full"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
               {emailError && <div className="text-[#fe0000] text-xs">{emailError}</div>}
             </div>
           </div>
 
           <div className="self-stretch h-[63px] flex-col justify-start items-start gap-[15px] flex"  style={{cursor:'pointer'}}>
             <div
-              className={`p-4 rounded justify-center items-center gap-3 inline-flex overflow-hidden w-full ${isFormValid ? 'bg-[#456eff]' : 'bg-[#cbd2ec]'}`}
+              className={`p-4 rounded justify-center items-center gap-3 inline-flex overflow-hidden w-full ${isFormValid ? 'bg-[#024a63]' : 'bg-[#cbd2ec]'}`}
               onClick={isFormValid ? handleLogin : null}
               
             >

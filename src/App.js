@@ -1,14 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {useState } from 'react';
 import './App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import OTPPage from './pages/OTPPage';
 import CreatePassword from './pages/CreatePassword';
 import ResetPassword from './pages/ResetPassword';
-import ProtectedRoute from "./ProtectedRoute";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Loader from './Loader';
 import DefaultLayout from './layout/DefaultLayout';
 import ECommerce from './pages/Dashboard/ECommerce';
 import TotalUsers from './components/DashBoardData/UserTable';
@@ -17,102 +15,41 @@ import SellerManagement from './pages/SellerManagement/SellerManagement';
 import ProductManagement from './pages/Product/ProductManagement';
 import OrderManagement from './pages/Order/OrderManagement';
 import PaymentManagement from './pages/payment/PaymentManagement';
-import { AuthContext } from './AuthContext';
 import NotFound from './pages/NotFound';
-
-
-
+import AuthCheck from './AuthCheck'
 
 function App() {
-  const { user } = useContext(AuthContext); 
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
 
-  return user ? (
-    <DefaultLayout>
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute user={user}>
-            <ECommerce />
-          </ProtectedRoute>
-        }
-      />
-      
-      <Route
-        path="/TotalUsers"
-        element={
-          <ProtectedRoute user={user}>
-            <TotalUsers />
-          </ProtectedRoute>
-        }
-      />
-       <Route
-        path="/buyer-management"
-        element={
-          <ProtectedRoute user={user}>
-            <BuyerManagement />
-          </ProtectedRoute>
-        }
-      />
-     
-      <Route
-        path="/seller-management"
-        element={
-          <ProtectedRoute user={user}>
-            <SellerManagement />
-          </ProtectedRoute>
-        }
-      />
-
-<Route
-        path="/product-management"
-        element={
-          <ProtectedRoute user={user}>
-            <ProductManagement />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/order-management"
-        element={
-          <ProtectedRoute user={user}>
-            <OrderManagement />
-          </ProtectedRoute>
-        }
-      />
-       <Route
-        path="/payment-management"
-        element={
-          <ProtectedRoute user={user}>
-            <PaymentManagement />
-          </ProtectedRoute>
-        }
-      />
-
-<Route path="/reset-password" element={<Navigate to="/" />} />
-        <Route path="/otp" element={<Navigate to="/" />} />
-        <Route path="/create-password" element={<Navigate to="/" />} />
-        <Route path="*" element={<NotFound />} />
-    </Routes>
-    <ToastContainer />
-  </DefaultLayout>
-  ) : (
-    <>
-    
+  return (
+<>
+    <AuthCheck setIsAuthenticated={setIsAuthenticated} />
+    {
+      isAuthenticated?  (
+        <DefaultLayout setIsAuthenticated={setIsAuthenticated}>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/otp" element={<OTPPage />} />
-          <Route path="/create-password" element={<CreatePassword />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <ToastContainer />
-     
+  <Route path="/" element={<ECommerce />} />
+  <Route path="/TotalUsers" element={<TotalUsers />} />
+  <Route path="/buyer-management" element={<BuyerManagement />} />
+  <Route path="/seller-management" element={<SellerManagement />} />
+  <Route path="/product-management" element={<ProductManagement />} />
+  <Route path="/order-management" element={<OrderManagement />} />
+  <Route path="/payment-management" element={<PaymentManagement />} />
+</Routes>
+        
+        </DefaultLayout>
+      ):(
+        <Routes>
+        <Route path="/" element={<Home setIsAuthenticated={setIsAuthenticated} />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/otp" element={<OTPPage />} />
+        <Route path="/create-password" element={<CreatePassword />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      )
+    }
+    <ToastContainer />
     </>
   );
 }

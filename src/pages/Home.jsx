@@ -1,79 +1,70 @@
-import React, { useContext, useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import bgImage from '../assets/images/bg.png';
 import iconImage from '../assets/images/icon.png';
-import IconEyeOff from '../assets/images/IconEyeOff.png';
-import IconEye from '../assets/images/IconEye.png';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import fram1 from '../assets/images/fram1.png';
 import Frame from '../assets/images/Frame.png';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../AuthContext';
-import axios from 'axios';
 
-const Home = () => {
-  const [email, setEmail] = useState('');
+const Home = ({setIsAuthenticated}) => {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+ 
+  const navigate = useNavigate();
 
-const { login } = useContext(AuthContext);
+  const isFormValid = username.trim() !== '' && password.trim() !== '';
+  useEffect(() => {
+    const token = localStorage.getItem('craftdelhiadmin_token');
+    const tokenExpiry = localStorage.getItem('craftdelhiadmin_tokenExpiry');
 
-  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (token && tokenExpiry) {
+      const currentTime = new Date().getTime();
+      if (currentTime > tokenExpiry) {
+        logout(); 
+      } else {
+        navigate('/'); 
+      }
+    }
+  }, [navigate]);
 
-  const isFormValid = email !== '' && password !== '';
 
-  const togglePasswordVisibility = () => {
-    setIsPasswordVisible(!isPasswordVisible);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (username === 'admin@gmail.com' && password === 'admin123') {
+      const dummyToken = 'abc123xyz456';
+      const name = 'Abhinav';
+      const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000;
+
+      // Save token, user name, and expiry time
+      
+      localStorage.setItem('user', JSON.stringify({ username }));
+      localStorage.setItem('name', name);
+      localStorage.setItem('craftdelhiadmin_token', dummyToken);
+localStorage.setItem('craftdelhiadmin_tokenExpiry', expiryTime);
+
+
+      setIsAuthenticated(true);
+      window.dispatchEvent(new Event('storage'));
+      navigate('/');
+    } else {
+      setError('Invalid username or password ❌');
+    }
   };
 
-  const validateForm = () => {
-    let valid = true;
-
-    if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email');
-      valid = false;
-    } else {
-      setEmailError('');
-    }
-
-    if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters');
-      valid = false;
-    } else {
-      setPasswordError('');
-    }
-
-    return valid;
+  const logout = () => {
+    localStorage.removeItem('craftdelhiadmin_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('name');
+    localStorage.removeItem('craftdelhiadmin_tokenExpiry');
+    setIsAuthenticated(false);
+    window.dispatchEvent(new Event('storage'));
+    navigate('/');
   };
 
-
-
-const handleLogin = async () => {
-  if (!validateForm()) {
-    console.log("Please fix the errors");
-    return;
-  }
-
-  try {
-    const response = await axios.post("https://craftdelhibackend.onrender.com/api/auth/login", { email, password });
-
-    
-
-    if (response.data?.user?.role === "admin") {
-      console.log("Admin Login Successful");
-      login(response.data.token, response.data.user); 
-      navigate("/");
-    } else {
-      console.log("Access Denied! Only Admins can login.");
-      alert("Only Admins are allowed to login!");
-    }
-  } catch (error) {
-    console.error("Login Error:", error.response?.data?.msg || "Server Error");
-    alert(error.response?.data?.msg || "Invalid credentials");
-  }
-};
-
-const navigate = useNavigate()
   const resetPassword = () => {
     navigate('/reset-password');
   };
@@ -83,8 +74,12 @@ const navigate = useNavigate()
       className="h-screen w-full bg-cover bg-center flex justify-center items-center relative"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
-      <div className="w-full max-w-[722px] h-auto px-5 py-[30px] bg-white rounded-[10px] shadow-[0px_20px_60px_0px_rgba(255,255,255,0.25)] flex-col justify-start items-start gap-[30px] inline-flex overflow-hidden">
-        <div className="flex items-center gap-2.5 self-stretch px-3 py-1 bg-white rounded-[100px] justify-center">
+       <form
+      onSubmit={handleSubmit}
+      className="w-[604px] p-5 bg-white rounded-[20px] shadow-lg flex flex-col items-center gap-5"
+    >
+      {/* Logo Section */}
+      <div className="flex items-center gap-2.5 self-stretch px-3 py-1 bg-white rounded-[100px] justify-center">
           <div className="w-[40.17px] h-[40.68px] relative">
             <img src={iconImage} alt="Logo" className="w-full h-full object-cover" />
           </div>
@@ -95,7 +90,8 @@ const navigate = useNavigate()
           </div>
         </div>
 
-        <div className="self-stretch h-[79px] flex-col justify-start items-center gap-[15px] flex">
+      {/* Login Heading */}
+      <div className="self-stretch h-[79px] flex-col justify-start items-center gap-[15px] flex">
           <div className="text-center text-black text-xl sm:text-2xl font-bold font-['Montserrat'] leading-loose">
             CRAFT DELHI ADMIN PLATFORM
           </div>
@@ -104,63 +100,61 @@ const navigate = useNavigate()
           </div>
         </div>
 
-        <div className="self-stretch h-auto flex-col justify-start items-start gap-2.5 flex">
-          <div className="self-stretch flex flex-col gap-3">
-            <div className="text-black text-[10px] sm:text-xs font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Email Address</div>
-            <div className={`h-14  bg-white rounded border ${emailError ? 'border-[#fe0000]' : 'border-[#e0e4f4]'} flex items-center`}>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                autoComplete="off"
-                autoFocus="off"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="grow h-14 text-black text-sm sm:text-base font-normal font-['Montserrat'] leading-tight bg-transparent border-none outline-none focus:outline-none"
-              />
-            </div>
-            {emailError && <div className="text-[#fe0000] text-xs">{emailError}</div>}
-          </div>
+      {/* Error Message */}
+      {error && <div className="text-red-500 text-sm">{error}</div>}
 
-          <div className="self-stretch flex flex-col gap-3">
-            <div className="text-black text-[10px] sm:text-xs font-bold font-['Montserrat'] uppercase leading-none tracking-widest">Password</div>
-            <div className={`h-14  bg-white rounded border ${passwordError ? 'border-[#fe0000]' : 'border-[#e0e4f4]'} flex items-center`}>
-              <input
-                type={isPasswordVisible ? 'text' : 'password'}
-                placeholder="Enter your password"
-                autoComplete="off"
-                autoFocus="off"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="grow h-14 text-black text-sm sm:text-base font-normal font-['Montserrat'] leading-tight bg-transparent border-none outline-none focus:outline-none"
-              />
-              <div className="w-4 h-4 relative cursor-pointer" onClick={togglePasswordVisibility}>
-                <img src={isPasswordVisible ? IconEye : IconEyeOff} alt="Toggle Visibility" className="w-full h-full object-cover" />
-              </div>
-            </div>
-            {passwordError && <div className="text-[#fe0000] text-xs">{passwordError}</div>}
-          </div>
+      {/* Form Fields */}
+      <div className="self-stretch flex flex-col gap-4">
+        {/* Username Field */}
+        <div className="flex flex-col gap-3">
+          <label className="text-black text-[10px] font-bold uppercase tracking-widest">Email ADDRESS</label>
+          <input
+            type="email"
+            className="h-14 px-3 bg-white rounded outline outline-1 outline-slate-200 w-full"
+            placeholder="Enter your email"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
         </div>
 
-        <div className="self-stretch h-[83px] flex-col justify-start items-start gap-[15px] flex">
-          <div
-            className={`p-5 rounded justify-center items-center gap-3 inline-flex overflow-hidden w-full ${isFormValid ? 'bg-[#456eff]' : 'bg-[#cbd2ec]'}`}
-            onClick={isFormValid ? handleLogin : null}
-            style={{cursor:'pointer'}}
-          >
-            <div className="text-center text-white text-lg sm:text-xl font-medium font-['Montserrat'] leading-none">
-              Login
-            </div>
-          </div>
-          <div className="self-stretch flex justify-end">
+        {/* Password Field */}
+        <div className="flex flex-col gap-3">
+          <label className="text-black text-[10px] font-bold uppercase tracking-widest">Password</label>
+          <div className="relative w-full">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className="h-14 px-3 bg-white rounded outline outline-1 outline-slate-200 w-full"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
             <button
-              onClick={resetPassword}
-              className="text-[#456eff] text-sm sm:text-base font-bold font-['Montserrat'] leading-tight"
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              onClick={() => setShowPassword(!showPassword)}
             >
-              Reset password
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        className={`self-stretch p-4 rounded  font-semibold transition-all ${
+          isFormValid ? 'bg-[#024a63] hover:bg-[#023a52] text-white cursor-pointer' : 'bg-gray-300 text-black cursor-not-allowed'
+        }`}
+        disabled={!isFormValid}
+      >
+        Login
+      </button>
+      <div className="text-right w-full">
+          <span onClick={resetPassword} className="text-blue-700 text-md font-bold cursor-pointer hover:underline">
+            Reset Password?
+          </span>
+        </div>
+    </form>
 
     <div className="absolute bottom-0 left-0 sm:block">
   <img

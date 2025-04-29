@@ -4,7 +4,7 @@ import Header from '../components/Header/index';
 import Sidebar from '../components/Sidebar/index';
 
 
-const DefaultLayout = ({ children }) => {
+const DefaultLayout = ({ children,setIsAuthenticated }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pageTitle, setPageTitle] = useState('');
   const location = useLocation();
@@ -37,7 +37,7 @@ const DefaultLayout = ({ children }) => {
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">
       <div className="flex h-screen overflow-hidden">
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} setIsAuthenticated={setIsAuthenticated}/>
         <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} pageTitle={pageTitle} />
           <main>

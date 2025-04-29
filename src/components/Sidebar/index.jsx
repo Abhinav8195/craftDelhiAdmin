@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import React, {  useEffect, useRef, useState } from 'react';
+import { NavLink,  useNavigate } from 'react-router-dom';
 import iconImage from '../../assets/images/icon.png';
 import IconPresentationChart_01 from '../../assets/images/IconPresentationChart_01.png'
 import IconUsersEdit from '../../assets/images/IconUsersEdit.png'
@@ -15,18 +15,35 @@ import orderactive from '../../assets/images/orderactive.png'
 import packactive from '../../assets/images/packactive.png';
 import users from '../../assets/images/user.png';
 import { IoIosArrowForward } from "react-icons/io";
-import { AuthContext } from '../../AuthContext';
-const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
-  const location = useLocation();
-  const { pathname } = location;
-  const { user, logout } = useContext(AuthContext);
+
+const Sidebar = ({ sidebarOpen, setSidebarOpen,setIsAuthenticated }) => {
   const trigger = useRef(null);
   const sidebar = useRef(null);
-
+  const navigate = useNavigate();
   const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
   const [sidebarExpanded, setSidebarExpanded] = useState(
     storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
   );
+  const [userName, setUserName] = useState(null);
+
+  const confirmLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('name');
+    localStorage.removeItem('tokenExpiry');
+    if (setIsAuthenticated) {
+      setIsAuthenticated(false);  
+      window.dispatchEvent(new Event('storage'));
+    }
+    navigate('/');
+  };
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("name");
+    if (storedName) {
+      setUserName(storedName);
+    }
+  }, []);
 
   // close on click outside
   useEffect(() => {
@@ -217,12 +234,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </div>
 
           {/* Profile */}
-          <div  onClick={logout} className="self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex">
+          <div  onClick={confirmLogout} className="self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex">
             <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
               <div className="w-5 h-5 relative overflow-hidden">
               <img src={users} alt="Payment Management Icon" className="w-full h-full object-cover" />
               </div>
-              <div className="grow shrink basis-0 text-[#36234e] text-xs font-medium font-['Montserrat'] leading-none">Welcome {user?.name || "Admin"}</div>
+              <div className="grow shrink basis-0 text-[#36234e] text-xs font-medium font-['Montserrat'] leading-none">Welcome {userName || "Admin"}</div>
             </div>
             <div className="w-5 h-5 p-2.5 justify-center items-center gap-2 rounded-full inline-flex">
               <div className="w-5 h-5 rounded-full relative">

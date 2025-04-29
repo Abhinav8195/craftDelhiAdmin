@@ -18,18 +18,17 @@ const navigate=useNavigate();
   }, []);
 
   useEffect(() => {
-    // Check if all OTP digits are entered
     const isOtpComplete = otp.every((digit) => digit !== '');
-    setIsButtonDisabled(!isOtpComplete); // Enable/Disable button
+    setIsButtonDisabled(!isOtpComplete); 
   }, [otp]);
 
   const handleChange = (index, value) => {
-    if (/^\d*$/.test(value) && value.length <= 1) { // Allow only single digit input
+    if (/^\d*$/.test(value) && value.length <= 1) { 
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
 
-      // Move to the next input field if the current one is filled
+   
       if (value && index < otp.length - 1) {
         document.getElementById(`otp-input-${index + 1}`).focus();
       }
@@ -41,7 +40,7 @@ const navigate=useNavigate();
     if (enteredOtp === '123456') {
       alert('OTP is correct!');
       setIsOtpCorrect(true);
-      navigate('/CreatePassword')
+      navigate('/create-password')
     } else {
       alert('Incorrect OTP. Please try again.');
       setIsOtpCorrect(false); // OTP is incorrect
@@ -76,7 +75,7 @@ const navigate=useNavigate();
           </div>
         </div>
         <div
-          className={`self-stretch p-4 ${isButtonDisabled ? 'bg-[#cbd2ec]' : 'bg-[#456eff]'} rounded justify-center items-center gap-3 inline-flex overflow-hidden`}
+          className={`self-stretch p-4 ${isButtonDisabled ? 'bg-[#cbd2ec]' : 'bg-[#024a63]'} rounded justify-center items-center gap-3 inline-flex overflow-hidden`}
           onClick={isButtonDisabled ? null : handleContinue}
         >
           <div className="text-center text-white text-sm font-medium font-['Montserrat'] leading-none">
