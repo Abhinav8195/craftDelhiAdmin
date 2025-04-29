@@ -27,10 +27,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen,setIsAuthenticated }) => {
   const [userName, setUserName] = useState(null);
 
   const confirmLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('craftdelhiadmin_token');
     localStorage.removeItem('user');
     localStorage.removeItem('name');
-    localStorage.removeItem('tokenExpiry');
+    localStorage.removeItem('craftdelhiadmin_tokenExpiry');
     if (setIsAuthenticated) {
       setIsAuthenticated(false);  
       window.dispatchEvent(new Event('storage'));
