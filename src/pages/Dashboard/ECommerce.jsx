@@ -23,12 +23,12 @@ const ECommerce = () => {
     <div className="px-4 md:px-8 lg:px-1 mt-0 lg:mt-[-30px]">
       {selectedCard === 1 && (
         <>
-          <UserTable />
+          <UserTable card1={handleCardClick}/>
         </>
       )}
       {selectedCard === 2 && (
         <>
-          <ProductTable />
+          <ProductTable card1={handleCardClick}/>
         </>
       )}
       {selectedCard === 3 && (
