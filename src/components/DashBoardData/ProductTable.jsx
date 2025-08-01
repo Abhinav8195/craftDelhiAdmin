@@ -50,19 +50,64 @@ const ProductTable = ({card1}) => {
     setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
-  const handleSelectStatus = (index, status) => {
-    const updated = [...products];
-    updated[index].status = status;
-    setProducts(updated);
-    setDropdownOpen(null);
+ const handleSelectStatus = async (index, status) => {
+  const statusMapping = {
+    Approved: 1,
+    Rejected: 2
   };
+
+  if (status === 'Pending') {
+    setDropdownOpen(null);
+    return;
+  }
+
+  const token = localStorage.getItem("craftdelhiadmin_token");
+  const productId = products[index].userId;
+  const mappedStatus = statusMapping[status];
+
+  console.log("Submitting status update:", { productId, mappedStatus });
+
+  try {
+    const response = await axios.put(
+      'https://backend.craftdelhi.com/backend/api/admin/update-product-approval',
+      {
+        productId: productId,
+        status: mappedStatus
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    console.log("API response:", response.data);
+
+    if (response.data.success) {
+      const updated = [...products];
+      updated[index].status = status;
+      setProducts(updated);
+    } else {
+      console.error('Failed to update status:', response.data.message);
+      alert("Failed to update status.");
+    }
+  } catch (error) {
+    console.error('Error updating status:', error.response?.data || error.message);
+    alert("Something went wrong while updating status.");
+  }
+
+  setDropdownOpen(null);
+};
+
+
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="px-4 md:px-8 mt-8">
+    <div className=" md:px-1 mt-8">
       <div className="text-black text-xl md:text-2xl font-bold font-['Montserrat'] mb-6 text-center md:text-left">
         Pending Approvals
       </div>
