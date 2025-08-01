@@ -4,6 +4,8 @@ import IconImageIndentRight from '../../assets/images/IconImageIndentRight.png';
 import { IoIosArrowDown } from 'react-icons/io';
 import { FaSearch } from 'react-icons/fa';
 import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const ProductTable = ({card1}) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -15,34 +17,34 @@ const ProductTable = ({card1}) => {
     Rejected: '#fe0000'
   });
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const token = localStorage.getItem("craftdelhiadmin_token");
-        const response = await axios.get('https://backend.craftdelhi.com/backend/api/admin/products-view', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (response.data.success) {
-          const filtered = response.data.data
-            .filter(product => product.admin_approval === 0)
-            .map(product => ({
-              userId: product.id,
-              name: product.product_name,
-              productImage: product.main_image_url,
-              seller: `${product.first_name || ''} ${product.last_name || ''}`.trim() || 'Unknown',
-              status: 'Pending'
-            }));
-
-          setProducts(filtered);
+  const fetchProducts = async () => {
+    try {
+      const token = localStorage.getItem("craftdelhiadmin_token");
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/admin/products-view`, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
+      });
 
+      if (response.data.success) {
+        const filtered = response.data.data
+          .filter(product => product.admin_approval === 0)
+          .map(product => ({
+            userId: product.id,
+            name: product.product_name,
+            productImage: product.main_image_url,
+            seller: `${product.first_name || ''} ${product.last_name || ''}`.trim() || 'Unknown',
+            status: 'Pending'
+          }));
+
+        setProducts(filtered);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
+   useEffect(() => {
     fetchProducts();
   }, []);
 
@@ -68,8 +70,8 @@ const ProductTable = ({card1}) => {
   console.log("Submitting status update:", { productId, mappedStatus });
 
   try {
-    const response = await axios.put(
-      'https://backend.craftdelhi.com/backend/api/admin/update-product-approval',
+    const response = await axios.post(
+      `${process.env.REACT_APP_BASE_URL}/admin/update-product-approval`,
       {
         productId: productId,
         status: mappedStatus
@@ -85,12 +87,10 @@ const ProductTable = ({card1}) => {
     console.log("API response:", response.data);
 
     if (response.data.success) {
-      const updated = [...products];
-      updated[index].status = status;
-      setProducts(updated);
+       toast.success(`Status updated to ${status}`);
+        fetchProducts();
     } else {
-      console.error('Failed to update status:', response.data.message);
-      alert("Failed to update status.");
+      toast.error("Failed to update status.");
     }
   } catch (error) {
     console.error('Error updating status:', error.response?.data || error.message);
