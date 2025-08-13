@@ -1,67 +1,178 @@
-import React, { useEffect, useState } from 'react'
-import IconUserCheck_01 from '../../assets/images/IconUserCheck_01.png';
-import IconShoppingBag_02 from '../../assets/images/IconShoppingBag_02.png';
-import IconFaceContent from '../../assets/images/IconFaceContent.png';
-import { NavLink } from 'react-router-dom';
-import SellerTable from '../../components/sellerManagement/SellerTable';
-import SellerEditProfile from '../../components/sellerManagement/SellerEditProfile';
-import SellerController from '../../components/sellerManagement/SellerController';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import IconUserCheck_01 from "../../assets/images/IconUserCheck_01.png";
+import IconShoppingBag_02 from "../../assets/images/IconShoppingBag_02.png";
+import IconFaceContent from "../../assets/images/IconFaceContent.png";
+import { NavLink } from "react-router-dom";
+import SellerTable from "../../components/sellerManagement/SellerTable";
+import SellerController from "../../components/sellerManagement/SellerController";
+import { motion } from "framer-motion";
+
+const cardVariants = {
+  hidden: { opacity: 0, scale: 0.9, y: 30 },
+  visible: (i) => ({
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.2,
+      type: "spring",
+      stiffness: 100,
+    },
+  }),
+};
 
 const SellerManagement = () => {
   const [selectedCard, setSelectedCard] = useState(null);
-  
-    const handleCardClick = (cardNumber) => {
-      setSelectedCard(cardNumber === selectedCard ? null : cardNumber);
+const [selectedSeller, setSelectedSeller] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    total_sellers: 0,
+    active_sellers: 0,
+    trashed_seller_accounts: 0,
+  });
+
+  const token = localStorage.getItem("craftdelhiadmin_token");
+
+  const handleCardClick = (seller) => {
+  setSelectedSeller(seller);
+  setSelectedCard(1); 
+};
+
+  useEffect(() => {
+    setSelectedCard(null);
+
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+
+        if (!token) {
+          console.error("No token found in localStorage.");
+          return;
+        }
+
+        const res = await axios.get(
+          `${process.env.REACT_APP_BASE_URL}/admin/seller-stats`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (
+          res.data &&
+          (res.data.status === true || res.data.success === true) &&
+          res.data.data
+        ) {
+          const {
+            total_sellers,
+            active_sellers,
+            trashed_seller_accounts,
+          } = res.data.data;
+
+          setStats({
+            total_sellers: Number(total_sellers) || 0,
+            active_sellers: Number(active_sellers) || 0,
+            trashed_seller_accounts: Number(trashed_seller_accounts) || 0,
+          });
+
+          console.log("Updated Stats State:", {
+            total_sellers,
+            active_sellers,
+            trashed_seller_accounts,
+          });
+        } else {
+          console.warn("Unexpected API response format:", res.data);
+        }
+      } catch (error) {
+        console.error("Error fetching seller stats:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-  
-  
-    useEffect(() => {   
-      setSelectedCard(null);
-    }, []); 
+
+    fetchStats();
+  }, [token]);
+
+  const cards = [
+    {
+      img: IconUserCheck_01,
+      bg: "from-[#ffe2e6] to-white",
+      title: "Total Number Of Seller's",
+      value: stats.total_sellers,
+    },
+    {
+      img: IconShoppingBag_02,
+      bg: "from-[#fff4de] to-white",
+      title: "Total Number Of Active Seller's",
+      value: stats.active_sellers,
+    },
+    {
+      img: IconFaceContent,
+      bg: "from-green-100 to-white",
+      title: "Total Number Of Trashed Account",
+      value: stats.trashed_seller_accounts,
+    },
+  ];
+
   return (
     <>
-    {selectedCard === 1 && (
+      {selectedCard === 1 && (
+  <SellerController
+    card1={() => setSelectedCard(null)}
+    seller={selectedSeller}
+  />
+)}
+
+      {selectedCard === null && (
         <>
-          <SellerController card1={handleCardClick} />
+     
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cards.map((card, i) => (
+              <motion.div
+                key={i}
+                custom={i}
+                initial="hidden"
+                animate="visible"
+                variants={cardVariants}
+              >
+                <NavLink>
+                  <div
+                    className={`h-[180px] p-5 bg-gradient-to-b ${card.bg} rounded-xl border border-[#d9d9d9] flex flex-col justify-between items-center text-center shadow-lg hover:shadow-xl transition-shadow duration-300`}
+                  >
+                    <img src={card.img} alt="Logo" className="w-10 h-10" />
+                    <div className="text-black text-base font-bold">
+                      {card.title}
+                    </div>
+                    <motion.div
+                      key={card.value}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="text-black text-2xl font-bold"
+                    >
+                      {loading ? "--" : card.value}
+                    </motion.div>
+                  </div>
+                </NavLink>
+              </motion.div>
+            ))}
+          </div>
+
+ 
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            <SellerTable card1={handleCardClick} />
+          </motion.div>
         </>
       )}
-
-{selectedCard === null && (
-        <>
-        
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-             {/* Card 1 */}
-             <NavLink>
-            <div className="h-[180px] p-5 bg-gradient-to-b from-[#ffe2e6] to-white rounded-xl border border-[#d9d9d9] flex flex-col  justify-between items-center text-center">
-               <img src={IconUserCheck_01} alt="Logo" className="w-10 h-10" />
-               <div className="text-black text-base font-bold">Total Number Of Seller's</div>
-               <div className="text-black text-2xl font-bold">87</div>
-               {/* <div className="text-[#2d53d8] text-xs font-bold">+8 from yesterday</div> */}
-             </div>
-            </NavLink>
-     
-             {/* Card 2 */}
-             <div className="h-[180px] p-5 bg-gradient-to-b from-[#fff4de] to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between items-center text-center">
-               <img src={IconShoppingBag_02} alt="Logo" className="w-10 h-10" />
-               <div className="text-black text-base font-bold">Total Number Of Active Seller's</div>
-               <div className="text-black text-2xl font-bold">2100</div>
-               {/* <div className="text-[#2d53d8] text-xs font-bold">+8 from yesterday</div> */}
-             </div>
-     
-             {/* Card 3 */}
-             <div className="h-[180px] p-5 bg-gradient-to-b from-green-100 to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between items-center text-center">
-               <img src={IconFaceContent} alt="Logo" className="w-10 h-10" />
-               <div className="text-black text-base font-bold">Total Number Of Trashed Account </div>
-               <div className="text-black text-2xl font-bold">200</div>
-               {/* <div className="text-[#2d53d8] text-xs font-bold">+8 from yesterday</div> */}
-             </div>
-           </div>
-
-           <SellerTable card1={handleCardClick}/>
-           </>
-)}
     </>
-  )
-}
+  );
+};
 
-export default SellerManagement
+export default SellerManagement;

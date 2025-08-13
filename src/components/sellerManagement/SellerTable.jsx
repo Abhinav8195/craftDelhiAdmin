@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import IconUserCheck_01 from '../../assets/images/IconUserCheck_01.png';
 import { IoIosArrowDown } from "react-icons/io";
 import { FaSearch } from "react-icons/fa";
@@ -7,51 +8,43 @@ import { FaRegEye } from "react-icons/fa";
 import { FaTrash } from "react-icons/fa6";
 import { LuPenLine } from "react-icons/lu";
 import BuyerDelete from '../buyerManagement/BuyerDelete';
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-
-const dummyData = [
-  {
-    userId: '01',
-    name: 'John Doe',
-    email: 'admin@gmail.com',
-    status: 'Approved',
-    phone:'+911234567890',
-    city:'Ambala'
-  },
-  {
-    userId: '02',
-    name: 'Jane Smith',
-    email: 'admin@gmail.com',
-    status: ' Approved',
-     phone:'+911234567890',
-      city:'Ambala'
-  },
-  {
-    userId: '03',
-    name: 'Sam Wilson',
-    email: 'admin@gmail.com',
-    status: 'Approved',
-     phone:'+911234567890',
-      city:'Ambala'
-  },
-  {
-    userId: '04',
-    name: 'Lucy Brown',
-    email: 'admin@gmail.com',
-    status: 'Rejected',
-     phone:'+911234567890',
-      city:'Ambala'
-  }
-];
-
-const SellerTable = ({card1}) => {
-    const [dropdownOpen, setDropdownOpen] = useState(null); 
-  const [updatedUsers, setUpdatedUsers] = useState(dummyData); 
+const SellerTable = ({ card1 }) => {
+  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [updatedUsers, setUpdatedUsers] = useState([]);
   const [DeleteUser, setDeleteUser] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null); 
+  const [selectedDate, setSelectedDate] = useState("");
  
+ useEffect(() => {
+    const fetchSellers = async () => {
+      try {
+        const token = localStorage.getItem("craftdelhiadmin_token"); 
+        const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/admin/seller-view`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.data && res.data.success) {
+          const sellers = res.data.data.map((seller) => ({
+            userId: seller.user_id,
+            name: `${seller.first_name} ${seller.last_name}`,
+            email: seller.email,
+            status: "Approved", 
+            phone: seller.phone_number,
+            city: seller.office_address || "N/A",
+            ...seller
+          }));
+          setUpdatedUsers(sellers);
+        }
+      } catch (error) {
+        console.error("Error fetching sellers:", error);
+      }
+    };
+
+    fetchSellers();
+  }, []);
 
   const openDeleteModal=(user)=>{
     setDeleteUser(user);
@@ -64,21 +57,21 @@ const SellerTable = ({card1}) => {
     setDropdownOpen(dropdownOpen === index ? null : index); 
   };
 
-  // Handle selecting a new status for a user
+  
   const handleSelectStatus = (index, status) => {
     const newUsers = [...updatedUsers];
-    newUsers[index].status = status; // Update the status of the selected user
+    newUsers[index].status = status; 
     setUpdatedUsers(newUsers);
-    setDropdownOpen(null); // Close the dropdown after selecting a status
+    setDropdownOpen(null); 
   };
   return (
-    <div className="px-4 md:px-8 lg:px-1 mt-0 lg:mt-[30px]">
-      {/* Table Section */}
+    <div className="px-4  md:px-8 lg:px-1 mt-5 lg:mt-[30px]">
+     
       <div className="h-[589px] flex flex-col gap-3 overflow-auto w-full">
   <div className="w-full flex flex-wrap justify-between items-center gap-3">
     <div className="text-black text-2xl font-bold">Total Seller's</div>
     
-    {/* Dropdown और Search Input Flex */}
+ 
     <div className="flex gap-2 w-full sm:w-auto">
     <div className="w-full sm:w-[206px]">
     <DateInputField 
@@ -124,7 +117,7 @@ const SellerTable = ({card1}) => {
 </div>
 
             {/* Table Rows */}
-            {dummyData.map((user, index) => (
+            {updatedUsers.map((user, index) => (
             <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.userId}</div>
               </div>
@@ -138,7 +131,7 @@ const SellerTable = ({card1}) => {
   </div>
 </div>
 
-            {dummyData.map((user, index) => (
+            {updatedUsers.map((user, index) => (
               <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.name}</div>
               </div>
@@ -152,7 +145,7 @@ const SellerTable = ({card1}) => {
   </div>
 </div>
 
-            {dummyData.map((user, index) => (
+            {updatedUsers.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.email}</div>
               </div>
@@ -165,7 +158,7 @@ const SellerTable = ({card1}) => {
   </div>
 </div>
 
-            {dummyData.map((user, index) => (
+            {updatedUsers.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.phone}</div>
               </div>
@@ -179,7 +172,7 @@ const SellerTable = ({card1}) => {
   </div>
 </div>
 
-            {dummyData.map((user, index) => (
+            {updatedUsers.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.city}</div>
               </div>
@@ -230,9 +223,9 @@ const SellerTable = ({card1}) => {
   </div>
 </div>
 
-  {dummyData.map((user, index) => (
+  {updatedUsers.map((user, index) => (
     <div key={index} className="h-[88px] gap-5 p-3 bg-white justify-center items-center inline-flex">
-      <button className="w-4 h-4 relative overflow-hidden" onClick={() => card1(1)}>
+      <button className="w-4 h-4 relative overflow-hidden" onClick={() => card1(user)}>
         <LuPenLine  />
       </button>
       <button className="w-4 h-4 relative overflow-hidden " onClick={() => openDeleteModal(user)}>

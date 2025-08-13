@@ -1,19 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Ellipse from "../../assets/images/Ellipse.png";
 import { IoMdCloudUpload } from "react-icons/io";
 
-
-const SellerStoreinfo = ({card1}) => {
+const SellerStoreinfo = ({ card1, seller }) => {
   const [formData, setFormData] = useState({
-    storeName: "Craft Delhi India",
-    storeId: "1043",
-    storeLink: "https://www.etsy.com/shop/YourShopName",
-    description: "I would like this order delivered on my friend’s anniversary. Could you ensure it arrives on the 25th in the morning?",
-    storeCreatedDate: "dd - mm - yyyy",
-    businessNumber: "0313 -3763603",
+    storeName: "",
+    storeId: "",
+    storeLink: "",
+    description: "",
+    storeCreatedDate: "",
+    businessNumber: "",
+    storeImage: ""
   });
 
-  // Handle input changes
+  useEffect(() => {
+    if (seller) {
+      setFormData({
+        storeName: seller.store_name || "",
+        storeId: seller.store_id || "",
+        storeLink: seller.store_link || "",
+        description: seller.description || "",
+        storeCreatedDate: seller.store_created_date
+          ? seller.store_created_date.split("T")[0]
+          : "",
+        businessNumber: seller.business_number || "",
+        storeImage: seller.store_image || ""
+      });
+    }
+  }, [seller]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -22,87 +37,65 @@ const SellerStoreinfo = ({card1}) => {
     }));
   };
 
-  // Handle form submission (Save)
   const handleSave = () => {
     console.log("Form Data Saved:", formData);
   };
 
-  // Handle form reset (Cancel)
   const handleCancel = () => {
-    card1(null)
-    setFormData({
-      storeName: "",
-      storeId: "",
-      storeLink: "",
-      description: "",
-      storeCreatedDate: "",
-      businessNumber: "",
-    });
+    card1(null);
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-white p-3">
-      <div className="w-full max-w-[980px]  p-5 bg-white rounded-xl  ">
+    <div className="w-full bg-white p-3">
+      <div className="w-full max-w-[980px] p-5 bg-white rounded-xl">
         {/* Header */}
-        <div className="self-stretch flex flex-col gap-3">
-          <h2 className="text-black text-2xl font-bold font-['Montserrat'] leading-loose">
-            General Information :
-          </h2>
+        <div className="flex flex-col gap-3">
+          <h2 className="text-black text-2xl font-bold">General Information :</h2>
           <div className="w-full border-2 border-[#d9d9d9]"></div>
         </div>
 
         {/* Profile & Form */}
         <div className="mt-6 flex flex-col gap-3">
-        <div className=" flex flex-col sm:flex-row items-center gap-5">
-  <label htmlFor="profile-upload" className=" cursor-pointer">
-    <img className="w-24 h-24 rounded-full" src={Ellipse} alt="Profile" />
-    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2   rounded-full shadow">
-      <IoMdCloudUpload className="text-xl text-white" />
-    </div>
-  </label>
-  <input type="file" id="profile-upload" className="hidden" />
-</div>
-
+          <div className="flex flex-col sm:flex-row items-center gap-5">
+            <label htmlFor="profile-upload" className="cursor-pointer relative">
+              <img
+                className="w-24 h-24 rounded-full object-cover"
+                src={formData.storeImage || Ellipse}
+                alt="Store"
+              />
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 rounded-full bg-black p-1 shadow">
+                <IoMdCloudUpload className="text-xl text-white" />
+              </div>
+            </label>
+            <input type="file" id="profile-upload" className="hidden" />
+          </div>
 
           <div className="flex flex-col gap-3">
-            {/* Store Name, ID & Link */}
             <div className="flex flex-wrap gap-3">
-              <div className="flex-1 min-w-[250px]">
-                <label className="text-black text-[10px] font-bold uppercase tracking-widest">Store Name</label>
-                <input
-                  type="text"
-                  name="storeName"
-                  value={formData.storeName}
-                  onChange={handleChange}
-                  className="h-14 px-3 bg-white rounded border border-[#e0e4f4] flex items-center text-black text-xs w-full"
-                />
-              </div>
+              <InputField
+                label="Store Name"
+                name="storeName"
+                value={formData.storeName}
+                onChange={handleChange}
+              />
 
-              <div className="w-[117px]">
-                <label className="text-black text-[10px] font-bold uppercase tracking-widest">Store ID</label>
-                <input
-                  type="text"
-                  name="storeId"
-                  value={formData.storeId}
-                  onChange={handleChange}
-                  className="h-14 px-3 bg-white rounded border border-[#e0e4f4] flex items-center text-black text-xs w-full"
-                />
-              </div>
+              <InputField
+                label="Store ID"
+                name="storeId"
+                value={formData.storeId}
+                onChange={handleChange}
+                small
+              />
 
-              <div className="flex-1 min-w-[250px]">
-                <label className="text-black text-[10px] font-bold uppercase tracking-widest">Store Link</label>
-                <input
-                  type="text"
-                  name="storeLink"
-                  value={formData.storeLink}
-                  onChange={handleChange}
-                  className="h-14 px-3 bg-white rounded border border-[#e0e4f4] flex items-center text-black text-xs w-full"
-                />
-              </div>
+              <InputField
+                label="Store Link"
+                name="storeLink"
+                value={formData.storeLink}
+                onChange={handleChange}
+              />
             </div>
 
-            {/* Store Description */}
-            <div className="flex flex-col gap-3">
+            <div>
               <label className="text-black text-[10px] font-bold uppercase tracking-widest">
                 Description About Store
               </label>
@@ -114,33 +107,36 @@ const SellerStoreinfo = ({card1}) => {
               />
             </div>
 
-            {/* Store Created Date & Business Number */}
             <div className="flex flex-wrap gap-3">
-              <div className="flex-1 min-w-[250px]">
-                <label className="text-black text-[10px] font-bold uppercase tracking-widest">Store Created Date</label>
-                <DateInputField label="Birthday" name="birthday" value={formData.birthday} onChange={handleChange} />
-              </div>
+              <DateInputField
+                label="Store Created Date"
+                name="storeCreatedDate"
+                value={formData.storeCreatedDate}
+                onChange={handleChange}
+              />
 
-              <div className="flex-1 min-w-[250px]">
-                <label className="text-black text-[10px] font-bold uppercase tracking-widest">Business Number</label>
-                <input
-                  type="text"
-                  name="businessNumber"
-                  value={formData.businessNumber}
-                  onChange={handleChange}
-                  className="h-14 px-3 bg-white rounded border border-[#e0e4f4] flex items-center text-black text-xs w-full"
-                />
-              </div>
+              <InputField
+                label="Business Number"
+                name="businessNumber"
+                value={formData.businessNumber}
+                onChange={handleChange}
+              />
             </div>
           </div>
         </div>
 
         {/* Buttons */}
         <div className="flex justify-end gap-2 mt-5">
-          <button onClick={handleCancel} className="p-4 bg-[#bbbbbb] rounded text-[#151618] text-sm font-medium">
+          <button
+            onClick={handleCancel}
+            className="p-4 bg-[#bbbbbb] rounded text-[#151618] text-sm font-medium"
+          >
             Cancel
           </button>
-          <button onClick={handleSave} className=" p-4 bg-[#024a63] rounded text-white text-sm font-medium">
+          <button
+            onClick={handleSave}
+            className="p-4 bg-[#024a63] rounded text-white text-sm font-medium"
+          >
             Save
           </button>
         </div>
@@ -149,23 +145,34 @@ const SellerStoreinfo = ({card1}) => {
   );
 };
 
+const InputField = ({ label, name, value, onChange, small }) => (
+  <div className={small ? "w-[117px]" : "flex-1 min-w-[250px]"}>
+    <label className="text-black text-[10px] font-bold uppercase tracking-widest">
+      {label}
+    </label>
+    <input
+      type="text"
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-black text-xs w-full"
+    />
+  </div>
+);
 
-const DateInputField = ({ label, name, value, onChange }) => {
-    return (
-      <div>
-       
-        <div className="relative w-full">
-          <input
-            type="date"
-            className="w-full h-14 px-3  bg-white rounded border border-[#e0e4f4] text-xs"
-            name={name}
-            value={value}
-            onChange={onChange}
-          />
-         
-        </div>
-      </div>
-    );
-  };
+const DateInputField = ({ label, name, value, onChange }) => (
+  <div className="flex-1 min-w-[250px]">
+    <label className="text-black text-[10px] font-bold uppercase tracking-widest">
+      {label}
+    </label>
+    <input
+      type="date"
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="w-full h-14 px-3 bg-white rounded border border-[#e0e4f4] text-xs"
+    />
+  </div>
+);
 
 export default SellerStoreinfo;

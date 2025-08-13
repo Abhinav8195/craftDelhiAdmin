@@ -1,92 +1,130 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Ellipse from "../../assets/images/Ellipse.png";
 import { IoMdCloudUpload } from "react-icons/io";
 
-const SellerBank = ({card1}) => {
+const SellerBank = ({ card1, seller }) => {
+  const [formData, setFormData] = useState({
+    bankName: "",
+    branchLocation: "",
+    accountHolder: "",
+    accountNumber: "",
+    ifscCode: "",
+    profileImage: ""
+  });
+
+  useEffect(() => {
+    if (seller) {
+      setFormData({
+        bankName: seller.bank_name || "",
+        branchLocation: seller.branch_location || "",
+        accountHolder: seller.account_holder_name || "",
+        accountNumber: seller.account_number || "",
+        ifscCode: seller.ifsc_code || "",
+        profileImage: seller.profile_image || ""
+      });
+    }
+  }, [seller]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-white p-3 ">
-    <div className="w-full max-w-[980px] mx-auto p-5 bg-white rounded-xl">
-      {/* Header */}
-      <div className="flex flex-col gap-3">
-        <h2 className="text-black text-2xl font-bold font-['Montserrat'] leading-loose">
-          Bank Information :
-        </h2>
-        <div className="w-full border-2 border-[#d9d9d9]"></div>
-      </div>
-
-      {/* Profile & Form */}
-      <div className="mt-6 flex flex-col gap-3">
-        {/* Profile Picture with Upload Icon */}
-        <div className=" flex flex-col sm:flex-row items-center gap-5">
-          <label htmlFor="profile-upload" className=" cursor-pointer">
-            <img className="w-24 h-24 rounded-full" src={Ellipse} alt="Profile" />
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2   rounded-full shadow">
-              <IoMdCloudUpload className="text-xl text-white" />
-            </div>
-          </label>
-          <input type="file" id="profile-upload" className="hidden" />
+    <div className="w-full p-3 bg-white">
+      <div className="w-full max-w-[980px] mx-auto p-5 bg-white rounded-xl">
+        <div className="flex flex-col gap-3">
+          <h2 className="text-black text-2xl font-bold">Bank Information :</h2>
+          <div className="w-full border-2 border-[#d9d9d9]"></div>
         </div>
 
-        {/* Form Section */}
-        <div className="w-full flex flex-col gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Bank Name */}
-            <div>
-              <label className="text-black text-[10px] font-bold uppercase tracking-widest">
-                Select Bank
-              </label>
-              <input type="text" defaultValue="State Bank of India" className="h-14 px-3 bg-white rounded border border-[#e0e4f4] w-full text-xs" />
-            </div>
-
-            {/* Branch Location */}
-            <div>
-              <label className="text-black text-[10px] font-bold uppercase tracking-widest">
-                Branch Location
-              </label>
-              <input type="text" defaultValue="Connaught Place, New Delhi" className="h-14 px-3 bg-white rounded border border-[#e0e4f4] w-full text-xs" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Account Holder Name */}
-            <div>
-              <label className="text-black text-[10px] font-bold uppercase tracking-widest">
-                Account Holder Name
-              </label>
-              <input type="text" defaultValue="Rahul Sharma" className="h-14 px-3 bg-white rounded border border-[#e0e4f4] w-full text-xs" />
-            </div>
-
-            {/* Account Number */}
-            <div>
-              <label className="text-black text-[10px] font-bold uppercase tracking-widest">
-                Account Number
-              </label>
-              <input type="text" defaultValue="123456789012" className="h-14 px-3 bg-white rounded border border-[#e0e4f4] w-full text-xs" />
-            </div>
-          </div>
-
-          {/* IFSC Code */}
-          <div>
-            <label className="text-black text-[10px] font-bold uppercase tracking-widest">
-              IFSC Code
+        <div className="mt-6 flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-5">
+            <label htmlFor="profile-upload" className="cursor-pointer relative">
+              <img
+                className="w-24 h-24 rounded-full"
+                src={formData.profileImage || Ellipse}
+                alt="Profile"
+              />
+              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 rounded-full shadow bg-[#00000099] p-1">
+                <IoMdCloudUpload className="text-xl text-white" />
+              </div>
             </label>
-            <input type="text" defaultValue="SBIN0001234" className="h-14 px-3 bg-white rounded border border-[#e0e4f4] w-full text-xs" />
+            <input type="file" id="profile-upload" className="hidden" />
+          </div>
+
+          <div className="w-full flex flex-col gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InputField
+                label="Select Bank"
+                name="bankName"
+                value={formData.bankName}
+                onChange={handleChange}
+              />
+              <InputField
+                label="Branch Location"
+                name="branchLocation"
+                value={formData.branchLocation}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InputField
+                label="Account Holder Name"
+                name="accountHolder"
+                value={formData.accountHolder}
+                onChange={handleChange}
+              />
+              <InputField
+                label="Account Number"
+                name="accountNumber"
+                value={formData.accountNumber}
+                onChange={handleChange}
+              />
+            </div>
+
+            <InputField
+              label="IFSC Code"
+              name="ifscCode"
+              value={formData.ifscCode}
+              onChange={handleChange}
+            />
           </div>
         </div>
-      </div>
 
-      {/* Buttons */}
-      <div className="flex justify-end gap-2 mt-5">
-        <button onClick={()=>card1(null)} className="p-4 bg-[#bbbbbb] rounded text-[#151618] text-sm font-medium">
-          Cancel
-        </button>
-        <button className="p-4 bg-[#024a63] rounded text-white text-sm font-medium">
-          Save
-        </button>
+        <div className="flex justify-end gap-2 mt-5">
+          <button
+            onClick={() => card1(null)}
+            className="p-4 bg-[#bbbbbb] rounded text-[#151618] text-sm font-medium"
+          >
+            Cancel
+          </button>
+          <button className="p-4 bg-[#024a63] rounded text-white text-sm font-medium">
+            Save
+          </button>
+        </div>
       </div>
-    </div>
     </div>
   );
 };
+
+const InputField = ({ label, name, value, onChange }) => (
+  <div>
+    <label className="text-black text-[10px] font-bold uppercase tracking-widest">
+      {label}
+    </label>
+    <input
+      type="text"
+      name={name}
+      value={value}
+      onChange={onChange}
+      className="h-14 px-3 bg-white rounded border border-[#e0e4f4] w-full text-xs"
+    />
+  </div>
+);
 
 export default SellerBank;
