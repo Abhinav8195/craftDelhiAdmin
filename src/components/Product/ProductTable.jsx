@@ -1,97 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import IconUserCheck_01 from '../../assets/images/IconUserCheck_01.png';
 import { IoIosArrowDown } from "react-icons/io";
 import { FaSearch } from "react-icons/fa";
-import { NavLink } from 'react-router-dom';
-import { FaRegEye } from "react-icons/fa";
 import { FaTrash } from "react-icons/fa6";
 import { LuPenLine } from "react-icons/lu";
-import BuyerDelete from '../buyerManagement/BuyerDelete';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import Sample from '../../assets/images/sample.png'
 import ProductDelete from './ProductDelete';
+import Sample from '../../assets/images/sample.png';
 
+const ProductTable = ({ card1 }) => {
+  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [deleteProduct, setDeleteProduct] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
 
-const dummyData = [
-  {
-    no: '01',
-    productid: 'John Doe',
-    productname: 'admin@gmail.com',
-    productimage: Sample,
-    productcategory:'+911234567890',
-    price:'1000',
-    status:'Approved'
-  },
-  {
-    no: '02',
-    productid: 'Jane Smith',
-    productname: 'admin@gmail.com',
-    productimage: Sample,
-     productcategory:'+911234567890',
-      price:'1000',
-      status:'Rejected'
-  },
-  {
-    no: '03',
-    productid: 'Sam Wilson',
-    productname: 'admin@gmail.com',
-    productimage: Sample,
-     productcategory:'+911234567890',
-      price:'1000',
-      status:'Pending'
-  },
-  {
-    no: '04',
-    productid: 'Lucy Brown',
-    productname: 'admin@gmail.com',
-    productimage: Sample,
-     productcategory:'+911234567890',
-      price:'1000',
-      status:'Approved'
-  },
-   {
-    no: '04',
-    productid: 'Lucy Brown',
-    productname: 'admin@gmail.com',
-    productimage: Sample,
-     productcategory:'+911234567890',
-      price:'1000',
-      status:'Approved'
-  }
-];
-
-const ProductTable = ({card1}) => {
-    const [dropdownOpen, setDropdownOpen] = useState(null); 
-  const [updatedUsers, setUpdatedUsers] = useState(dummyData); 
-  const [DeleteProduct, setDeleteProduct] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(null); 
- 
-
-  const openDeleteModal=(product)=>{
-    setDeleteProduct(product);
-  }
-  const closeDeleteModal = () => {
-    setDeleteProduct(null);
+  const statusColors = {
+    Pending: '#ffc600',
+    Approved: '#69d297',
+    Rejected: '#fe0000'
   };
- 
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const token = localStorage.getItem("craftdelhiadmin_token"); 
+        const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/admin/totalproductsforadmin`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (res.data?.status) {
+          setProducts(res.data.data || []);
+        } else {
+          console.error("Failed to fetch products", res.data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching products", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const toggleDropdown = (index) => {
-    setDropdownOpen(dropdownOpen === index ? null : index); 
+    setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
-  // Handle selecting a new status for a user
   const handleSelectStatus = (index, status) => {
-    const newUsers = [...updatedUsers];
-    newUsers[index].status = status; // Update the status of the selected user
-    setUpdatedUsers(newUsers);
-    setDropdownOpen(null); // Close the dropdown after selecting a status
+    const updated = [...products];
+    updated[index].status = status;
+    setProducts(updated);
+    setDropdownOpen(null);
   };
 
-   const [statusColors, setStatusColors] = useState({
-      Pending: '#ffc600',
-      Approved: '#69d297',
-      Rejected: '#fe0000'
-    });
+  const openDeleteModal = (product) => setDeleteProduct(product);
+  const closeDeleteModal = () => setDeleteProduct(null);
 
   return (
     <div className="px-4 md:px-8 lg:px-1 mt-0 lg:mt-[30px]">
@@ -147,9 +109,9 @@ const ProductTable = ({card1}) => {
 </div>
 
             {/* Table Rows */}
-            {dummyData.map((user, index) => (
+            {products.map((user, index) => (
             <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.no}</div>
+<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{index + 1}</div>
               </div>
             ))}
           </div>
@@ -161,9 +123,9 @@ const ProductTable = ({card1}) => {
   </div>
 </div>
 
-            {dummyData.map((user, index) => (
+            {products.map((user, index) => (
               <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.productid}</div>
+<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.id}</div>
               </div>
             ))}
           </div>
@@ -175,9 +137,9 @@ const ProductTable = ({card1}) => {
   </div>
 </div>
 
-            {dummyData.map((user, index) => (
+            {products.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.productname}</div>
+<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.name}</div>
               </div>
             ))}
           </div>
@@ -188,11 +150,11 @@ const ProductTable = ({card1}) => {
   </div>
 </div>
 
-                {dummyData.map((product, index) => (
+                {products.map((product, index) => (
                  <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
                    <div className="w-16 h-16 justify-center items-center flex">
                      <img
-                       src={product.productimage}
+                       src={product.main_image_url || Sample}
                        alt={product.name}
                        className="w-16 h-16 rounded-full"
                      />
@@ -208,9 +170,9 @@ const ProductTable = ({card1}) => {
   </div>
 </div>
 
-            {dummyData.map((user, index) => (
+            {products.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.productcategory}</div>
+<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.category_id}</div>
               </div>
             ))}
           </div>
@@ -221,7 +183,7 @@ const ProductTable = ({card1}) => {
   </div>
 </div>
 
-            {dummyData.map((user, index) => (
+            {products.map((user, index) => (
              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
 <div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.price}</div>
               </div>
@@ -234,10 +196,20 @@ const ProductTable = ({card1}) => {
   </div>
 </div>
 
-                         {updatedUsers.map((user, index) => (
+                         {products.map((user, index) => (
                            <div key={index} className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-                             <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex `} style={{ backgroundColor: statusColors[user.status] }} >
-                               <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.status}</div>
+                             <div className={`p-1 rounded-sm justify-center items-center gap-2.5 flex `} style={{
+                              backgroundColor: statusColors[
+                                user.admin_approval === 1
+                                  ? 'Approved'
+                                  : user.admin_approval === 0
+                                  ? 'Pending'
+                                  : 'Rejected'
+                              ]
+                            }}
+                            >
+                               <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.admin_approval === 1 ? 'Approved' :
+         user.admin_approval === 0 ? 'Pending' : 'Rejected'}</div>
                              </div>
                              <div className="relative w-4 h-4">
                                <IoIosArrowDown onClick={() => toggleDropdown(index)} />
@@ -277,7 +249,7 @@ const ProductTable = ({card1}) => {
   </div>
 </div>
 
-  {dummyData.map((product, index) => (
+  {products.map((product, index) => (
     <div key={index} className="h-[88px] gap-5 p-3 bg-white justify-center items-center inline-flex">
       <button className="w-4 h-4 relative overflow-hidden" onClick={() => card1(1)}>
         <LuPenLine  />
@@ -301,9 +273,9 @@ const ProductTable = ({card1}) => {
     </div>
   </div>
 )} */}
-{DeleteProduct && (
+{deleteProduct && (
   
-      <ProductDelete user={DeleteProduct} close={closeDeleteModal} />
+      <ProductDelete user={deleteProduct} close={closeDeleteModal} />
 
 
 )}

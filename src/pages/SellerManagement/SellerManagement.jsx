@@ -77,12 +77,6 @@ const [selectedSeller, setSelectedSeller] = useState(null);
             active_sellers: Number(active_sellers) || 0,
             trashed_seller_accounts: Number(trashed_seller_accounts) || 0,
           });
-
-          console.log("Updated Stats State:", {
-            total_sellers,
-            active_sellers,
-            trashed_seller_accounts,
-          });
         } else {
           console.warn("Unexpected API response format:", res.data);
         }
