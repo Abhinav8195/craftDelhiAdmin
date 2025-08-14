@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Ellipse from "../../assets/images/Ellipse.png";
 import { IoMdCloudUpload } from "react-icons/io";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SellerBank = ({ card1, seller }) => {
   const [formData, setFormData] = useState({
@@ -9,7 +12,9 @@ const SellerBank = ({ card1, seller }) => {
     accountHolder: "",
     accountNumber: "",
     ifscCode: "",
-    profileImage: ""
+    profileImage: "",
+    profileImageFile: null,
+    userId: ""
   });
 
   useEffect(() => {
@@ -20,7 +25,9 @@ const SellerBank = ({ card1, seller }) => {
         accountHolder: seller.account_holder_name || "",
         accountNumber: seller.account_number || "",
         ifscCode: seller.ifsc_code || "",
-        profileImage: seller.profile_image || ""
+        profileImage: seller.profile_image || "",
+        profileImageFile: null,
+        userId: seller.user_id || ""
       });
     }
   }, [seller]);
@@ -31,6 +38,48 @@ const SellerBank = ({ card1, seller }) => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        profileImageFile: file,
+        profileImage: URL.createObjectURL(file)
+      }));
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const fd = new FormData();
+      fd.append("user_id", formData.userId);
+
+      if (formData.bankName) fd.append("bank_name", formData.bankName);
+      if (formData.branchLocation) fd.append("branch_location", formData.branchLocation);
+      if (formData.accountHolder) fd.append("account_holder_name", formData.accountHolder);
+      if (formData.accountNumber) fd.append("account_number", formData.accountNumber);
+      if (formData.ifscCode) fd.append("ifsc_code", formData.ifscCode);
+      if (formData.profileImageFile) fd.append("profile_image", formData.profileImageFile);
+
+      const res = await axios.put(
+        `${process.env.REACT_APP_BASE_URL}/admin/update-sellerbyadmin`,
+        fd,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("craftdelhiadmin_token")}`,
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      );
+
+      toast.success(res.data.message || "Bank details updated successfully!");
+      card1(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update bank details.");
+    }
   };
 
   return (
@@ -45,7 +94,7 @@ const SellerBank = ({ card1, seller }) => {
           <div className="flex flex-col sm:flex-row items-center gap-5">
             <label htmlFor="profile-upload" className="cursor-pointer relative">
               <img
-                className="w-24 h-24 rounded-full"
+                className="w-24 h-24 rounded-full object-cover"
                 src={formData.profileImage || Ellipse}
                 alt="Profile"
               />
@@ -53,7 +102,12 @@ const SellerBank = ({ card1, seller }) => {
                 <IoMdCloudUpload className="text-xl text-white" />
               </div>
             </label>
-            <input type="file" id="profile-upload" className="hidden" />
+            <input
+              type="file"
+              id="profile-upload"
+              className="hidden"
+              onChange={handleFileChange}
+            />
           </div>
 
           <div className="w-full flex flex-col gap-4">
@@ -103,7 +157,10 @@ const SellerBank = ({ card1, seller }) => {
           >
             Cancel
           </button>
-          <button className="p-4 bg-[#024a63] rounded text-white text-sm font-medium">
+          <button
+            onClick={handleSave}
+            className="p-4 bg-[#024a63] rounded text-white text-sm font-medium"
+          >
             Save
           </button>
         </div>

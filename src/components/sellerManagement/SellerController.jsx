@@ -9,7 +9,7 @@ const SellerController = ({ seller, card1 }) => {
   const tabs = ["Basic Information", "Store Information", "Bank Details"];
 
   return (
-    <div className="flex justify-center items-start bg-white py-10">
+    <div className="flex justify-center items-start bg-white py-5">
       <div className="w-full max-w-[980px] p-5 bg-white rounded-xl shadow-lg">
         {/* Tab Navigation */}
         <div className="h-12 p-1 bg-[#ecf0ff] rounded flex">

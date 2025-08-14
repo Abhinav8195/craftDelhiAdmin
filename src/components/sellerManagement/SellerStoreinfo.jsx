@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Ellipse from "../../assets/images/Ellipse.png";
 import { IoMdCloudUpload } from "react-icons/io";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SellerStoreinfo = ({ card1, seller }) => {
   const [formData, setFormData] = useState({
@@ -10,7 +13,9 @@ const SellerStoreinfo = ({ card1, seller }) => {
     description: "",
     storeCreatedDate: "",
     businessNumber: "",
-    storeImage: ""
+    storeImage: "",
+    storeImageFile: null,
+    userId: ""
   });
 
   useEffect(() => {
@@ -24,7 +29,9 @@ const SellerStoreinfo = ({ card1, seller }) => {
           ? seller.store_created_date.split("T")[0]
           : "",
         businessNumber: seller.business_number || "",
-        storeImage: seller.store_image || ""
+        storeImage: seller.store_image || "",
+        storeImageFile: null,
+        userId: seller.user_id || ""
       });
     }
   }, [seller]);
@@ -33,12 +40,50 @@ const SellerStoreinfo = ({ card1, seller }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
 
-  const handleSave = () => {
-    console.log("Form Data Saved:", formData);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        storeImageFile: file,
+        storeImage: URL.createObjectURL(file)
+      }));
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const fd = new FormData();
+      fd.append("user_id", formData.userId);
+
+      if (formData.storeName) fd.append("store_name", formData.storeName);
+      if (formData.storeLink) fd.append("store_link", formData.storeLink);
+      if (formData.description) fd.append("description", formData.description);
+      if (formData.storeCreatedDate) fd.append("store_created_date", formData.storeCreatedDate);
+      if (formData.businessNumber) fd.append("business_number", formData.businessNumber);
+      if (formData.storeImageFile) fd.append("store_image", formData.storeImageFile);
+
+      const res = await axios.put(
+        `${process.env.REACT_APP_BASE_URL}/admin/update-sellerbyadmin`,
+        fd,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("craftdelhiadmin_token")}`,
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      );
+
+      toast.success(res.data.message || "Store information updated successfully!");
+      card1(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update store information.");
+    }
   };
 
   const handleCancel = () => {
@@ -67,7 +112,12 @@ const SellerStoreinfo = ({ card1, seller }) => {
                 <IoMdCloudUpload className="text-xl text-white" />
               </div>
             </label>
-            <input type="file" id="profile-upload" className="hidden" />
+            <input
+              type="file"
+              id="profile-upload"
+              className="hidden"
+              onChange={handleFileChange}
+            />
           </div>
 
           <div className="flex flex-col gap-3">
@@ -85,6 +135,7 @@ const SellerStoreinfo = ({ card1, seller }) => {
                 value={formData.storeId}
                 onChange={handleChange}
                 small
+                readOnly 
               />
 
               <InputField
@@ -92,6 +143,7 @@ const SellerStoreinfo = ({ card1, seller }) => {
                 name="storeLink"
                 value={formData.storeLink}
                 onChange={handleChange}
+                readOnly 
               />
             </div>
 
@@ -145,7 +197,7 @@ const SellerStoreinfo = ({ card1, seller }) => {
   );
 };
 
-const InputField = ({ label, name, value, onChange, small }) => (
+const InputField = ({ label, name, value, onChange, small,readOnly }) => (
   <div className={small ? "w-[117px]" : "flex-1 min-w-[250px]"}>
     <label className="text-black text-[10px] font-bold uppercase tracking-widest">
       {label}
@@ -154,6 +206,7 @@ const InputField = ({ label, name, value, onChange, small }) => (
       type="text"
       name={name}
       value={value}
+      readOnly={readOnly}
       onChange={onChange}
       className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-black text-xs w-full"
     />
