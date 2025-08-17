@@ -7,6 +7,7 @@ import { FaTrash } from "react-icons/fa6";
 import { LuPenLine } from "react-icons/lu";
 import ProductDelete from './ProductDelete';
 import Sample from '../../assets/images/sample.png';
+import { toast } from "react-toastify";
 
 const ProductTable = ({ card1 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -274,11 +275,34 @@ const ProductTable = ({ card1 }) => {
   </div>
 )} */}
 {deleteProduct && (
-  
-      <ProductDelete user={deleteProduct} close={closeDeleteModal} />
+  <ProductDelete
+    user={deleteProduct}
+    close={closeDeleteModal}
+    onDelete={async (reason, description) => {
+      try {
+        const token = localStorage.getItem("craftdelhiadmin_token");
+        const res = await axios.delete(
+          `${process.env.REACT_APP_BASE_URL}/admin/deleteproductbyadmin/${deleteProduct.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
 
-
+        if (res.data?.status) {
+          // Remove product from list
+          setProducts(products.filter(p => p.id !== deleteProduct.id));
+          toast.success(" Product deleted successfully!");
+        } else {
+           toast.error(`${res.data.message || "Failed to delete product"}`);
+        }
+      } catch (error) {
+        toast.error("⚠️ Error deleting product");
+        console.error("Error deleting product", error);
+      } 
+    }}
+  />
 )}
+
 
     </div>
   );
