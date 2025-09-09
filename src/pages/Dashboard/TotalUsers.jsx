@@ -1,37 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import IconUserCheck_01 from '../../assets/images/IconUserCheck_01.png';
-import IconShoppingBag_02 from '../../assets/images/IconShoppingBag_02.png';
-import IconFaceContent from '../../assets/images/IconFaceContent.png';
-import { NavLink } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import IconUserCheck_01 from "../../assets/images/IconUserCheck_01.png";
+import IconShoppingBag_02 from "../../assets/images/IconShoppingBag_02.png";
+import IconFaceContent from "../../assets/images/IconFaceContent.png";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const TotalUsers = ({ card1 }) => {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    total_users: 0,
+    active_sellers: 0,
+    active_buyers: 0,
+  });
+
+  const navigate = useNavigate();
 
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem("craftdelhiadmin_token");
-
       const response = await axios.get(
         `${process.env.REACT_APP_BASE_URL}/admin/dashboard-stats`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (response.data?.status) {
-        setStats(response.data.data);
-      } else {
-        setStats(null);
-      }
+      if (response.data?.status) setStats(response.data.data);
     } catch (err) {
       console.error("Error fetching dashboard stats:", err);
-      setStats(null);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -39,46 +33,132 @@ const TotalUsers = ({ card1 }) => {
     fetchStats();
   }, []);
 
-  if (loading) {
-    return <div className="text-center py-10">Loading dashboard...</div>;
-  }
+  // Container animation
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.3, delayChildren: 0.2 },
+    },
+  };
 
-  if (!stats) {
-    return <div className="text-center py-10 text-red-500">Unable to load dashboard data.</div>;
-  }
+  // Card animation
+  const cardVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 120, damping: 18 },
+    },
+  };
+
+  // Image animation (pop / rotate in)
+  const imageVariants = {
+    hidden: { opacity: 0, scale: 0.5, rotate: -45 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+      transition: { type: "spring", stiffness: 200, damping: 12 },
+    },
+  };
+
+  // Title animation (fade in from right)
+  const titleVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { type: "tween", duration: 0.6, ease: "easeOut" },
+    },
+  };
+
+  // Number animation (bounce up)
+  const numberVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: "spring", stiffness: 150, damping: 10 },
+    },
+  };
+
+  const cardsData = [
+    {
+      id: 1,
+      icon: IconUserCheck_01,
+      title: "Total Number Of Users",
+      value: stats.total_users,
+      gradient: "from-[#ffe2e6] to-white",
+      onClick: () => card1(1),
+    },
+    {
+      id: 2,
+      icon: IconShoppingBag_02,
+      title: "Total Number Of Active Sellers",
+      value: stats.active_sellers,
+      gradient: "from-[#fff4de] to-white",
+      onClick: () => navigate("/sellers"),
+    },
+    {
+      id: 3,
+      icon: IconFaceContent,
+      title: "Total Number Of Active Buyers",
+      value: stats.active_buyers,
+      gradient: "from-green-100 to-white",
+      onClick: () => navigate("/buyers"),
+    },
+  ];
 
   return (
     <>
-     <div className="text-black text-2xl font-bold font-['Montserrat'] mb-3 text-center md:text-left">
+      <div className="text-black text-2xl font-bold font-['Montserrat'] mb-3 text-center md:text-left">
         Total Users
       </div>
 
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <NavLink onClick={() => card1(1)}>
-          <div className="h-[180px] p-5 bg-gradient-to-b from-[#ffe2e6] to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between">
-            <img src={IconUserCheck_01} alt="User Icon" className="w-10 h-10" />
-            <div className="text-black text-base font-bold">Total Number Of Users</div>
-            <div className="text-black text-2xl font-bold">{stats.total_users}</div>
-            <div className="text-[#2d53d8] text-xs font-bold">+8 from yesterday</div>
-          </div>
-        </NavLink>
-
-        <div className="h-[180px] p-5 bg-gradient-to-b from-[#fff4de] to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between">
-          <img src={IconShoppingBag_02} alt="Seller Icon" className="w-10 h-10" />
-          <div className="text-black text-base font-bold">Total Number Of Active Sellers</div>
-          <div className="text-black text-2xl font-bold">{stats.active_sellers}</div>
-          <div className="text-[#2d53d8] text-xs font-bold">+8 from yesterday</div>
-        </div>
-
-       
-        <div className="h-[180px] p-5 bg-gradient-to-b from-green-100 to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between">
-          <img src={IconFaceContent} alt="Buyer Icon" className="w-10 h-10" />
-          <div className="text-black text-base font-bold">Total Number Of Active Buyers</div>
-          <div className="text-black text-2xl font-bold">{stats.active_buyers}</div>
-          <div className="text-[#2d53d8] text-xs font-bold">+8 from yesterday</div>
-        </div>
-      </div>
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        {cardsData.map((card) => (
+          <motion.div
+            key={card.id}
+            variants={cardVariants}
+            whileHover={{ boxShadow: "0px 10px 25px rgba(0,0,0,0.15)" }}
+            whileTap={{ scale: 0.97 }}
+            className={`h-[180px] p-5 bg-gradient-to-b ${card.gradient} rounded-xl border border-[#d9d9d9] flex flex-col justify-between cursor-pointer`}
+            onClick={card.onClick}
+          >
+            <motion.img
+              src={card.icon}
+              alt="Icon"
+              className="w-10 h-10"
+              variants={imageVariants}
+            />
+            <motion.div
+              className="text-black text-base font-bold"
+              variants={titleVariants}
+            >
+              {card.title}
+            </motion.div>
+            <motion.div
+              className="text-black text-2xl font-bold"
+              variants={numberVariants}
+            >
+              {card.value}
+            </motion.div>
+            <motion.div
+              className="text-[#2d53d8] text-xs font-bold"
+              variants={titleVariants}
+            >
+              +8 from yesterday
+            </motion.div>
+          </motion.div>
+        ))}
+      </motion.div>
     </>
   );
 };
