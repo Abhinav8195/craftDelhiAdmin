@@ -4,7 +4,7 @@ import IconImageIndentRight from '../../assets/images/IconImageIndentRight.png';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const PendingApproval = ({ card1 }) => {
+const PendingApproval = ({ card1,products }) => {
   // Parent container animation
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -75,7 +75,7 @@ const PendingApproval = ({ card1 }) => {
               className="text-black text-2xl font-bold"
               variants={contentVariants}
             >
-              20
+              {products.length}
             </motion.div>
           </motion.div>
         </NavLink>
@@ -107,7 +107,7 @@ const PendingApproval = ({ card1 }) => {
             className="text-black text-2xl font-bold"
             variants={contentVariants}
           >
-            20
+            {products.length}
           </motion.div>
         </motion.div>
       </motion.div>

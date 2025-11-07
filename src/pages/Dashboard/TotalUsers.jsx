@@ -6,32 +6,10 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-const TotalUsers = ({ card1 }) => {
-  const [stats, setStats] = useState({
-    total_users: 0,
-    active_sellers: 0,
-    active_buyers: 0,
-  });
+const TotalUsers = ({ card1,stats  }) => {
 
   const navigate = useNavigate();
 
-  const fetchStats = async () => {
-    try {
-      const token = localStorage.getItem("craftdelhiadmin_token");
-      const response = await axios.get(
-        `${process.env.REACT_APP_BASE_URL}/admin/dashboard-stats`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (response.data?.status) setStats(response.data.data);
-    } catch (err) {
-      console.error("Error fetching dashboard stats:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
 
   // Container animation
   const containerVariants = {
@@ -89,7 +67,7 @@ const TotalUsers = ({ card1 }) => {
       id: 1,
       icon: IconUserCheck_01,
       title: "Total Number Of Users",
-      value: stats.total_users,
+      value: stats?.total_users || 0,
       gradient: "from-[#ffe2e6] to-white",
       onClick: () => card1(1),
     },
@@ -97,7 +75,7 @@ const TotalUsers = ({ card1 }) => {
       id: 2,
       icon: IconShoppingBag_02,
       title: "Total Number Of Active Sellers",
-      value: stats.active_sellers,
+      value: stats?.active_sellers || 0,
       gradient: "from-[#fff4de] to-white",
       onClick: () => navigate("/sellers"),
     },
@@ -105,7 +83,7 @@ const TotalUsers = ({ card1 }) => {
       id: 3,
       icon: IconFaceContent,
       title: "Total Number Of Active Buyers",
-      value: stats.active_buyers,
+      value: stats?.active_buyers || 0,
       gradient: "from-green-100 to-white",
       onClick: () => navigate("/buyers"),
     },
