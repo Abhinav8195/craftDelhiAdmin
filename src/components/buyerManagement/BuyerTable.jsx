@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import IconUserCheck_01 from '../../assets/images/IconUserCheck_01.png';
+// import IconUserCheck_01 from '../../assets/images/IconUserCheck_01.png';
 import { IoIosArrowDown } from "react-icons/io";
 import { FaSearch, FaRegEye } from "react-icons/fa";
 import { FaTrash } from "react-icons/fa6";
 import { LuPenLine } from "react-icons/lu";
 import BuyerDetails from './BuyerDetails';
 import BuyerDelete from './BuyerDelete';
+import { getAdminToken } from '../../utils/auth';
 
 const BuyerTable = ({ card1 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [updatedUsers, setUpdatedUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [deleteUser, setDeleteUser] = useState(null);
+  const token = getAdminToken();
 
   // Fetch buyers on mount
   useEffect(() => {
@@ -20,16 +22,18 @@ const BuyerTable = ({ card1 }) => {
       try {
         const res = await axios.get(`${process.env.REACT_APP_BASE_URL}admin/buyers-view`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('craftdelhiadmin_token')}`, 
+            Authorization: `Bearer ${token}`, 
           },
         });
+        console.log(res.data)
 
         if (res.data.success) {
           const buyers = res.data.data.map(buyer => ({
             userId: buyer.user_id,
             name: `${buyer.first_name} ${buyer.last_name}`,
             email: buyer.email,
-            status: 'Approved', 
+            status: buyer.user_status,
+
             phone: buyer.phone_number,
             profileImage: buyer.profile_image,
           }));
@@ -155,24 +159,48 @@ const BuyerTable = ({ card1 }) => {
             </div>
             {updatedUsers.map((user, index) => (
               <div key={index} className="h-[88px] p-3 bg-white flex items-center gap-2">
-                <div className={`p-1 rounded-sm flex ${user.status === 'Approved' ? 'bg-[#69d297]' : 'bg-[#fe0000]'}`}>
-                  <div className="text-black text-[10px] font-medium">{user.status}</div>
-                </div>
-                <div className="relative w-4 h-4">
-                  <IoIosArrowDown onClick={() => toggleDropdown(index)} />
-                  {dropdownOpen === index && (
-                    <div className="absolute left-0 top-full z-50 bg-white border border-[#e0e4f4] mt-1 rounded w-24 shadow-md">
-                      <div className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px]" 
-                           onClick={() => handleSelectStatus(index, 'Approved')}>
-                        Approved
-                      </div>
-                      <div className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px]" 
-                           onClick={() => handleSelectStatus(index, 'Rejected')}>
-                        Rejected
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <div className="flex items-center gap-2">
+  <span
+    className={`px-2 py-1 rounded text-white text-[10px] font-medium
+      ${user.status === 0 ? "bg-yellow-500" :
+        user.status === 1 ? "bg-green-500" :
+        "bg-red-500"}`}
+  >
+    {user.status === 0 ? "Pending" : user.status === 1 ? "Approved" : "Rejected"}
+  </span>
+
+  <div className="relative w-4 h-4">
+    <IoIosArrowDown onClick={() => toggleDropdown(index)} />
+
+    {dropdownOpen === index && (
+      <div className="absolute left-0 top-full z-50 bg-white border border-gray-300 mt-1 rounded w-24 shadow-md text-[10px]">
+
+        <div
+          onClick={() => handleSelectStatus(index, 1)}
+          className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+        >
+          Approved
+        </div>
+
+        <div
+          onClick={() => handleSelectStatus(index, 2)}
+          className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+        >
+          Rejected
+        </div>
+
+        <div
+          onClick={() => handleSelectStatus(index, 0)}
+          className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+        >
+          Pending
+        </div>
+
+      </div>
+    )}
+  </div>
+</div>
+
               </div>
             ))}
           </div>

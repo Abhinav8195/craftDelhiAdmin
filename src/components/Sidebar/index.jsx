@@ -15,6 +15,8 @@ import orderactive from '../../assets/images/orderactive.png';
 import packactive from '../../assets/images/packactive.png';
 import users from '../../assets/images/user.png';
 import { IoIosArrowForward } from 'react-icons/io';
+import Swal from "sweetalert2";
+
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
   const trigger = useRef(null);
@@ -27,16 +29,39 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
   const [userName, setUserName] = useState(null);
 
   const confirmLogout = () => {
-    localStorage.removeItem('craftdelhiadmin_token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('name');
-    localStorage.removeItem('craftdelhiadmin_tokenExpiry');
-    if (setIsAuthenticated) {
-      setIsAuthenticated(false);
-      window.dispatchEvent(new Event('storage'));
+  Swal.fire({
+    title: "Logout?",
+    text: "Are you sure you want to logout?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#024a63",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, Logout",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.removeItem('craftdelhiadmin_token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('name');
+      localStorage.removeItem('craftdelhiadmin_tokenExpiry');
+
+      if (setIsAuthenticated) {
+        setIsAuthenticated(false);
+        window.dispatchEvent(new Event('storage'));
+      }
+
+      Swal.fire({
+        title: "Logged Out",
+        text: "You have been successfully logged out.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      navigate('/');
     }
-    navigate('/');
-  };
+  });
+};
+
 
   const handleLinkClick = () => {
     if (window.innerWidth < 1024) {

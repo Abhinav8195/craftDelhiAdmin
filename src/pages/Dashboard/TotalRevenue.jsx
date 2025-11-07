@@ -4,8 +4,8 @@ import new1 from '../../assets/images/new1.png';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-const TotalRevenue = ({ card1 }) => {
-  // Container animation (stagger children)
+const TotalRevenue = ({ card1,revenue }) => {
+  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -14,7 +14,7 @@ const TotalRevenue = ({ card1 }) => {
     },
   };
 
-  // Card animation
+
   const cardVariants = {
     hidden: { opacity: 0, y: 40 },
     visible: {
@@ -24,7 +24,7 @@ const TotalRevenue = ({ card1 }) => {
     },
   };
 
-  // Image animation (pop / rotate in)
+  
   const imageVariants = {
     hidden: { opacity: 0, scale: 0.5, rotate: -45 },
     visible: {
@@ -35,7 +35,7 @@ const TotalRevenue = ({ card1 }) => {
     },
   };
 
-  // Title animation (fade in from right)
+ 
   const titleVariants = {
     hidden: { opacity: 0, x: 50 },
     visible: {
@@ -45,7 +45,6 @@ const TotalRevenue = ({ card1 }) => {
     },
   };
 
-  // Number animation (bounce up)
   const numberVariants = {
     hidden: { opacity: 0, y: 30, scale: 0.8 },
     visible: {
@@ -97,7 +96,7 @@ const TotalRevenue = ({ card1 }) => {
               className="text-black text-2xl font-bold"
               variants={numberVariants}
             >
-              87
+              {revenue.total_revenue}
             </motion.div>
           </motion.div>
         </NavLink>
@@ -128,7 +127,7 @@ const TotalRevenue = ({ card1 }) => {
             className="text-black text-2xl font-bold"
             variants={numberVariants}
           >
-            20
+            {revenue.current_month_revenue}
           </motion.div>
         </motion.div>
       </motion.div>

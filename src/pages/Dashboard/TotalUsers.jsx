@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
 import IconUserCheck_01 from "../../assets/images/IconUserCheck_01.png";
 import IconShoppingBag_02 from "../../assets/images/IconShoppingBag_02.png";
 import IconFaceContent from "../../assets/images/IconFaceContent.png";
-import axios from "axios";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 

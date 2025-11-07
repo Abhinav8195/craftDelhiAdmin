@@ -1,155 +1,183 @@
-import React, { useState } from 'react';
-import IconCoins_04 from '../../assets/images/IconCoins_04.png';
-import new1 from '../../assets/images/new1.png'
-import IconSearchRefraction from '../../assets/images/IconSearchRefraction.png';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import IconCoins_04 from "../../assets/images/IconCoins_04.png";
+import new1 from "../../assets/images/new1.png";
+import { motion } from "framer-motion";
 import { FaSearch } from "react-icons/fa";
+import { getAdminToken } from "../../utils/auth";
 
-// Dummy data with product images and other details
-const dummyData = [
-  { userId: '01', name: 'Product A', amount: '5000', date: '11-January-2025',},
-  { userId: '02', name: 'Product B', amount: '5000', date: '11-January-2025', },
-  { userId: '03', name: 'Product C', amount: '5000', date: '11-January-2025',},
-  { userId: '04', name: 'Product D', amount: '5000', date: '11-January-2025', }
-];
+// Animation Variants
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 120, damping: 18 },
+  },
+};
 
-const RevenueTable = () => {
-  const [statusColors, setStatusColors] = useState({
-    Pending: '#ffc600',
-    Approved: '#69d297',
-    Rejected: '#fe0000'
-  });
+const tableContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+  },
+};
 
-  const [products, setProducts] = useState(dummyData);
+const tableRow = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+};
 
-  const handleStatusChange = (index, newStatus) => {
-    const updatedProducts = [...products];
-    updatedProducts[index].status = newStatus;
+const RevenueTable = ({ revenue, card1 }) => {
+  const [revenueData, setRevenueData] = useState([]);
+const [filteredData, setFilteredData] = useState([]);
+const [search, setSearch] = useState("");
+  const token = getAdminToken();
 
-    // Change color based on the new status
-    const newColor = {
-      Pending: '#ffc600',
-      Approved: '#69d297',
-      Rejected: '#fe0000'
-    };
-
-    setProducts(updatedProducts);
-    setStatusColors(newColor);
+  const fetchRevenueDetails = async (year, month = null) => {
+    try {
+      const params = { year };
+      if (month) params.month = month;
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/admin/revenue-details`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params,
+        }
+      );
+      if (response.data.success) {
+  setRevenueData(response.data.data);
+  setFilteredData(response.data.data);
+}
+    } catch {}
   };
+
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    fetchRevenueDetails(currentYear);
+  }, []);
+  useEffect(() => {
+  const result = revenueData.filter((item) =>
+    item.seller_name?.toLowerCase().includes(search.toLowerCase()) ||
+    item.seller_id?.toString().includes(search)
+  );
+  setFilteredData(result);
+}, [search, revenueData]);
+
 
   return (
     <>
-    <div className="px-4 md:px-8 lg:px-1 mt-0 lg:mt-[-60px] ">
-      <div className="text-black text-2xl font-bold font-['Montserrat'] mt-8 mb-4 text-center md:text-left">
-             Total Revenue
-           </div>
-     
-           {/* Pending Approvals Grid */}
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-             
-             <div className="h-[200px] p-5 bg-gradient-to-b from-[#fce4b3] to-white rounded-xl border border-[#d9d9d9] flex flex-col items-center justify-between">
-               <img src={new1} alt="Logo" className="w-10 h-10" />
-               <div className="text-black text-base font-bold text-center">Total Revenue</div>
-               <div className="text-black text-2xl font-bold">87</div>
-             </div>
-             
-             {/* Approval Card 2 */}
-             <div className="h-[200px] p-5 bg-gradient-to-b from-[#fce4b3] to-white rounded-xl border border-[#d9d9d9] flex flex-col items-center justify-between">
-               <img src={IconCoins_04} alt="Logo" className="w-10 h-10" />
-               <div className="text-black text-base font-bold text-center">Current Month Revenue</div>
-               <div className="text-black text-2xl font-bold">20</div>
-             </div>
-           </div>
-           </div>
+      {/* Page Heading */}
+      <div className="text-black text-2xl font-bold font-['Montserrat'] px-4 mt-8 mb-4">
+        Total Revenue
+      </div>
 
-<div className="px-4 md:px-8 lg:px-1 mt-0 lg:mt-[30px]">
-      {/* Table Section */}
-       <div className="h-[589px] flex flex-col gap-3 overflow-auto w-full">
-            <div className="w-full flex flex-wrap justify-between items-center gap-3">
-              <div className="text-black text-2xl font-bold"> Total Revenue</div>
-              
-             
-              <div className="flex gap-2 w-full sm:w-auto">
-                <div className="relative w-full sm:w-[239px]">
-                  <input
-                    placeholder="Search"
-                    className="w-full h-10 text-black text-xs border border-gray-300 rounded px-3 pr-10"
-                  />
-                  <div  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5">
-                  <FaSearch />
-                  </div>
-                 
-                </div>
-              </div>
+      {/* Animated Cards */}
+      <div className="px-4 mt-2">
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+          initial="hidden"
+          animate="visible"
+          variants={tableContainer}
+        >
+          <motion.button
+            variants={cardVariants}
+            whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.15)" }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => card1(null)}
+            className="h-[200px] p-5 bg-gradient-to-b from-[#fce4b3] to-white rounded-xl border shadow flex flex-col items-center justify-between"
+          >
+            <img src={new1} className="w-10 h-10" alt="icon"/>
+            <div className="text-black text-base font-bold">Total Revenue</div>
+            <div className="text-black text-2xl font-bold">₹ {revenue.total_revenue}</div>
+          </motion.button>
+
+          <motion.div
+            variants={cardVariants}
+            whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.15)" }}
+            className="h-[200px] p-5 bg-gradient-to-b from-[#fce4b3] to-white rounded-xl border shadow flex flex-col items-center justify-between"
+          >
+            <img src={IconCoins_04} className="w-10 h-10" alt="icon"/>
+            <div className="text-black text-base font-bold">Current Month Revenue</div>
+            <div className="text-black text-2xl font-bold">₹ {revenue.current_month_revenue}</div>
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Heading + Search */}
+      <div className="px-4 mt-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="text-black text-2xl font-bold font-['Montserrat']">
+          Revenue Records
+        </div>
+
+        <div className="flex gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-[239px]">
+            <input
+                placeholder="Search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full h-10 text-black text-xs border border-gray-300 rounded px-3 pr-10 bg-white"
+              />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+              <FaSearch size={14} />
             </div>
-
-
-
-        {/* Table Headers */}
-        <div className="w-full justify-start items-start gap-px inline-flex overflow-auto">
-          <div className="w-[130px] flex-col justify-start items-start gap-px inline-flex">
-          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
-    Transaction id
-  </div>
-</div>
-
-            {/* Table Rows */}
-            {dummyData.map((user, index) => (
-            <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.userId}</div>
-              </div>
-            ))}
           </div>
-
-          <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
-    Seller Name
-  </div>
-</div>
-
-            {dummyData.map((user, index) => (
-              <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.name}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
-    Amount
-  </div>
-</div>
-
-            {dummyData.map((user, index) => (
-             <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.amount}</div>
-              </div>
-            ))}
-          </div>
-          <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-          <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-  <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
-    Date
-  </div>
-</div>
-
-      {dummyData.map((user, index) => (
-             <div class="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-<div class="text-black text-[10px] font-medium font-['Montserrat'] leading-3">{user.date}</div>
-              </div>
-            ))}
-    </div>
-
-         
         </div>
       </div>
-    </div>
 
+      {/* Animated Table */}
+      <motion.div
+        className="px-4 mt-3"
+        variants={tableContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="bg-white/80 backdrop-blur-md border border-[#e5e7eb] rounded-2xl shadow-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse">
+              <thead className="bg-[#36234e] text-white uppercase text-[10px] tracking-widest">
+                <tr>
+                  <th className="px-4 py-3 text-left">Seller ID</th>
+                  <th className="px-4 py-3 text-left">Seller Name</th>
+                  <th className="px-4 py-3 text-left">Total Revenue</th>
+                  <th className="px-4 py-3 text-left">Year</th>
+                </tr>
+              </thead>
+
+              <motion.tbody variants={tableContainer}>
+               {filteredData.map((row, i) => (
+                  <motion.tr
+                    key={i}
+                    variants={tableRow}
+                    className="border-b hover:bg-gray-100 transition-all hover:shadow-sm cursor-pointer"
+                  >
+                    <td className="px-4 py-4 text-[12px] text-gray-700 font-medium">{row.seller_id}</td>
+                    <td className="px-4 py-4 text-[12px] text-gray-700 font-medium">{row.seller_name}</td>
+                    <td className="px-4 py-4 text-[12px] font-semibold text-[#024a63]">
+                      ₹ {row.total_revenue?.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4 text-[12px] text-gray-500">{row.year}</td>
+                  </motion.tr>
+                ))}
+
+                {revenueData.length === 0 && (
+                  <motion.tr
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <td colSpan="4" className="py-6 text-center text-gray-500 text-sm">
+                      No revenue records found
+                    </td>
+                  </motion.tr>
+                )}
+              </motion.tbody>
+            </table>
+          </div>
+        </div>
+      </motion.div>
     </>
-   
-   
   );
 };
 

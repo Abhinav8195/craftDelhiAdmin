@@ -11,6 +11,24 @@ import { getAdminToken } from '../../utils/auth';
 const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.12 } } };
 const row = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } };
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 120, damping: 18 },
+  },
+};
+
+const containerVariant = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+  },
+};
+
+
 const ProductTable = ({ card1, products, reload }) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,21 +72,36 @@ const ProductTable = ({ card1, products, reload }) => {
         Pending Approvals
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-6">
-        <button onClick={() => card1(null)} className="w-full">
+       <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-6"
+        variants={containerVariant}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.button
+          variants={cardVariants}
+          whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.15)" }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => card1(null)}
+          className="w-full"
+        >
           <div className="h-[180px] p-4 bg-gradient-to-b from-[#ffeaea] to-white rounded-2xl border border-[#d9d9d9] shadow flex flex-col items-center justify-between">
-            <img src={IconCube_02} className="w-10 h-10" />
+            <img src={IconCube_02} alt="" className="w-10 h-10" />
             <div className="text-black text-base font-semibold text-center">Products Pending Approval</div>
             <div className="text-black text-3xl font-bold">{products.length}</div>
           </div>
-        </button>
+        </motion.button>
 
-        <div className="h-[180px] p-4 bg-gradient-to-b from-[#ffeaea] to-white rounded-2xl border border-[#d9d9d9] shadow flex flex-col items-center justify-between">
-          <img src={IconImageIndentRight} className="w-10 h-10" />
+        <motion.div
+          variants={cardVariants}
+          whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.15)" }}
+          className="h-[180px] p-4 bg-gradient-to-b from-[#ffeaea] to-white rounded-2xl border border-[#d9d9d9] shadow flex flex-col items-center justify-between"
+        >
+          <img src={IconImageIndentRight} alt="" className="w-10 h-10" />
           <div className="text-black text-base font-semibold text-center">Products Pending Actions</div>
           <div className="text-black text-3xl font-bold">{products.length}</div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
         <h2 className="text-xl font-bold text-black">Products Pending Approval</h2>
@@ -101,7 +134,7 @@ const ProductTable = ({ card1, products, reload }) => {
                 <motion.tr key={index} variants={row} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-3">{product.id}</td>
                   <td className="px-4 py-3 truncate max-w-[160px]">{product.name}</td>
-                  <td className="px-4 py-3"><img src={product.productImage} className="w-12 h-12 rounded border object-cover" /></td>
+                  <td className="px-4 py-3"><img alt="" src={product.productImage} className="w-12 h-12 rounded border object-cover" /></td>
                   <td className="px-4 py-3 truncate max-w-[120px]">{product.seller}</td>
 
                   <td className="px-4 py-3 relative">

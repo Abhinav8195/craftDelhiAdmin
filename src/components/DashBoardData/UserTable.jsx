@@ -91,7 +91,7 @@ const UserTable = ({ card1, stats }) => {
             onClick={() => card1(null)}
             className="cursor-pointer h-[180px] p-5 bg-gradient-to-b from-[#ffe2e6] to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between"
           >
-            <img src={IconUserCheck_01} className="w-10 h-10" />
+            <img src={IconUserCheck_01} alt="" className="w-10 h-10" />
             <div className="text-black text-base font-bold">Total Number Of Users</div>
             <div className="text-black text-2xl font-bold">{stats?.total_users}</div>
             <div className="text-[#2d53d8] text-xs font-bold">Live Data</div>
@@ -102,7 +102,7 @@ const UserTable = ({ card1, stats }) => {
             whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.15)" }}
             className="h-[180px] p-5 bg-gradient-to-b from-[#fff4de] to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between"
           >
-            <img src={IconShoppingBag_02} className="w-10 h-10" />
+            <img src={IconShoppingBag_02}alt="" className="w-10 h-10" />
             <div className="text-black text-base font-bold">Total Active Sellers</div>
             <div className="text-black text-2xl font-bold">{stats?.active_sellers}</div>
             <div className="text-[#2d53d8] text-xs font-bold">Live Data</div>
@@ -113,7 +113,7 @@ const UserTable = ({ card1, stats }) => {
             whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.15)" }}
             className="h-[180px] p-5 bg-gradient-to-b from-green-100 to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between"
           >
-            <img src={IconFaceContent} className="w-10 h-10" />
+            <img src={IconFaceContent} alt="" className="w-10 h-10" />
             <div className="text-black text-base font-bold">Total Active Buyers</div>
             <div className="text-black text-2xl font-bold">{stats?.active_buyers}</div>
             <div className="text-[#2d53d8] text-xs font-bold">Live Data</div>

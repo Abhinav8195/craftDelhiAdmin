@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react';
-import Ellipse from '../../assets/images/Ellipse.png';
+// import React, { useEffect } from 'react';
+// import Ellipse from '../../assets/images/Ellipse.png';
 import { IoMdCloseCircleOutline } from "react-icons/io";
 
 const BuyerDetails = ({ user,close }) => {
-
   
   return (
     <div className="w-full max-w-[883px] h-auto p-5 bg-white rounded-xl shadow-lg border border-[#d9d9d9] flex flex-col items-start gap-4 overflow-y-auto">
@@ -27,8 +26,8 @@ const BuyerDetails = ({ user,close }) => {
           { label: "Buyer Name", value: user.name },
           { label: "Email Address", value: user.email },
           { label: "Contact Number", value: user.phone },
-          { label: "Birthday", value: "22 - June - 1997" },
-          { label: "Gender", value: "Male" }
+          { label: "Birthday", value: "" },
+          { label: "Gender", value: "" }
         ].map((item, index) => (
           <div key={index} className="w-full flex flex-col gap-2">
             <div className="flex gap-5">
@@ -44,10 +43,10 @@ const BuyerDetails = ({ user,close }) => {
       <div className="w-full flex flex-col gap-2.5">
         <h3 className="text-black text-base font-bold">Shipping Information:</h3>
         {[
-          { label: "Full Address", value: "House no 766, Isra Village, Hyderabad, Pakistan" },
-          { label: "State", value: "Delhi" },
-          { label: "Colony / Locality", value: "Colony no 2" },
-          { label: "Area", value: "Hala Naaqa House no 388" }
+          { label: "Full Address", value: "" },
+          { label: "State", value: "" },
+          { label: "Colony / Locality", value: "" },
+          { label: "Area", value: "" }
         ].map((item, index) => (
           <div key={index} className="w-full flex flex-col gap-2">
             <div className="flex gap-5">

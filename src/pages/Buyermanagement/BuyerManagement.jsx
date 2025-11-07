@@ -4,9 +4,9 @@ import { motion } from 'framer-motion';
 import IconUserCheck_01 from '../../assets/images/IconUserCheck_01.png';
 import IconShoppingBag_02 from '../../assets/images/IconShoppingBag_02.png';
 import IconFaceContent from '../../assets/images/IconFaceContent.png';
-import { NavLink } from 'react-router-dom';
 import BuyerTable from '../../components/buyerManagement/BuyerTable';
 import BuyerEditProfile from '../../components/buyerManagement/BuyerEditProfile';
+import { getAdminToken } from '../../utils/auth';
 
 const BuyerManagement = () => {
   const [selectedCard, setSelectedCard] = useState(null);
@@ -16,7 +16,7 @@ const BuyerManagement = () => {
     trashed_accounts: 0
   });
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem('craftdelhiadmin_token');
+  const token = getAdminToken();
 
   const handleCardClick = (cardNumber) => {
     setSelectedCard(cardNumber === selectedCard ? null : cardNumber);
@@ -38,10 +38,10 @@ const BuyerManagement = () => {
         if (res.data.status) {
           setStats(res.data.data);
         } else {
-          console.warn('API returned false status:', res.data);
+          // console.warn('API returned false status:', res.data);
         }
       } catch (err) {
-        console.error('Error fetching buyer stats:', err);
+        // console.error('Error fetching buyer stats:', err);
       } finally {
         setLoading(false);
       }
@@ -50,7 +50,7 @@ const BuyerManagement = () => {
     if (token) {
       fetchStats();
     } else {
-      console.warn('No token found in localStorage');
+      // console.warn('No token found in localStorage');
       setLoading(false);
     }
   }, [token]);
