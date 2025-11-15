@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { IoMdCloseCircleOutline } from "react-icons/io";
 import Swal from "sweetalert2";
-import IconCheckSquareBroken from '../../assets/images/IconCheckSquareBroken.png';
-import { toast } from "react-toastify"; // << Toast added
+
 
 const BuyerDelete = ({ close, onDelete }) => {
 
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const maxChars = 300;
+  const [selectedReason, setSelectedReason] = useState("");
+const [customReason, setCustomReason] = useState("");
+
 
   const predefinedReasons = [
     "Multiple Account Abuse",
@@ -19,45 +21,41 @@ const BuyerDelete = ({ close, onDelete }) => {
 
   const handleDelete = async () => {
 
-    // VALIDATION
-    if (!reason.trim()) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Reason Required",
-        text: "Please select or type a reason before deleting.",
-      });
-    }
+  const finalReason = customReason.trim() !== "" ? customReason : selectedReason;
 
-    if (!description.trim()) {
-      return Swal.fire({
-        icon: "warning",
-        title: "Description Required",
-        text: "Please write a description.",
-      });
-    }
-
-    // FINAL CONFIRMATION
-    const confirmation = await Swal.fire({
-      title: "Are you sure?",
-      text: "This account will be moved to trash permanently!",
+  if (!finalReason) {
+    return Swal.fire({
       icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#024a63",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, Trash it",
+      title: "Reason Required",
+      text: "Please select or type a reason before deleting.",
     });
+  }
 
-    if (!confirmation.isConfirmed) return;
+  if (!description.trim()) {
+    return Swal.fire({
+      icon: "warning",
+      title: "Description Required",
+      text: "Please write a description.",
+    });
+  }
 
-    // API execute
-    if (typeof onDelete === "function") {
-      await onDelete(reason, description);
-    }
+  const confirmation = await Swal.fire({
+    title: "Are you sure?",
+    text: "This account will be moved to trash permanently!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#024a63",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, Trash it",
+  });
 
-    setTimeout(() => {
-      close();
-    }, 400);
-  };
+  if (!confirmation.isConfirmed) return;
+
+  await onDelete(finalReason, description);
+
+  close();
+};
+
 
   return (
     <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50">
@@ -91,26 +89,27 @@ const BuyerDelete = ({ close, onDelete }) => {
             </div>
 
             <select
-              className="w-full h-12 px-3 mt-1 border border-[#e0e4f4] text-xs rounded"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-            >
-              <option value="">-- Select a reason --</option>
-              {predefinedReasons.map((r, i) => (
-                <option key={i} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
+  className="w-full h-12 px-3 mt-1 border border-[#e0e4f4] text-xs rounded"
+  value={selectedReason}
+  onChange={(e) => setSelectedReason(e.target.value)}
+>
+  <option value="">-- Select a reason --</option>
+  {predefinedReasons.map((r, i) => (
+    <option key={i} value={r}>
+      {r}
+    </option>
+  ))}
+</select>
 
-            <input
-              type="text"
-              className="w-full mt-3 h-12 px-3 border border-[#cfd2e3] rounded text-xs"
-              placeholder="Or type your own reason..."
-              maxLength={maxChars}
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-            />
+<input
+  type="text"
+  className="w-full mt-3 h-12 px-3 border border-[#cfd2e3] rounded text-xs"
+  placeholder="Or type your own reason..."
+  maxLength={maxChars}
+  value={customReason}
+  onChange={(e) => setCustomReason(e.target.value)}
+/>
+
           </div>
 
           {/* DESCRIPTION */}
@@ -138,7 +137,7 @@ const BuyerDelete = ({ close, onDelete }) => {
           </button>
           <button
             className="p-3 bg-[#024a63] text-white rounded text-sm disabled:opacity-50"
-            disabled={!reason.trim() || !description.trim()}
+           disabled={(!selectedReason && !customReason.trim()) || !description.trim()}
             onClick={handleDelete}
           >
             Delete
