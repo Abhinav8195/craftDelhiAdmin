@@ -18,8 +18,8 @@ const BuyerManagement = () => {
   const [loading, setLoading] = useState(true);
   const token = getAdminToken();
 
-  const handleCardClick = (cardNumber) => {
-    setSelectedCard(cardNumber === selectedCard ? null : cardNumber);
+  const handleCardClick = (user = null) => {
+    setSelectedCard(user);
   };
 
   useEffect(() => {
@@ -29,33 +29,19 @@ const BuyerManagement = () => {
       try {
         const res = await axios.get(
           `${process.env.REACT_APP_BASE_URL}admin/buyer-stats`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        if (res.data.status) {
-          setStats(res.data.data);
-        } else {
-          // console.warn('API returned false status:', res.data);
-        }
-      } catch (err) {
-        // console.error('Error fetching buyer stats:', err);
-      } finally {
+        if (res.data.status) setStats(res.data.data);
+      } catch (err) {}
+      finally {
         setLoading(false);
       }
     };
 
-    if (token) {
-      fetchStats();
-    } else {
-      // console.warn('No token found in localStorage');
-      setLoading(false);
-    }
+    if (token) fetchStats();
+    else setLoading(false);
   }, [token]);
 
-  // Animation variants for cards
   const cardVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: (i) => ({
@@ -67,11 +53,11 @@ const BuyerManagement = () => {
 
   return (
     <>
-      {selectedCard === 1 && (
-        <BuyerEditProfile card1={handleCardClick} />
+      {selectedCard && (
+        <BuyerEditProfile buyer={selectedCard} card1={handleCardClick} />
       )}
 
-      {selectedCard === null && (
+      {!selectedCard && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[{
