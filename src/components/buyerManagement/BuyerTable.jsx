@@ -27,7 +27,7 @@ const BuyerTable = ({ card1 }) => {
         const res = await axios.get(`${process.env.REACT_APP_BASE_URL}admin/buyers-view`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
+console.log(res.data.data)
         if (res.data.success) {
           const buyers = res.data.data.map(buyer => ({
             userId: buyer.user_id,
@@ -89,29 +89,71 @@ const BuyerTable = ({ card1 }) => {
   };
 
 const handleSelectStatus = async (index, status) => {
-    const user = updatedUsers[index];
+  const user = updatedUsers[index];
 
-    try {
-      const res = await axios.put(
-        `${process.env.REACT_APP_BASE_URL}admin/update-buyer-status`,
-        { user_id: user.userId, user_status: status },
-        { headers: { Authorization: `Bearer ${token}` } }
+  if (status === 2) {
+    setDeleteUser(user);
+    setDropdownOpen(null);
+    return;
+  }
+
+  try {
+    const res = await axios.put(
+      `${process.env.REACT_APP_BASE_URL}admin/update-buyer-status`,
+      { user_id: user.userId, user_status: status },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.data.success) {
+      const newUsers = [...updatedUsers];
+      newUsers[index].status = status;
+      setUpdatedUsers(newUsers);
+      toast.success("Status updated successfully");
+    } else {
+      toast.error(res.data.message);
+    }
+  } catch (error) {
+    toast.error("Failed to update status");
+  }
+
+  setDropdownOpen(null);
+};
+
+const handleTrashUser = async (reason, description) => {
+  try {
+    const res = await axios.put(
+      `${process.env.REACT_APP_BASE_URL}admin/update-buyer-status`,
+      { 
+        user_id: deleteUser.userId, 
+        user_status: 2, 
+        trash_reason: reason, 
+        trash_description: description 
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.data.success) {
+
+      const updatedList = users.map(u =>
+        u.userId === deleteUser.userId ? { ...u, status: 2 } : u
       );
 
-      if (res.data.success) {
-        const newUsers = [...updatedUsers];
-        newUsers[index].status = status;
-        setUpdatedUsers(newUsers);
-        toast.success("Status updated successfully");
-      } else {
-        toast.error(res.data.message);
-      }
-    } catch (error) {
-      toast.error("Failed to update status");
+      setUsers(updatedList);
+
+      toast.success("User successfully moved to Trash! 🗑💥");
+    } else {
+      toast.error(res.data.message);
     }
 
-    setDropdownOpen(null);
-  };
+  } catch (error) {
+    toast.error("Failed to move user to Trash");
+  }
+
+  closeDeleteModal(); 
+};
+
+
+
 
 
   return (
@@ -256,7 +298,7 @@ const handleSelectStatus = async (index, status) => {
                 <button onClick={() => card1(user)}>
                 <LuPenLine />
               </button>
-                <button onClick={() => openDeleteModal(user)}><FaTrash /></button>
+                {/* <button onClick={() => openDeleteModal(user)}><FaTrash /></button> */}
               </div>
             ))}
           </div>
@@ -275,9 +317,13 @@ const handleSelectStatus = async (index, status) => {
         </div>
       )}
 
-      {deleteUser && (
-        <BuyerDelete user={deleteUser} close={closeDeleteModal} />
-      )}
+{deleteUser && (
+  <BuyerDelete 
+    user={deleteUser} 
+    close={closeDeleteModal} 
+    onDelete={handleTrashUser} 
+  />
+)}
     </div>
   );
 };

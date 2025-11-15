@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { IoMdCloseCircleOutline } from "react-icons/io";
+import Swal from "sweetalert2";
 import IconCheckSquareBroken from '../../assets/images/IconCheckSquareBroken.png';
+import { toast } from "react-toastify"; // << Toast added
 
 const BuyerDelete = ({ close, onDelete }) => {
-  const [reason, setReason] = useState("Multiple Account Abuse");
+
+  const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
-  const [deleted, setDeleted] = useState(false);
   const maxChars = 300;
 
-  const reasons = [
+  const predefinedReasons = [
     "Multiple Account Abuse",
     "Fraudulent Activity",
     "Inappropriate Behavior",
@@ -16,110 +18,133 @@ const BuyerDelete = ({ close, onDelete }) => {
   ];
 
   const handleDelete = async () => {
-    if (typeof onDelete === "function") {
-      await onDelete(reason, description); // pass reason & description to API
-      setDeleted(true);
+
+    // VALIDATION
+    if (!reason.trim()) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Reason Required",
+        text: "Please select or type a reason before deleting.",
+      });
     }
+
+    if (!description.trim()) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Description Required",
+        text: "Please write a description.",
+      });
+    }
+
+    // FINAL CONFIRMATION
+    const confirmation = await Swal.fire({
+      title: "Are you sure?",
+      text: "This account will be moved to trash permanently!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#024a63",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Trash it",
+    });
+
+    if (!confirmation.isConfirmed) return;
+
+    // API execute
+    if (typeof onDelete === "function") {
+      await onDelete(reason, description);
+    }
+
+    setTimeout(() => {
+      close();
+    }, 400);
   };
 
   return (
     <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50">
-      <div
+
+      {/* Overlay */}
+      <div 
         className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 backdrop-blur-md"
         onClick={close}
       />
 
-      {!deleted ? (
-        <div className="relative w-[742px] h-[438px] p-5 bg-white rounded-xl shadow-lg border border-[#d9d9d9] flex flex-col z-50">
-          <div className="flex justify-between items-center">
-            <div className="text-black text-2xl font-bold">Trash Reason</div>
-            <button onClick={close}>
-              <IoMdCloseCircleOutline size={28} />
-            </button>
-          </div>
+      {/* MODAL */}
+      <div className="relative w-[742px] p-6 bg-white rounded-xl shadow-lg border border-[#d9d9d9] flex flex-col z-50">
 
-          <div className="border-t-2 border-[#d9d9d9] my-2"></div>
+        {/* HEADER */}
+        <div className="flex justify-between items-center">
+          <div className="text-black text-2xl font-bold">Trash Account</div>
+          <button onClick={close}>
+            <IoMdCloseCircleOutline size={28} />
+          </button>
+        </div>
 
-          <div className="flex flex-col flex-grow">
-            <div className="flex flex-col">
-              <div className="text-black text-[10px] font-bold uppercase tracking-widest">
-                Select Reason
-              </div>
-              <select
-                className="w-full h-14 px-3 bg-white rounded border border-[#e0e4f4] text-xs"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              >
-                {reasons.map((r, index) => (
-                  <option key={index} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+        <div className="border-t border-[#d9d9d9] my-2"></div>
+
+        {/* CONTENT */}
+        <div className="flex flex-col flex-grow">
+
+          {/* REASON SELECT + Input */}
+          <div>
+            <div className="text-black text-[10px] font-bold uppercase tracking-widest">
+              Select or Type Reason
             </div>
 
-            <div className="flex flex-col mt-2">
-              <div className="text-black text-[10px] font-bold uppercase tracking-widest">
-                Description
-              </div>
-              <textarea
-                className="w-full h-[146px] px-3 py-2 bg-white rounded border border-[#d9d9d9] text-xs resize-none"
-                value={description}
-                placeholder="Provide details for the trash reason..."
-                onChange={(e) => setDescription(e.target.value)}
-                maxLength={maxChars}
-              />
-              <div className="text-right text-[10px] font-bold uppercase">
-                {description.length}/{maxChars}
-              </div>
+            <select
+              className="w-full h-12 px-3 mt-1 border border-[#e0e4f4] text-xs rounded"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            >
+              <option value="">-- Select a reason --</option>
+              {predefinedReasons.map((r, i) => (
+                <option key={i} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="text"
+              className="w-full mt-3 h-12 px-3 border border-[#cfd2e3] rounded text-xs"
+              placeholder="Or type your own reason..."
+              maxLength={maxChars}
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+            />
+          </div>
+
+          {/* DESCRIPTION */}
+          <div className="mt-3">
+            <div className="text-black text-[10px] font-bold uppercase tracking-widest">
+              Description (Required)
+            </div>
+            <textarea
+              className="w-full h-[140px] px-3 py-2 mt-1 border border-[#d9d9d9] rounded text-xs resize-none"
+              placeholder="Write additional details..."
+              maxLength={maxChars}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <div className="text-right text-[10px] font-bold">
+              {description.length}/{maxChars}
             </div>
           </div>
-
-          <div className="flex justify-end gap-2 mt-4">
-            <button
-              className="p-4 bg-[#bbbbbb] rounded text-sm font-medium"
-              onClick={close}
-            >
-              Cancel
-            </button>
-            <button
-              className="p-4 bg-[#024a63] rounded text-white text-sm font-medium"
-              disabled={!description.trim()}
-              onClick={handleDelete}
-            >
-              Delete
-            </button>
-          </div>
         </div>
-      ) : (
-        <div className="w-full max-w-[742px] min-h-[285px] p-5 bg-white rounded-xl shadow-lg border border-[#d9d9d9] flex flex-col items-center z-50">
-          <div className="w-full flex justify-between items-center">
-            <div className="text-black text-xl font-bold">Successfully Trashed</div>
-            <button onClick={close}>
-              <IoMdCloseCircleOutline size={28} />
-            </button>
-          </div>
 
-          <div className="w-full h-[2px] bg-[#d9d9d9] my-4"></div>
-
-          <div className="flex justify-center items-center">
-            <img src={IconCheckSquareBroken} alt="Success" className="w-[100px] h-[100px]" />
-          </div>
-
-          <div className="text-center text-[#024a63] text-xl font-bold mt-4">
-            You Have Successfully Trashed the Account!
-          </div>
-
-          <div className="w-full flex justify-end gap-2 mt-6">
-            <button className="p-4 bg-[#bbbbbb] rounded text-sm font-medium" onClick={close}>
-              Cancel
-            </button>
-            <button className="p-4 bg-[#024a63] rounded text-white text-sm font-medium" onClick={close}>
-              Continue
-            </button>
-          </div>
+        {/* FOOTER BUTTONS */}
+        <div className="flex justify-end gap-2 mt-4">
+          <button className="p-3 bg-[#bbbbbb] rounded text-sm" onClick={close}>
+            Cancel
+          </button>
+          <button
+            className="p-3 bg-[#024a63] text-white rounded text-sm disabled:opacity-50"
+            disabled={!reason.trim() || !description.trim()}
+            onClick={handleDelete}
+          >
+            Delete
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };
