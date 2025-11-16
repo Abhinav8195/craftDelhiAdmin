@@ -1,339 +1,277 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import IconUserCheck_01 from "../../assets/images/IconUserCheck_01.png";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaSearch } from "react-icons/fa";
-import { NavLink } from "react-router-dom";
-import { FaRegEye } from "react-icons/fa";
-import { FaTrash } from "react-icons/fa6";
 import { LuPenLine } from "react-icons/lu";
+import { FaTrash } from "react-icons/fa6";
 import BuyerDelete from "../buyerManagement/BuyerDelete";
-import "react-datepicker/dist/react-datepicker.css";
+import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { getAdminToken } from "../../utils/auth";
+
+const tableContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.05 } },
+};
+
+const tableRow = {
+  hidden: { opacity: 0, y: 8 },
+  show: { opacity: 1, y: 0 },
+};
 
 const SellerTable = ({ card1 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [updatedUsers, setUpdatedUsers] = useState([]);
   const [DeleteUser, setDeleteUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const token = getAdminToken();
 
-  useEffect(() => {
-    const fetchSellers = async () => {
-      try {
-        const token = localStorage.getItem("craftdelhiadmin_token");
-        const res = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/admin/seller-view`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+ useEffect(() => {
+  const fetchSellers = async () => {
+    try {
+      const token = localStorage.getItem("craftdelhiadmin_token");
 
-        if (res.data && res.data.success) {
-          const sellers = res.data.data.map((seller) => ({
-            userId: seller.user_id,
-            name: `${seller.first_name} ${seller.last_name}`,
-            email: seller.email,
-            status: seller.user_approval, // store as number (0,1,2)
-            phone: seller.phone_number,
-            city: seller.office_address || "N/A",
-            ...seller,
-          }));
-          setUpdatedUsers(sellers);
+      const res = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}/admin/seller-view`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-      } catch (error) {
-        console.error("Error fetching sellers:", error);
+      );
+
+      if (res.data?.success) {
+        const sellers = res.data.data.map((seller) => ({
+          ...seller,
+          userId: seller.user_id,
+          fullName: `${seller.first_name} ${seller.last_name}`,
+          phone: seller.phone_number,
+          city: seller.office_address || "N/A",
+          status: seller.user_approval,
+          accountHolderName: seller.account_holder_name,
+          accountNumber: seller.account_number,
+          bankName: seller.bank_name,
+          branchLocation: seller.branch_location,
+          gender: seller.gender,
+          storeName: seller.store_name,
+          storeID: seller.store_id,
+          storeImage: seller.store_image,
+          storeLink: seller.store_link,
+          profileImage: seller.profile_image,
+          dob: seller.date_of_birth,
+          about: seller.description,
+          businessNumber: seller.business_number,
+        }));
+
+        setUpdatedUsers(sellers);
       }
-    };
-
-    fetchSellers();
-  }, []);
-
-  const openDeleteModal = (user) => {
-    setDeleteUser(user);
+    } catch (error) {
+      console.error("Error fetching sellers:", error);
+    }
   };
-  const closeDeleteModal = () => {
-    setDeleteUser(null);
-  };
+
+  fetchSellers();
+}, []);
+
 
   const toggleDropdown = (index) => {
     setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
+  const openDeleteModal = (user) => setDeleteUser(user);
+  const closeDeleteModal = () => setDeleteUser(null);
+
+  const filteredUsers = updatedUsers.filter((u) => {
+  const text = searchValue.toLowerCase();
+
+  return (
+    (u.fullName?.toLowerCase() || "").includes(text) ||
+    (u.email?.toLowerCase() || "").includes(text) ||
+    (u.phone?.toLowerCase() || "").includes(text) ||
+    (u.storeName?.toLowerCase() || "").includes(text) ||
+    (u.userId?.toString() || "").includes(text)
+  );
+});
+
+
   const handleSelectStatus = async (index, newStatusValue) => {
-    const prevStatus = updatedUsers[index].status;
-    const newUsers = [...updatedUsers];
-    newUsers[index].status = newStatusValue;
-    setUpdatedUsers(newUsers);
-    setDropdownOpen(null);
+    const previous = [...updatedUsers];
+    const updated = [...updatedUsers];
+    updated[index].status = newStatusValue;
+    setUpdatedUsers(updated);
+    setDropdownOpen(null);  
 
     try {
-      const token = localStorage.getItem("craftdelhiadmin_token");
-      const sellerId = newUsers[index].userId;
-
-      const res = await axios.post(
+      await axios.post(
         `${process.env.REACT_APP_BASE_URL}/admin/update-seller-approval`,
         {
-          seller_id: sellerId,
+          seller_id: updated[index].userId,
           user_approval: newStatusValue,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (res.data && res.data.success) {
-        toast.success(
-          `Seller status updated to ${
-            newStatusValue === 0
-              ? "Pending"
-              : newStatusValue === 1
-              ? "Approved"
-              : "Rejected"
-          }`
-        );
-      } else {
-        toast.error(res.data?.message || "Failed to update status");
-        const rollbackUsers = [...updatedUsers];
-        rollbackUsers[index].status = prevStatus;
-        setUpdatedUsers(rollbackUsers);
-      }
+      toast.success("Seller status updated successfully");
     } catch (error) {
-      toast.error("Error updating seller status");
-      const rollbackUsers = [...updatedUsers];
-      rollbackUsers[index].status = prevStatus;
-      setUpdatedUsers(rollbackUsers);
-      console.error("❌ Error updating status:", error);
+      toast.error("Failed to update status");
+      setUpdatedUsers(previous);
     }
   };
 
   const handleDeleteSeller = async (reason, description) => {
     try {
       const token = localStorage.getItem("craftdelhiadmin_token");
+
       const res = await axios.delete(
         `${process.env.REACT_APP_BASE_URL}/admin/delete-sellerbyadmin/${DeleteUser.userId}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
           data: { reason, description },
         }
       );
 
-      if (res.data && res.data.success) {
-        toast.success("Seller account deleted successfully");
+      if (res.data?.success) {
+        toast.success("Seller deleted");
         setUpdatedUsers((prev) =>
           prev.filter((u) => u.userId !== DeleteUser.userId)
         );
         closeDeleteModal();
-      } else {
-        toast.error(res.data?.message || "Failed to delete seller");
       }
-    } catch (error) {
-      console.error("❌ Error deleting seller:", error);
+    } catch {
       toast.error("Error deleting seller");
     }
   };
 
-  const getStatusInfo = (status) => {
-    switch (status) {
-      case 0:
-        return { text: "Pending", color: "bg-yellow-300" };
-      case 1:
-        return { text: "Approved", color: "bg-green-400" };
-      case 2:
-        return { text: "Rejected", color: "bg-red-400" };
-      default:
-        return { text: "Unknown", color: "bg-gray-300" };
-    }
-  };
+  const getStatusInfo = (status) =>
+    ({
+      0: { text: "Pending" },
+      1: { text: "Approved" },
+      2: { text: "Rejected" },
+    }[status] || { text: "Unknown" });
 
   return (
-    <div className="px-4 md:px-8 lg:px-1 mt-5 lg:mt-[30px]">
-      <div className="h-[589px] flex flex-col gap-3 overflow-auto w-full">
-        <div className="w-full flex flex-wrap justify-between items-center gap-3">
-          <div className="text-black text-2xl font-bold">Total Seller's</div>
+    <div className="px-5 mt-6">
+      {/* Top Bar */}
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+        <h2 className="text-xl font-bold text-gray-800">Seller Management</h2>
 
-          <div className="flex gap-2 w-full sm:w-auto">
-            <div className="w-full sm:w-[206px]">
-              <DateInputField
-                label="Select Date"
-                name="selectedDate"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
-            </div>
+        <div className="flex gap-3">
+          <input
+            type="date"
+            className="border px-3 py-2 rounded-lg text-sm"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
 
-            {/* Search Box */}
-            <div className="relative w-full sm:w-[239px]">
-              <input
-                placeholder="Search"
-                className="w-full h-10 text-black text-xs border border-gray-300 rounded px-3 pr-10"
-              />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5">
-                <FaSearch />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="w-full justify-start items-start gap-px inline-flex overflow-auto">
-          {/* User ID */}
-          <div className="w-[130px] flex-col justify-start items-start gap-px inline-flex">
-            <TableHeader title="User ID" />
-            {updatedUsers.map((user, index) => (
-              <TableCell key={index} text={user.userId} />
-            ))}
-          </div>
-
-          {/* Name */}
-          <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <TableHeader title="Name" />
-            {updatedUsers.map((user, index) => (
-              <TableCell key={index} text={user.name} />
-            ))}
-          </div>
-
-          {/* Email */}
-          <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <TableHeader title="Email Address" />
-            {updatedUsers.map((user, index) => (
-              <TableCell key={index} text={user.email} />
-            ))}
-          </div>
-
-          {/* Phone */}
-          <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <TableHeader title="Phone Number" />
-            {updatedUsers.map((user, index) => (
-              <TableCell key={index} text={user.phone} />
-            ))}
-          </div>
-
-          {/* City */}
-          <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <TableHeader title="City" />
-            {updatedUsers.map((user, index) => (
-              <TableCell key={index} text={user.city} />
-            ))}
-          </div>
-
-          {/* Status */}
-          <div className="grow shrink basis-0 flex-col justify-start items-start gap-px inline-flex">
-            <TableHeader title="Status" />
-            {updatedUsers.map((user, index) => {
-              const { text, color } = getStatusInfo(user.status);
-              return (
-                <div
-                  key={index}
-                  className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex"
-                >
-                  <div
-                    className={`p-1 rounded-sm justify-center items-center gap-2.5 flex ${color}`}
-                  >
-                    <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">
-                      {text}
-                    </div>
-                  </div>
-                  <div className="relative w-4 h-4">
-                    <IoIosArrowDown onClick={() => toggleDropdown(index)} />
-                    {dropdownOpen === index && (
-                      <div className="absolute left-0 right-0 top-full z-50 bg-white border border-[#e0e4f4] mt-1 rounded w-24 shadow-md">
-                        <div
-                          className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-xs"
-                          onClick={() => handleSelectStatus(index, 1)}
-                        >
-                          Approved
-                        </div>
-                        <div
-                          className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-xs"
-                          onClick={() => handleSelectStatus(index, 2)}
-                        >
-                          Rejected
-                        </div>
-                        <div
-                          className="px-4 py-2 cursor-pointer hover:bg-[#e0e4f4] text-[10px] sm:text-xs"
-                          onClick={() => handleSelectStatus(index, 0)}
-                        >
-                          Pending
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Actions */}
-          <div className="grow shrink basis-0 flex-col justify-center items-center gap-px inline-flex">
-            <TableHeader title="Actions" />
-            {updatedUsers.map((user, index) => (
-              <div
-                key={index}
-                className="h-[88px] gap-5 p-3 bg-white justify-center items-center inline-flex"
-              >
-                <button
-                  className="w-4 h-4 relative overflow-hidden"
-                  onClick={() => card1(user)}
-                >
-                  <LuPenLine />
-                </button>
-                <button
-                  className="w-4 h-4 relative overflow-hidden "
-                  onClick={() => openDeleteModal(user)}
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            ))}
+          <div className="relative">
+            <input
+              placeholder="Search seller..."
+              className="border px-4 py-2 rounded-lg text-sm pr-10"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+            <FaSearch className="absolute right-3 top-3 text-gray-500 text-sm" />
           </div>
         </div>
       </div>
 
+      {/* TABLE */}
+     <div className="border rounded-xl shadow-lg bg-white backdrop-blur-lg overflow-x-auto">
+
+       <table className="w-full min-w-[750px] text-left">
+          <thead className="bg-[#36234e] text-white">
+            <tr>
+              {["User ID", "Name", "Email", "Phone", "City", "Status", "Actions"].map((h) => (
+                <th key={h} className="p-3 text-xs uppercase tracking-wider">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          {/* Body */}
+          <motion.tbody variants={tableContainer} initial="hidden" animate="show">
+            {filteredUsers.map((user, index) => {
+              const { text } = getStatusInfo(user.status);
+
+              return (
+                <motion.tr
+                  key={index}
+                  variants={tableRow}
+                  className="border-b hover:bg-[#f8f6ff] transition duration-200"
+                >
+                  <td className="p-4 text-[12px] font-medium text-gray-700">{user.userId}</td>
+                  <td className="p-4 text-[12px] font-semibold text-gray-900">{user.fullName}</td>
+                  <td className="p-4 text-[12px] text-gray-600">{user.email}</td>
+                  <td className="p-4 text-[12px]">{user.phone}</td>
+                  <td className="p-4 text-[12px]">{user.city}</td>
+
+                  {/* Status Capsule */}
+                  <td className="p-4">
+                    <div className="relative flex items-center gap-2">
+                      <motion.div
+                        whileHover={{ scale: 1.06 }}
+                        className={`px-3 py-1 rounded-full text-[10px] font-semibold text-white border shadow
+                        ${
+                          user.status === 1
+                            ? "bg-gradient-to-r from-[#2ecc71] to-[#3ed98a] border-green-300"
+                            : user.status === 2
+                            ? "bg-gradient-to-r from-[#ff5a5a] to-[#e64545] border-red-300"
+                            : "bg-gradient-to-r from-[#facc15] to-[#ffe372] text-black border-yellow-300"
+                        }`}
+                      >
+                        {text}
+                      </motion.div>
+
+                      <button onClick={() => toggleDropdown(index)}>
+                        <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
+                      </button>
+
+                      {dropdownOpen === index && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="absolute top-9 left-0 bg-white shadow-xl rounded-lg border w-[120px] z-50 overflow-hidden"
+                        >
+                          {[
+                            { label: "Approved", value: 1 },
+                            { label: "Rejected", value: 2 },
+                            { label: "Pending", value: 0 },
+                          ].map((opt) => (
+                            <button
+                              key={opt.value}
+                              onClick={() => handleSelectStatus(index, opt.value)}
+                              className="w-full px-4 py-2 text-left text-[11px] hover:bg-gray-100"
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* Actions */}
+                  <td className="p-4 w-[120px]">
+                    <div className="flex justify-center items-center gap-4">
+                     <motion.button whileHover={{ scale: 1.15 }} onClick={() => card1({ ...user })}>
+                        <LuPenLine size={18} className="text-blue-600 hover:text-blue-800" />
+                      </motion.button>
+
+                      <motion.button whileHover={{ scale: 1.15 }} onClick={() => openDeleteModal(user)}>
+                        <FaTrash size={18} className="text-red-500 hover:text-red-700" />
+                      </motion.button>
+                    </div>
+                  </td>
+                </motion.tr>
+              );
+            })}
+          </motion.tbody>
+        </table>
+      </div>
+
       {DeleteUser && (
-        <BuyerDelete
-          user={DeleteUser}
-          close={closeDeleteModal}
-          onDelete={handleDeleteSeller}
-        />
+        <BuyerDelete user={DeleteUser} close={closeDeleteModal} onDelete={handleDeleteSeller} />
       )}
-    </div>
-  );
-};
-
-const TableHeader = ({ title }) => (
-  <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] justify-start items-center gap-3 inline-flex">
-    <div className="text-white text-[8px] sm:text-[10px] font-bold font-['Montserrat'] uppercase leading-none tracking-widest">
-      {title}
-    </div>
-  </div>
-);
-
-const TableCell = ({ text }) => (
-  <div className="h-[88px] p-3 bg-white justify-start items-center gap-3 inline-flex">
-    <div className="text-black text-[10px] font-medium font-['Montserrat'] leading-3">
-      {text}
-    </div>
-  </div>
-);
-
-const DateInputField = ({ label, name, value, onChange }) => {
-  return (
-    <div className="relative w-full">
-      <input
-        type="date"
-        className="w-full h-10 px-3 bg-white rounded border border-[#e0e4f4] text-xs"
-        name={name}
-        value={value}
-        onChange={onChange}
-      />
     </div>
   );
 };

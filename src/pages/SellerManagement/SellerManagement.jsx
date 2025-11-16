@@ -7,6 +7,7 @@ import { NavLink } from "react-router-dom";
 import SellerTable from "../../components/sellerManagement/SellerTable";
 import SellerController from "../../components/sellerManagement/SellerController";
 import { motion } from "framer-motion";
+import { getAdminToken } from "../../utils/auth";
 
 const cardVariants = {
   hidden: { opacity: 0, scale: 0.9, y: 30 },
@@ -33,7 +34,7 @@ const [selectedSeller, setSelectedSeller] = useState(null);
     trashed_seller_accounts: 0,
   });
 
-  const token = localStorage.getItem("craftdelhiadmin_token");
+  const token = getAdminToken();
 
   const handleCardClick = (seller) => {
   setSelectedSeller(seller);

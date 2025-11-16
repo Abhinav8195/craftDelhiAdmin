@@ -8,6 +8,9 @@ const SellerController = ({ seller, card1 }) => {
   const [activeTab, setActiveTab] = useState("Basic Information");
   const tabs = ["Basic Information", "Store Information", "Bank Details"];
 
+
+  console.log('card1',seller)
+
   return (
     <div className="flex justify-center items-start bg-white py-5">
       <div className="w-full max-w-[980px] p-5 bg-white rounded-xl shadow-lg">
