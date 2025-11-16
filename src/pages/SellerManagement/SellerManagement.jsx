@@ -157,13 +157,9 @@ const [selectedSeller, setSelectedSeller] = useState(null);
           </div>
 
  
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-          >
+          <div>
             <SellerTable card1={handleCardClick} />
-          </motion.div>
+          </div>
         </>
       )}
     </>

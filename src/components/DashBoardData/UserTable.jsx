@@ -144,15 +144,16 @@ const UserTable = ({ card1, stats }) => {
               <option value="trash">Trash</option>
             </select>
 
-            <div className="relative w-full sm:w-[239px]">
+            <div className="w-full sm:w-[239px] flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white">
               <input
-                placeholder="Customer Name"
+                  placeholder="Customer Name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full h-10 text-black text-xs border border-gray-300 rounded px-3 pr-10"
+                className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none"
               />
-              <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm" />
+              <FaSearch className="text-gray-500 text-sm" />
             </div>
+
           </div>
         </div>
 
@@ -167,44 +168,53 @@ const UserTable = ({ card1, stats }) => {
                 <th className="p-3 text-xs uppercase tracking-wider">Status</th>
               </tr>
             </thead>
+<motion.tbody variants={tableContainer}>
+  {filteredUsers.length === 0 ? (
+    <tr>
+      <td
+        colSpan="4"
+        className="text-center py-6 text-gray-500 text-sm font-medium"
+      >
+        🚫 No users found
+      </td>
+    </tr>
+  ) : (
+    filteredUsers.map((user, index) => (
+      <motion.tr
+        key={index}
+        variants={tableRow}
+        className="border-b hover:bg-gray-50 transition"
+      >
+        <td className="p-3 text-[11px]">{user.user_id}</td>
 
-            <motion.tbody variants={tableContainer}>
-              {filteredUsers.map((user, index) => (
-                <motion.tr
-                  key={index}
-                  variants={tableRow}
-                  className="border-b hover:bg-gray-50 transition"
-                >
-                  <td className="p-3 text-[11px]">{user.user_id}</td>
+        <td className="p-3 text-[11px]">
+          {user.first_name} {user.last_name}
+        </td>
 
-                  <td className="p-3 text-[11px]">
-                    {user.first_name} {user.last_name}
-                  </td>
+        <td className="p-3 text-[11px] capitalize">{user.role}</td>
 
-                  <td className="p-3 text-[11px] capitalize">
-                    {user.role}
-                  </td>
+        <td className="p-3">
+          <span
+            className={`px-2 py-1 rounded text-[10px] font-semibold text-white ${
+              user.account_trashed === 1
+                ? "bg-[#6b7280]"
+                : user.user_status === 1
+                ? "bg-[#69d297]"
+                : "bg-[#fe0000]"
+            }`}
+          >
+            {user.account_trashed === 1
+              ? "Trash"
+              : user.user_status === 1
+              ? "Active"
+              : "Inactive"}
+          </span>
+        </td>
+      </motion.tr>
+    ))
+  )}
+</motion.tbody>
 
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 rounded text-[10px] font-semibold text-white ${
-                        user.account_trashed === 1
-                          ? "bg-[#6b7280]"
-                          : user.user_status === 1
-                          ? "bg-[#69d297]"
-                          : "bg-[#fe0000]"
-                      }`}
-                    >
-                      {user.account_trashed === 1
-                        ? "Trash"
-                        : user.user_status === 1
-                        ? "Active"
-                        : "Inactive"}
-                    </span>
-                  </td>
-                </motion.tr>
-              ))}
-            </motion.tbody>
           </table>
         </div>
       </motion.div>

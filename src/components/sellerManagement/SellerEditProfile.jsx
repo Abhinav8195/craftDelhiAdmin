@@ -3,6 +3,11 @@ import Ellipse from "../../assets/images/d1.png";
 import { IoMdCloudUpload } from "react-icons/io";
 import axios from "axios";
 import { toast } from "react-toastify";
+const genderOptions = [
+  { label: "Male", value: 0 },
+  { label: "Female", value: 1 },
+  { label: "Prefer not to say", value: 2 },
+];
 
 const SellerEditProfile = ({ card1, seller }) => {
   const [errors, setErrors] = useState({});
@@ -26,7 +31,7 @@ const SellerEditProfile = ({ card1, seller }) => {
         email: seller.email || "",
         contact: seller.phone || seller.phone_number || "",
         birthday: seller.dob ? seller.dob.split("T")[0] : "",
-        gender: seller.gender || "",
+       gender: seller.gender !== undefined && seller.gender !== null ? Number(seller.gender) : "",
         address: seller.office_address || "",
         home: seller.home_address || "",
         profileImage: seller.profileImage || Ellipse,
@@ -44,7 +49,9 @@ const SellerEditProfile = ({ card1, seller }) => {
     if (!/^\d{10}$/.test(formData.contact))
       newErrors.contact = "Phone must be 10 digits.";
 
-    if (!formData.gender) newErrors.gender = "Please select gender.";
+    if (formData.gender === "" || formData.gender === null || formData.gender === undefined) {
+  newErrors.gender = "Please select gender.";
+}
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -164,15 +171,15 @@ const SelectField = ({ label, name, value, onChange, error }) => (
   <div>
     <label className="text-black text-xs font-bold uppercase">{label}</label>
     <select
-      value={value}
       name={name}
-      onChange={(e)=>onChange((prev)=>({...prev,[name]:e.target.value}))}
+      value={value}
+      onChange={(e)=>onChange(prev=>({...prev, [name]: Number(e.target.value)}))}
       className="w-full h-12 px-3 bg-white rounded border border-[#e0e4f4] text-xs"
     >
       <option value="">Select</option>
-      <option value="Male">Male</option>
-      <option value="Female">Female</option>
-      <option value="Prefer not to say">Prefer not to say</option>
+      {genderOptions.map(g => (
+        <option key={g.value} value={g.value}>{g.label}</option>
+      ))}
     </select>
     {error && <p className="text-red-500 text-xs">{error}</p>}
   </div>

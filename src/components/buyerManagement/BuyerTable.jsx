@@ -27,7 +27,6 @@ const BuyerTable = ({ card1 }) => {
         const res = await axios.get(`${process.env.REACT_APP_BASE_URL}admin/buyers-view`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-console.log(res.data.data)
         if (res.data.success) {
           const buyers = res.data.data.map(buyer => ({
             userId: buyer.user_id,
@@ -173,16 +172,14 @@ const handleTrashUser = async (reason, description) => {
               <option value="2">Trash</option>
             </select>
             </div>
-            <div className="relative w-full sm:w-[239px]">
-             <input
+            <div className="w-full sm:w-[239px] flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white">
+              <input
                 placeholder="Search user..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-10 text-xs border border-gray-300 rounded px-3 pr-10"
+                className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none"
               />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5">
-                <FaSearch />
-              </div>
+              <FaSearch className="text-gray-500 text-sm" />
             </div>
           </div>
         </div>

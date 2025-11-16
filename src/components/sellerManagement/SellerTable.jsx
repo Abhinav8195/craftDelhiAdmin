@@ -23,9 +23,10 @@ const SellerTable = ({ card1 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [updatedUsers, setUpdatedUsers] = useState([]);
   const [DeleteUser, setDeleteUser] = useState(null);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [searchValue, setSearchValue] = useState("");
   const token = getAdminToken();
+  const [filterStatus, setFilterStatus] = useState("all");
+const [search, setSearch] = useState("");
+
 
  useEffect(() => {
   const fetchSellers = async () => {
@@ -81,16 +82,19 @@ const SellerTable = ({ card1 }) => {
   const closeDeleteModal = () => setDeleteUser(null);
 
   const filteredUsers = updatedUsers.filter((u) => {
-  const text = searchValue.toLowerCase();
+  const text = search.toLowerCase();
 
-  return (
+  const matchesSearch =
     (u.fullName?.toLowerCase() || "").includes(text) ||
     (u.email?.toLowerCase() || "").includes(text) ||
     (u.phone?.toLowerCase() || "").includes(text) ||
     (u.storeName?.toLowerCase() || "").includes(text) ||
-    (u.userId?.toString() || "").includes(text)
-  );
+    (u.userId?.toString() || "").includes(text);
+
+  if (filterStatus === "all") return matchesSearch;
+  return matchesSearch && String(u.status) === String(filterStatus);
 });
+
 
 
   const handleSelectStatus = async (index, newStatusValue) => {
@@ -151,28 +155,32 @@ const SellerTable = ({ card1 }) => {
   return (
     <div className="px-5 mt-6">
       {/* Top Bar */}
-      <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Seller Management</h2>
+       <div className="w-full flex flex-wrap justify-between items-center gap-3 mb-5">
+                <div className="text-black text-2xl font-bold">Seller Management</div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <div className="w-full sm:w-[206px]">
+                     <select
+                    className="w-full h-10 text-xs bg-white border border-gray-300 rounded px-2"
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                  >
+                    <option value="all">All Users</option>
+                    <option value="1">Active</option>
+                    <option value="0">Inactive</option>
+                    <option value="2">Trash</option>
+                  </select>
+                  </div>
+                 <div className="w-full sm:w-[239px] flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white">
+              <input
+                placeholder="Search user..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none"
+              />
+              <FaSearch className="text-gray-500 text-sm" />
+            </div>
 
-        <div className="flex gap-3">
-          <input
-            type="date"
-            className="border px-3 py-2 rounded-lg text-sm"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-
-          <div className="relative">
-            <input
-              placeholder="Search seller..."
-              className="border px-4 py-2 rounded-lg text-sm pr-10"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-            />
-            <FaSearch className="absolute right-3 top-3 text-gray-500 text-sm" />
-          </div>
-        </div>
-      </div>
+                </div>
+              </div>
 
       {/* TABLE */}
      <div className="border rounded-xl shadow-lg bg-white backdrop-blur-lg overflow-x-auto">
@@ -190,82 +198,78 @@ const SellerTable = ({ card1 }) => {
 
           {/* Body */}
           <motion.tbody variants={tableContainer} initial="hidden" animate="show">
-            {filteredUsers.map((user, index) => {
-              const { text } = getStatusInfo(user.status);
+  {filteredUsers.length === 0 ? (
+    <tr>
+      <td
+        colSpan="7"
+        className="text-center py-6 text-gray-500 text-sm font-medium"
+      >
+        🚫 No seller found
+      </td>
+    </tr>
+  ) : (
+    filteredUsers.map((user, index) => {
+      const { text } = getStatusInfo(user.status);
 
-              return (
-                <motion.tr
-                  key={index}
-                  variants={tableRow}
-                  className="border-b hover:bg-[#f8f6ff] transition duration-200"
-                >
-                  <td className="p-4 text-[12px] font-medium text-gray-700">{user.userId}</td>
-                  <td className="p-4 text-[12px] font-semibold text-gray-900">{user.fullName}</td>
-                  <td className="p-4 text-[12px] text-gray-600">{user.email}</td>
-                  <td className="p-4 text-[12px]">{user.phone}</td>
-                  <td className="p-4 text-[12px]">{user.city}</td>
+      return (
+        <motion.tr
+          key={index}
+           variants={tableRow}
+  initial="hidden"
+  animate="show"
+  
+          className="border-b hover:bg-[#f8f6ff] transition duration-200"
+        >
+          <td className="p-4 text-[12px] font-medium text-gray-700">{user.userId}</td>
+          <td className="p-4 text-[12px] font-semibold text-gray-900">{user.fullName}</td>
+          <td className="p-4 text-[12px] text-gray-600">{user.email}</td>
+          <td className="p-4 text-[12px]">{user.phone}</td>
+          <td className="p-4 text-[12px]">{user.city}</td>
 
-                  {/* Status Capsule */}
-                  <td className="p-4">
-                    <div className="relative flex items-center gap-2">
-                      <motion.div
-                        whileHover={{ scale: 1.06 }}
-                        className={`px-3 py-1 rounded-full text-[10px] font-semibold text-white border shadow
-                        ${
-                          user.status === 1
-                            ? "bg-gradient-to-r from-[#2ecc71] to-[#3ed98a] border-green-300"
-                            : user.status === 2
-                            ? "bg-gradient-to-r from-[#ff5a5a] to-[#e64545] border-red-300"
-                            : "bg-gradient-to-r from-[#facc15] to-[#ffe372] text-black border-yellow-300"
-                        }`}
-                      >
-                        {text}
-                      </motion.div>
+          {/* Status Badge */}
+          <td className="p-4">
+            <div className="relative flex items-center gap-2">
+              <motion.div
+                whileHover={{ scale: 1.06 }}
+                className={`px-3 py-1 rounded-full text-[10px] font-semibold text-white border shadow
+                  ${
+                    user.status === 1
+                      ? "bg-green-500"
+                      : user.status === 2
+                      ? "bg-red-500"
+                      : "bg-yellow-400 text-black"
+                  }`}
+              >
+                {text}
+              </motion.div>
 
-                      <button onClick={() => toggleDropdown(index)}>
-                        <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
-                      </button>
+              <button onClick={() => toggleDropdown(index)}>
+                <IoIosArrowDown
+                  size={18}
+                  className="text-gray-500 hover:text-black"
+                />
+              </button>
+            </div>
+          </td>
 
-                      {dropdownOpen === index && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="absolute top-9 left-0 bg-white shadow-xl rounded-lg border w-[120px] z-50 overflow-hidden"
-                        >
-                          {[
-                            { label: "Approved", value: 1 },
-                            { label: "Rejected", value: 2 },
-                            { label: "Pending", value: 0 },
-                          ].map((opt) => (
-                            <button
-                              key={opt.value}
-                              onClick={() => handleSelectStatus(index, opt.value)}
-                              className="w-full px-4 py-2 text-left text-[11px] hover:bg-gray-100"
-                            >
-                              {opt.label}
-                            </button>
-                          ))}
-                        </motion.div>
-                      )}
-                    </div>
-                  </td>
+          {/* Actions */}
+          <td className="p-4 w-[120px]">
+            <div className="flex justify-center items-center gap-4">
+              <motion.button whileHover={{ scale: 1.15 }} onClick={() => card1({ ...user })}>
+                <LuPenLine size={18} className="text-blue-600 hover:text-blue-800" />
+              </motion.button>
 
-                  {/* Actions */}
-                  <td className="p-4 w-[120px]">
-                    <div className="flex justify-center items-center gap-4">
-                     <motion.button whileHover={{ scale: 1.15 }} onClick={() => card1({ ...user })}>
-                        <LuPenLine size={18} className="text-blue-600 hover:text-blue-800" />
-                      </motion.button>
+              <motion.button whileHover={{ scale: 1.15 }} onClick={() => openDeleteModal(user)}>
+                <FaTrash size={18} className="text-red-500 hover:text-red-700" />
+              </motion.button>
+            </div>
+          </td>
+        </motion.tr>
+      );
+    })
+  )}
+</motion.tbody>
 
-                      <motion.button whileHover={{ scale: 1.15 }} onClick={() => openDeleteModal(user)}>
-                        <FaTrash size={18} className="text-red-500 hover:text-red-700" />
-                      </motion.button>
-                    </div>
-                  </td>
-                </motion.tr>
-              );
-            })}
-          </motion.tbody>
         </table>
       </div>
 
