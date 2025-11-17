@@ -98,7 +98,7 @@ const handleSelectStatus = async (index, status) => {
 
   try {
     const res = await axios.put(
-      `${process.env.REACT_APP_BASE_URL}admin/update-buyer-status`,
+      `${process.env.REACT_APP_BASE_URL}admin/update-buyerseller-status`,
       { user_id: user.userId, user_status: status },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -121,7 +121,7 @@ const handleSelectStatus = async (index, status) => {
 const handleTrashUser = async (reason, description) => {
   try {
     const res = await axios.put(
-      `${process.env.REACT_APP_BASE_URL}admin/update-buyer-status`,
+      `${process.env.REACT_APP_BASE_URL}admin/update-buyerseller-status`,
       { 
         user_id: deleteUser.userId, 
         user_status: 2, 

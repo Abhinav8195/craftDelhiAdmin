@@ -3,6 +3,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { FaSearch, FaTrash } from "react-icons/fa";
 import { LuPenLine } from "react-icons/lu";
 import ProductDelete from "../Product/ProductDelete";
+import { getAdminToken } from "../../utils/auth";
 
 const OrderTable = ({ card1 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -10,6 +11,7 @@ const OrderTable = ({ card1 }) => {
   const [DeleteProduct, setDeleteProduct] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const token  = getAdminToken();
 
   const statusColors = {
     Refunded: "#ffc600",
@@ -31,6 +33,8 @@ const OrderTable = ({ card1 }) => {
             },
           }
         );
+
+        console.log(res)
 
         if (!res.ok) throw new Error(`Error ${res.status}`);
 

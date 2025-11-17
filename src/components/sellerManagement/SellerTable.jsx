@@ -98,52 +98,73 @@ const [search, setSearch] = useState("");
 
 
   const handleSelectStatus = async (index, newStatusValue) => {
-    const previous = [...updatedUsers];
-    const updated = [...updatedUsers];
-    updated[index].status = newStatusValue;
-    setUpdatedUsers(updated);
-    setDropdownOpen(null);  
+  const user = updatedUsers[index];
 
-    try {
-      await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/admin/update-seller-approval`,
-        {
-          seller_id: updated[index].userId,
-          user_approval: newStatusValue,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  // If selected Reject -> open modal instead of direct update
+  if (newStatusValue === 2) {
+    setDeleteUser(user); 
+    setDropdownOpen(null);
+    return;
+  }
 
-      toast.success("Seller status updated successfully");
-    } catch (error) {
-      toast.error("Failed to update status");
-      setUpdatedUsers(previous);
-    }
-  };
+  // For Pending & Approved (0,1) update normally
+  const previous = [...updatedUsers];
+  const updated = [...updatedUsers];
+  updated[index].status = newStatusValue;
+  setUpdatedUsers(updated);
+  setDropdownOpen(null);
 
-  const handleDeleteSeller = async (reason, description) => {
-    try {
-      const token = localStorage.getItem("craftdelhiadmin_token");
+  try {
+    await axios.post(
+      `${process.env.REACT_APP_BASE_URL}admin/update-seller-approval`,
+      {
+        seller_id: user.userId,
+        user_approval: newStatusValue
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      const res = await axios.delete(
-        `${process.env.REACT_APP_BASE_URL}/admin/delete-sellerbyadmin/${DeleteUser.userId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          data: { reason, description },
-        }
-      );
+    toast.success("Status updated successfully");
+  } catch (error) {
+    toast.error("Failed to update status");
+    setUpdatedUsers(previous);
+  }
+};
 
-      if (res.data?.success) {
-        toast.success("Seller deleted");
-        setUpdatedUsers((prev) =>
-          prev.filter((u) => u.userId !== DeleteUser.userId)
-        );
-        closeDeleteModal();
+
+  const handleRejectSeller = async (reason, description) => {
+  try {
+    const res = await axios.post(
+      `${process.env.REACT_APP_BASE_URL}admin/update-seller-approval`,
+      {
+        seller_id: DeleteUser.userId,
+        user_approval: 2,
+        reject_reason: reason,
+        reject_description: description,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
       }
-    } catch {
-      toast.error("Error deleting seller");
+    );
+
+    if (res.data?.success) {
+      toast.success("Seller rejected");
+
+      setUpdatedUsers(prev =>
+        prev.map(u =>
+          u.userId === DeleteUser.userId
+            ? { ...u, status: 2 }
+            : u
+        )
+      );
+
+      closeDeleteModal();
     }
-  };
+  } catch (err) {
+    toast.error("Error updating seller");
+  }
+};
+
 
   const getStatusInfo = (status) =>
     ({
@@ -243,12 +264,35 @@ const [search, setSearch] = useState("");
                 {text}
               </motion.div>
 
-              <button onClick={() => toggleDropdown(index)}>
-                <IoIosArrowDown
-                  size={18}
-                  className="text-gray-500 hover:text-black"
-                />
-              </button>
+             <div className="relative">
+  <button onClick={() => toggleDropdown(index)}>
+    <IoIosArrowDown size={18} className="text-gray-500 cursor-pointer hover:text-black" />
+  </button>
+
+  {dropdownOpen === index && (
+    <div className="absolute top-6 right-0 w-32 bg-white border shadow-md rounded-md z-50">
+      <button
+        onClick={() => handleSelectStatus(index, 0)}
+        className="px-4 py-2 w-full text-left text-sm hover:bg-gray-100"
+      >
+        Pending
+      </button>
+      <button
+        onClick={() => handleSelectStatus(index, 1)}
+        className="px-4 py-2 w-full text-left text-sm hover:bg-gray-100"
+      >
+        Approve
+      </button>
+      <button
+        onClick={() => handleSelectStatus(index, 2)}
+        className="px-4 py-2 w-full text-left text-sm hover:bg-gray-100 text-red-500"
+      >
+        Reject
+      </button>
+    </div>
+  )}
+</div>
+
             </div>
           </td>
 
@@ -274,7 +318,8 @@ const [search, setSearch] = useState("");
       </div>
 
       {DeleteUser && (
-        <BuyerDelete user={DeleteUser} close={closeDeleteModal} onDelete={handleDeleteSeller} />
+       <BuyerDelete user={DeleteUser} close={closeDeleteModal} onDelete={handleRejectSeller} />
+
       )}
     </div>
   );
