@@ -27,8 +27,6 @@ const ProductTable = ({ card1 }) => {
   const [search, setSearch] = useState("");
   const token = getAdminToken();
 
-  console.log('products',products)
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
