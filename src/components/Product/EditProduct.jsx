@@ -227,7 +227,7 @@ const removeHashtag = (tag) => {
 
     if (response.data.status) {
       toast.success("Product updated successfully!");
-      card1(null); // close modal/screen
+      card1(null); 
     } else {
       toast.error(response.data.message || "Something went wrong");
     }

@@ -27,6 +27,8 @@ const ProductTable = ({ card1 }) => {
   const [search, setSearch] = useState("");
   const token = getAdminToken();
 
+  console.log('products',products)
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -45,26 +47,65 @@ const ProductTable = ({ card1 }) => {
   const toggleDropdown = (index) =>
     setDropdownOpen(dropdownOpen === index ? null : index);
 
-  const handleSelectStatus = async (index, newValue) => {
-    const updated = [...products];
-    updated[index].admin_approval = newValue;
-    setProducts(updated);
-    setDropdownOpen(null);
+const handleSelectStatus = (index, newValue) => {
 
-    try {
-      await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/admin/updateproductstatus`,
-        {
-          product_id: updated[index].id,
-          admin_approval: newValue,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success("Status Updated");
-    } catch {
-      toast.error("Failed to update status");
-    }
-  };
+  // 🔥 if Reject → open reason modal instead of calling API now
+  if (newValue === 2) {
+    setDeleteProduct({ ...products[index], index });
+    setDropdownOpen(null);
+    return;
+  }
+
+  // 👇 For Pending(0) or Approve(1) → direct update
+  updateProductStatus(products[index].id, newValue);
+
+  const updated = [...products];
+  updated[index].admin_approval = newValue;
+  setProducts(updated);
+
+  setDropdownOpen(null);
+};
+
+const updateProductStatus = async (productId, status, reject_reason = "", reject_description = "") => {
+  try {
+    await axios.put(
+      `${process.env.REACT_APP_BASE_URL}admin/update-product-approval/${productId}`,
+      {
+        status,
+        reject_reason,
+        reject_description
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    toast.success("Status Updated");
+
+    // refresh UI
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId ? { ...p, admin_approval: status } : p
+      )
+    );
+  } catch (err) {
+    toast.error("Failed to update");
+  }
+};
+
+const handleReject = async (product, reason, desc) => {
+  await updateProductStatus(product.id, 2, reason, desc);
+
+  setProducts(prev =>
+    prev.map(p =>
+      p.id === product.id ? { ...p, admin_approval: 2 } : p
+    )
+  );
+
+  closeDeleteModal();
+};
+
+
+
+
 
   const filteredProducts = products.filter((p) =>
     (p.name?.toLowerCase() || "").includes(search.toLowerCase())
@@ -91,7 +132,7 @@ const ProductTable = ({ card1 }) => {
               placeholder="Search product..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 text-xs bg-transparent border-none outline-none"
+              className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none"
             />
             <FaSearch className="text-gray-500 text-sm" />
           </div>
@@ -186,9 +227,9 @@ const ProductTable = ({ card1 }) => {
                     <motion.button whileHover={{ scale: 1.15 }} onClick={() => card1(product)}>
                       <LuPenLine className="text-blue-600 hover:text-blue-800" size={18} />
                     </motion.button>
-                    <motion.button whileHover={{ scale: 1.15 }} onClick={() => openDeleteModal(product)}>
+                    {/* <motion.button whileHover={{ scale: 1.15 }} onClick={() => openDeleteModal(product)}>
                       <FaTrash className="text-red-500 hover:text-red-700" size={18} />
-                    </motion.button>
+                    </motion.button> */}
                   </td>
                 </motion.tr>
               ))
@@ -199,8 +240,15 @@ const ProductTable = ({ card1 }) => {
 
       {/* DELETE MODAL */}
       {deleteProduct && (
-        <ProductDelete user={deleteProduct} close={closeDeleteModal} />
-      )}
+  <ProductDelete 
+    user={deleteProduct} 
+    close={closeDeleteModal} 
+    onDelete={(reason, desc) =>
+      handleReject(deleteProduct, reason, desc)
+    }
+  />
+)}
+
     </div>
   );
 };
