@@ -11,6 +11,8 @@ import { AiOutlineCheckCircle } from "react-icons/ai";
 
 const OrderManagement = () => {
   const [selectedCard, setSelectedCard] = useState(null);
+  const [selectedOrderData, setSelectedOrderData] = useState(null);
+
 
   const [stats, setStats] = useState({
     total_orders: 0,
@@ -20,8 +22,11 @@ const OrderManagement = () => {
 
   const token = getAdminToken();
 
-  const handleCardClick = (cardNumber) =>
-    setSelectedCard(cardNumber === selectedCard ? null : cardNumber);
+  const handleCardClick = (cardNumber, orderData = null) => {
+  setSelectedCard(cardNumber);
+  if (orderData) setSelectedOrderData(orderData);
+};
+
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -113,7 +118,7 @@ const OrderManagement = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <EditOrder card1={handleCardClick} />
+            <EditOrder card1={handleCardClick} orderData={selectedOrderData} />
           </motion.div>
         ) : (
           <motion.div key="main" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -147,7 +152,7 @@ const OrderManagement = () => {
                 transition={{ delay: 0.8, duration: 0.8 }}
                 className="mt-6"
               >
-                <OrderTable card1={handleCardClick} />
+                <OrderTable card1={handleCardClick}  />
               </motion.div>
             </>
           </motion.div>
