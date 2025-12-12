@@ -17,8 +17,11 @@ const ECommerce = () => {
   current_month_revenue: 0
 });
 
-  const handleCardClick = (cardNumber) => {
+const [userFilter, setUserFilter] = useState('all');
+
+  const handleCardClick = (cardNumber, filter = 'all') => {
     setSelectedCard(cardNumber === selectedCard ? null : cardNumber);
+    setUserFilter(filter);
   };
 
 
@@ -92,7 +95,7 @@ const ECommerce = () => {
     <div className="px-4 md:px-8 lg:px-1 mt-0 lg:mt-[-30px]">
       {selectedCard === 1 && (
         <>
-          <UserTable card1={handleCardClick} stats={stats}/>
+          <UserTable card1={handleCardClick} stats={stats} filter={userFilter}/>
         </>
       )}
       {selectedCard === 2 && (

@@ -67,7 +67,7 @@ const TotalUsers = ({ card1,stats  }) => {
       title: "Total Number Of Users",
       value: stats?.total_users || 0,
       gradient: "from-[#ffe2e6] to-white",
-      onClick: () => card1(1),
+     onClick: () => card1(1, 'all'),
     },
     {
       id: 2,
@@ -75,7 +75,7 @@ const TotalUsers = ({ card1,stats  }) => {
       title: "Total Number Of Active Sellers",
       value: stats?.active_sellers || 0,
       gradient: "from-[#fff4de] to-white",
-      onClick: () => navigate("/sellers"),
+      onClick: () => card1(1, 'seller'),
     },
     {
       id: 3,
@@ -83,7 +83,7 @@ const TotalUsers = ({ card1,stats  }) => {
       title: "Total Number Of Active Buyers",
       value: stats?.active_buyers || 0,
       gradient: "from-green-100 to-white",
-      onClick: () => navigate("/buyers"),
+      onClick: () => card1(1, 'buyer'),
     },
   ];
 

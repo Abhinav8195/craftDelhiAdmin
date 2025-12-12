@@ -3,6 +3,7 @@ import IconUserCheck_01 from '../../assets/images/IconUserCheck_01.png';
 import IconShoppingBag_02 from '../../assets/images/IconShoppingBag_02.png';
 import IconFaceContent from '../../assets/images/IconFaceContent.png';
 import { FaSearch } from "react-icons/fa";
+import { HiOutlineArrowLeft } from "react-icons/hi";
 import { motion } from "framer-motion";
 import axios from "axios";
 
@@ -21,13 +22,17 @@ const tableRow = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.35 } }
 };
 
-const UserTable = ({ card1, stats }) => {
+const UserTable = ({ card1, stats, filter = 'all' }) => {
 
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
 
-  const [filterRole, setFilterRole] = useState("all"); 
+  const [filterRole, setFilterRole] = useState(filter);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    setFilterRole(filter || 'all');
+  }, [filter]);
 
   const fetchUsers = async () => {
     try {
@@ -50,7 +55,6 @@ const UserTable = ({ card1, stats }) => {
     fetchUsers();
   }, []);
 
-
   useEffect(() => {
     let updated = [...users];
     if (filterRole === "buyer") {
@@ -61,7 +65,6 @@ const UserTable = ({ card1, stats }) => {
       updated = updated.filter(u => u.account_trashed === 1);
     }
 
-  
     if (searchTerm.trim() !== "") {
       updated = updated.filter(u =>
         `${u.first_name} ${u.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
@@ -71,12 +74,19 @@ const UserTable = ({ card1, stats }) => {
     setFilteredUsers(updated);
   }, [filterRole, searchTerm, users]);
 
+  const headingMap = {
+    all: "Total Users",
+    seller: "Total Sellers",
+    buyer: "Total Buyers",
+    trash: "Trashed Accounts"
+  };
+  const heading = headingMap[filterRole] || "Total Users";
+
   return (
     <>
       <div className="px-4 md:px-8 lg:px-1">
         <div className="text-black text-2xl font-bold mb-3">Total Users</div>
 
-       
         <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           initial="hidden"
@@ -88,7 +98,7 @@ const UserTable = ({ card1, stats }) => {
             variants={cardVariants}
             whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.15)" }}
             whileTap={{ scale: 0.97 }}
-            onClick={() => card1(null)}
+            onClick={() => setFilterRole("all")}
             className="cursor-pointer h-[180px] p-5 bg-gradient-to-b from-[#ffe2e6] to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between"
           >
             <img src={IconUserCheck_01} alt="" className="w-10 h-10" />
@@ -100,28 +110,29 @@ const UserTable = ({ card1, stats }) => {
           <motion.div
             variants={cardVariants}
             whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.15)" }}
-            className="h-[180px] p-5 bg-gradient-to-b from-[#fff4de] to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between"
+            onClick={() => setFilterRole("seller")}
+            className="cursor-pointer h-[180px] p-5 bg-gradient-to-b from-[#fff4de] to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between"
           >
-            <img src={IconShoppingBag_02}alt="" className="w-10 h-10" />
-            <div className="text-black text-base font-bold">Total Active Sellers</div>
+            <img src={IconShoppingBag_02} alt="" className="w-10 h-10" />
+            <div className="text-black text-base font-bold">Total Number Of Active Sellers</div>
             <div className="text-black text-2xl font-bold">{stats?.active_sellers}</div>
             <div className="text-[#2d53d8] text-xs font-bold">Live Data</div>
           </motion.div>
 
           <motion.div
             variants={cardVariants}
+            onClick={() => setFilterRole("buyer")}
             whileHover={{ scale: 1.03, boxShadow: "0 10px 20px rgba(0,0,0,0.15)" }}
-            className="h-[180px] p-5 bg-gradient-to-b from-green-100 to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between"
+            className="cursor-pointer h-[180px] p-5 bg-gradient-to-b from-green-100 to-white rounded-xl border border-[#d9d9d9] flex flex-col justify-between"
           >
             <img src={IconFaceContent} alt="" className="w-10 h-10" />
-            <div className="text-black text-base font-bold">Total Active Buyers</div>
+            <div className="text-black text-base font-bold">Total Number Of Active Buyers</div>
             <div className="text-black text-2xl font-bold">{stats?.active_buyers}</div>
             <div className="text-[#2d53d8] text-xs font-bold">Live Data</div>
           </motion.div>
         </motion.div>
       </div>
 
-      
       <motion.div
         className="px-4 md:px-8 lg:px-1 mt-8 overflow-auto"
         variants={tableContainer}
@@ -129,12 +140,23 @@ const UserTable = ({ card1, stats }) => {
         animate="visible"
       >
 
-       
         <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-          <div className="text-black text-xl font-bold">Total Users</div>
+          {/* --- Back button (subtle, non-intrusive) --- */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => { if (typeof card1 === "function") card1(null); }}
+              aria-label="Go back"
+              className="flex items-center gap-2 px-3 py-1 bg-white/90 hover:bg-white rounded-full shadow-sm text-sm border border-gray-200"
+            >
+              <HiOutlineArrowLeft className="text-lg" />
+              <span className="text-xs font-medium">Back</span>
+            </button>
+
+            <div className="text-black text-xl font-bold">{heading}</div>
+          </div>
 
           <div className="flex gap-2 w-full sm:w-auto">
-            <select 
+            <select
               className="w-full sm:w-[206px] h-10 text-xs bg-white border border-gray-300 rounded px-2"
               onChange={(e) => setFilterRole(e.target.value)}
             >
@@ -146,7 +168,7 @@ const UserTable = ({ card1, stats }) => {
 
             <div className="w-full sm:w-[239px] flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white">
               <input
-                  placeholder="Customer Name"
+                placeholder="Customer Name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none"
@@ -157,7 +179,6 @@ const UserTable = ({ card1, stats }) => {
           </div>
         </div>
 
-     
         <div className="border rounded-lg overflow-hidden shadow-sm">
           <table className="w-full text-left">
             <thead className="bg-[#36234e] text-white">
@@ -168,52 +189,52 @@ const UserTable = ({ card1, stats }) => {
                 <th className="p-3 text-xs uppercase tracking-wider">Status</th>
               </tr>
             </thead>
-<motion.tbody variants={tableContainer}>
-  {filteredUsers.length === 0 ? (
-    <tr>
-      <td
-        colSpan="4"
-        className="text-center py-6 text-gray-500 text-sm font-medium"
-      >
-        🚫 No users found
-      </td>
-    </tr>
-  ) : (
-    filteredUsers.map((user, index) => (
-      <motion.tr
-        key={index}
-        variants={tableRow}
-        className="border-b hover:bg-gray-50 transition"
-      >
-        <td className="p-3 text-[11px]">{user.user_id}</td>
+            <motion.tbody variants={tableContainer}>
+              {filteredUsers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="text-center py-6 text-gray-500 text-sm font-medium"
+                  >
+                    🚫 No users found
+                  </td>
+                </tr>
+              ) : (
+                filteredUsers.map((user, index) => (
+                  <motion.tr
+                    key={index}
+                    variants={tableRow}
+                    className="border-b hover:bg-gray-50 transition"
+                  >
+                    <td className="p-3 text-[11px]">{user.user_id}</td>
 
-        <td className="p-3 text-[11px]">
-          {user.first_name} {user.last_name}
-        </td>
+                    <td className="p-3 text-[11px]">
+                      {user.first_name} {user.last_name}
+                    </td>
 
-        <td className="p-3 text-[11px] capitalize">{user.role}</td>
+                    <td className="p-3 text-[11px] capitalize">{user.role}</td>
 
-        <td className="p-3">
-          <span
-            className={`px-2 py-1 rounded text-[10px] font-semibold text-white ${
-              user.account_trashed === 1
-                ? "bg-[#6b7280]"
-                : user.user_status === 1
-                ? "bg-[#69d297]"
-                : "bg-[#fe0000]"
-            }`}
-          >
-            {user.account_trashed === 1
-              ? "Trash"
-              : user.user_status === 1
-              ? "Active"
-              : "Inactive"}
-          </span>
-        </td>
-      </motion.tr>
-    ))
-  )}
-</motion.tbody>
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 rounded text-[10px] font-semibold text-white ${
+                          user.account_trashed === 1
+                            ? "bg-[#6b7280]"
+                            : user.user_status === 1
+                              ? "bg-[#69d297]"
+                              : "bg-[#fe0000]"
+                        }`}
+                      >
+                        {user.account_trashed === 1
+                          ? "Trash"
+                          : user.user_status === 1
+                            ? "Active"
+                            : "Inactive"}
+                      </span>
+                    </td>
+                  </motion.tr>
+                ))
+              )}
+            </motion.tbody>
 
           </table>
         </div>
