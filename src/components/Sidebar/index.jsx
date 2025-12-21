@@ -264,6 +264,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
                 </div>
               )}
             </NavLink>
+
+             <NavLink to="/chat"  onClick={handleLinkClick} className={({ isActive }) => {
+    const bgColor = isActive ? "bg-[#024a63]" : "";
+    return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
+  }}>
+     {({ isActive }) => (
+              <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
+                <div className="w-5 h-5 relative overflow-hidden">
+                  <img src={isActive? orderactive:IconWallet_05} alt="Order Management Icon" className="w-full h-full object-cover" />
+                </div>
+                <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? "text-[#ffffff]" : "text-[black]"}`}>Messages</div>
+              </div>
+            )}
+            </NavLink>
           </div>
 
           {/* Profile */}

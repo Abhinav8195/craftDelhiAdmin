@@ -17,6 +17,7 @@ import OrderManagement from './pages/Order/OrderManagement';
 import PaymentManagement from './pages/payment/PaymentManagement';
 import NotFound from './pages/NotFound';
 import AuthCheck from './AuthCheck'
+import Chat from './pages/Message/Chat';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,6 +37,7 @@ function App() {
   <Route path="/product-management" element={<ProductManagement />} />
   <Route path="/order-management" element={<OrderManagement />} />
   <Route path="/payment-management" element={<PaymentManagement />} />
+   <Route path="/chat" element={<Chat />} />
 </Routes>
         
         </DefaultLayout>

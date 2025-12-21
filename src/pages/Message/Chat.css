@@ -1,0 +1,9 @@
+/* Hide scrollbar but keep scrolling functional */
+.user-list::-webkit-scrollbar {
+    display: none;
+  }
+  .user-list {
+    -ms-overflow-style: none; /* IE & Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
