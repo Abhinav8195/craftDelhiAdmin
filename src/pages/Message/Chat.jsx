@@ -1,339 +1,341 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiSend, FiPaperclip, FiX } from "react-icons/fi";
+import { FiSend } from "react-icons/fi";
 import MobileChat from "./MobileChat";
+import { io } from "socket.io-client";
+import axios from "axios";
+import { getAdminToken } from "../../utils/auth";
+
+/* ================= CONFIG ================= */
+
+const API_BASE = "https://backend.craftdelhi.com/chat";
+const Admin_Id = "23";
+
+/* ================= COMPONENT ================= */
 
 const Chat = () => {
-  const [activeTab, setActiveTab] = useState("chat");
+  const socketRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+
+  const [rooms, setRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [roomId, setRoomId] = useState(null);
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [attachedFiles, setAttachedFiles] = useState([]);
-  const [isImageOpen, setIsImageOpen] = useState(false); // State for image modal visibility
-  const [imageSrc, setImageSrc] = useState(""); 
-  
+  const [typingUser, setTypingUser] = useState(false);
 
-  const fileInputRef = useRef(null);
-  const messagesEndRef = useRef(null); // Ref for scrolling to the latest message
+  const [isMobile] = useState(window.innerWidth <= 768);
 
-  const customers = [
-    { name: "Rajesh", status: "Online" },
-    { name: "Priya", status: "Offline" },
-    { name: "Amit", status: "Online" },
-    { name: "Neha", status: "Offline" },
-    { name: "Suresh", status: "Online" },
-    { name: "Pooja", status: "Online" },
-    { name: "Vikram", status: "Offline" },
-    { name: "Divya", status: "Online" },
-    { name: "Karan", status: "Online" },
-    { name: "Simran", status: "Offline" },
-  ];
-
-  const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const isMobile = window.innerWidth <= 768;
+  /* ================= FETCH ROOMS ================= */
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
+    const fetchRooms = async () => {
+      const TOKEN = getAdminToken();
+      if (!TOKEN || !Admin_Id) return;
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() === "" && attachedFiles.length === 0) return;
-
-    const newMsg = {
-      text: newMessage,
-      files: attachedFiles,
-      sender: "me", 
+      try {
+        const res = await axios.get(`${API_BASE}/rooms/${Admin_Id}`, {
+          headers: { Authorization: `Bearer ${TOKEN}` },
+        });
+        setRooms(res.data?.data || []);
+        console.log(res.data?.data || [])
+      } catch (err) {
+        console.error("❌ Rooms fetch failed", err);
+        setRooms([]);
+      } finally {
+        setLoadingRooms(false);
+      }
     };
 
-    setMessages([...messages, newMsg]);
-    setNewMessage("");
-    setAttachedFiles([]);
-  };
+    fetchRooms();
+  }, []);
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    setAttachedFiles((prev) => [...prev, ...files]);
-  };
+  /* ================= SOCKET INIT ================= */
 
-  const handleRemoveFile = (index) => {
-    setAttachedFiles(attachedFiles.filter((_, idx) => idx !== index));
-  };
+  useEffect(() => {
+    const TOKEN = getAdminToken();
+    if (!TOKEN) return;
 
-  // Handle Enter key to send message
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // Prevents form submission on Enter
-      handleSendMessage();
-    }
-  };
+    socketRef.current = io("https://backend.craftdelhi.com", {
+      path: "/chat/socket.io",
+      auth: { token: TOKEN },
+      transports: ["polling", "websocket"],
+      withCredentials: true,
+    });
 
-  // Open image in full screen (60% width)
-  const handleImageClick = (file) => {
-    if (file.type.startsWith("image/")) {
-      setImageSrc(URL.createObjectURL(file));
-      setIsImageOpen(true);
-    }
-  };
+    // ✅ RECEIVE MESSAGE (replace optimistic)
+    socketRef.current.on("message_received", (data) => {
+      setMessages((prev) => {
+        const exists = prev.find(
+          (m) =>
+            m.senderId === data.senderId &&
+            m.message === data.message
+        );
 
-  const handleCloseImage = () => {
-    setIsImageOpen(false);
-    setImageSrc("");
-  };
-
-  return (
-    <div className="flex justify-center items-start">
-      {
-        isMobile ?  <MobileChat customers={customers}/>:
-        <div className="w-full max-w-8xl bg-white flex rounded-2xl shadow-lg border border-gray-200 overflow-hidden h-[80vh]">
-        
-        {/* Sidebar */}
-        <div className="w-1/3 border-r border-gray-200 flex flex-col">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold">Chats</h2>
-            {selectedCustomer && (
-              <div className="flex items-center gap-3 p-3 mt-3 border-2 border-green-500 rounded-lg bg-green-50">
-                <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-                <div>
-                  <h3 className="font-semibold">{selectedCustomer.name}</h3>
-                  <p className={`text-xs ${selectedCustomer.status === "Online" ? "text-green-600" : "text-gray-400"}`}>
-                    {selectedCustomer.status}
-                  </p>
-                </div>
-              </div>
-            )}
-            <input
-              type="text"
-              placeholder="Search Customer Name"
-              className="mt-3 w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          {/* Chat list */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            {filteredCustomers.map((customer, index) => (
-              <div
-                key={index}
-                onClick={() => setSelectedCustomer(customer)}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 cursor-pointer"
-              >
-                <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-                <div>
-                  <h3 className="font-semibold">{customer.name}</h3>
-                  <p className={`text-xs ${customer.status === "Online" ? "text-green-600" : "text-gray-400"}`}>
-                    {customer.status}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Messages Area */}
-        <div className="w-2/3 flex flex-col">
-          {/* Header */}
-          <div className="h-16 p-4 bg-[#ecf0ff] flex items-center justify-between rounded-tl-2xl border-b border-gray-200">
-            {selectedCustomer ? (
-             <>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-300 rounded-full"></div>
-                <div>
-                  <h3 className="font-semibold">{selectedCustomer.name}</h3>
-                  <p className={`text-xs ${selectedCustomer.status === "Online" ? "text-green-600" : "text-gray-400"}`}>
-                    {selectedCustomer.status}
-                  </p>
-                </div>
-                
-              </div>
-
-
-              
-           
-           
-           
-             </>
-            ) : (
-              <h3 className="text-gray-500">Select a user to start chatting</h3>
-            )}
-          </div>
-
-
-          {selectedCustomer &&   <div className="h-12 p-1 bg-[#ecf0ff] rounded flex w-full">
-        <button
-          onClick={() => setActiveTab("chat")}
-          className={`w-1/2 px-2 py-1 rounded-sm text-center text-xs font-medium ${
-            activeTab === "chat" ? "bg-[#ee6f69] text-white" : "text-black"
-          }`}
-        >
-          Chat
-        </button>
-        <button
-          onClick={() => setActiveTab("orderChat")}
-          className={`w-1/2 px-2 py-1 rounded-sm text-center text-xs font-medium ${
-            activeTab === "orderChat" ? "bg-[#ee6f69] text-white" : "text-black"
-          }`}
-        >
-          Order Chat
-        </button>
-      </div>}
-             
-
-          {/* Chat Messages (Scrollable Area) */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex ${msg.sender === "me" ? "justify-end" : "items-start gap-2"}`}
-              >
-                {msg.sender !== "me" && <div className="w-8 h-8 bg-gray-300 rounded-full"></div>}
-                <div className={`${msg.sender === "me" ? "bg-blue-500 text-white" : "bg-gray-100"} p-3 rounded-lg max-w-xs`}>
-                  <p className="text-sm">{msg.text}</p>
-                  {/* Files */}
-                  {msg.files?.length > 0 && (
-                    <div className="mt-2 space-y-2">
-                      {msg.files.map((file, fidx) => (
-                        <div key={fidx} className="bg-white border rounded p-2 text-xs">
-                          {file.type.startsWith("image/") && (
-                            <img
-                              src={URL.createObjectURL(file)}
-                              alt="preview"
-                              className="h-24 object-cover rounded cursor-pointer"
-                              onClick={() => handleImageClick(file)} // Click to open image
-                            />
-                          )}
-                          {file.type.startsWith("video/") && (
-                            <video src={URL.createObjectURL(file)} controls className="h-24 rounded" />
-                          )}
-                          {file.type === "application/pdf" && (
-                            <div>
-                              <p className="text-gray-600">PDF Preview:</p>
-                              <embed
-                                src={URL.createObjectURL(file)}
-                                type="application/pdf"
-                                width="100%"
-                                height="200px"
-                                className="border rounded"
-                              />
-                            </div>
-                          )}
-                          {file.type.startsWith("application/") && !file.type.includes("pdf") && (
-                            <div className="flex justify-between items-center">
-                              <p className="text-gray-600">{file.name}</p>
-                              <a
-                                href={URL.createObjectURL(file)}
-                                download={file.name}
-                                className="text-blue-500 text-xs"
-                              >
-                                Download
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Message Input Area */}
-          <div className="border-t border-gray-200 p-4 flex flex-col gap-2">
-            {/* Previews */}
-            {attachedFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {attachedFiles.map((file, index) => (
-                  <div key={index} className="relative w-20 h-20 border rounded overflow-hidden">
-                    {file.type.startsWith("image/") && (
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt="preview"
-                        className="object-cover w-full h-full"
-                      />
-                    )}
-                    {file.type.startsWith("video/") && (
-                      <video src={URL.createObjectURL(file)} className="object-cover w-full h-full" />
-                    )}
-                    {file.type.startsWith("application/") && (
-                      <div className="flex items-center justify-center w-full h-full text-xs">
-                        {file.name}
-                      </div>
-                    )}
-                    <button
-                      onClick={() => handleRemoveFile(index)}
-                      className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1"
-                    >
-                      <FiX size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Input + Send Area */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => fileInputRef.current.click()}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <FiPaperclip size={20} />
-              </button>
-              <input
-                type="file"
-                multiple
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className="hidden"
-                accept="image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              />
-              <input
-                type="text"
-                placeholder="Type a new message here"
-                className="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={handleKeyDown} // Listen for Enter key
-              />
-              <button
-                onClick={handleSendMessage}
-                className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600"
-              >
-                <FiSend size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        if (exists) {
+          return prev.map((m) =>
+            m.senderId === data.senderId && m.message === data.message
+              ? data
+              : m
+          );
         }
 
-{isImageOpen && (
-  <div className="fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
-    <div className="relative">
-      <button
-        onClick={handleCloseImage}
-        className="absolute top-2 right-2 bg-white text-black rounded-full p-2"
-      >
-        <FiX size={24} />
-      </button>
-      <img
-        src={imageSrc}
-        alt="Preview"
-        className="max-w-[60vw] max-h-[60vh] object-cover rounded"
-      />
-    </div>
-  </div>
-)}
+        return [...prev, data];
+      });
+    });
 
+    // ✅ TYPING INDICATOR
+    socketRef.current.on("user_typing", ({ userId, isTyping }) => {
+      if (String(userId) === String(Admin_Id)) return;
+      setTypingUser(isTyping);
+    });
 
-    
-     
+    return () => socketRef.current?.disconnect();
+  }, []);
+
+  /* ================= AUTOSCROLL ================= */
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  /* ================= ROOM SELECT ================= */
+
+  const handleRoomSelect = async (room) => {
+    const other = room.participants?.find(
+      (p) => String(p.userId) !== String(Admin_Id)
+    );
+
+    setSelectedCustomer(other || {});
+    setRoomId(room._id);
+    setMessages([]);
+    setTypingUser(false);
+
+    const TOKEN = getAdminToken();
+
+    try {
+      socketRef.current.emit("join_room", { roomId: room._id });
+
+      const res = await axios.get(
+        `${API_BASE}/messages?roomId=${room._id}&page=1&limit=50`,
+        { headers: { Authorization: `Bearer ${TOKEN}` } }
+      );
+
+      const list = res.data?.data || res.data || [];
+
+      // ✅ SORT messages (old → new)
+      const sorted = [...list].sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+
+      setMessages(sorted);
+    } catch (err) {
+      console.error("❌ Message load failed", err);
+    }
+  };
+
+  /* ================= TYPING EMIT ================= */
+
+  const emitTyping = () => {
+    if (!roomId) return;
+
+    socketRef.current.emit("typing", { roomId, isTyping: true });
+
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      socketRef.current.emit("typing", { roomId, isTyping: false });
+    }, 1500);
+  };
+
+  /* ================= SEND MESSAGE ================= */
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !roomId) return;
+
+    const messageText = newMessage;
+
+    // ✅ OPTIMISTIC UI
+    setMessages((prev) => [
+      ...prev,
+      {
+        message: messageText,
+        senderId: Admin_Id,
+      },
+    ]);
+
+    setNewMessage("");
+
+    // ✅ ALWAYS SAVE IN DB
+    await sendMessageViaREST(roomId, messageText);
+
+    // ✅ SOCKET FOR REALTIME
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("send_message", {
+        roomId,
+        message: messageText,
+      });
+    }
+  };
+
+  const sendMessageViaREST = async (roomId, message) => {
+    const TOKEN = getAdminToken();
+    if (!TOKEN) return;
+
+    try {
+      await axios.post(
+        `${API_BASE}/message`,
+        { roomId, message },
+        { headers: { Authorization: `Bearer ${TOKEN}` } }
+      );
+    } catch (err) {
+      console.error("❌ REST send failed", err);
+    }
+  };
+
+  /* ================= HELPERS ================= */
+
+  const formatTime = (date) =>
+    date
+      ? new Date(date).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
+
+  const getInitial = (name = "") => name.charAt(0).toUpperCase();
+
+  /* ================= UI ================= */
+
+  return (
+    <div className="flex justify-center h-screen p-4 bg-gray-50">
+      {isMobile ? (
+        <MobileChat customers={rooms} />
+      ) : (
+        <div className="w-full max-w-6xl bg-white flex rounded-2xl shadow-lg border h-[85vh] overflow-hidden">
+          {/* Sidebar */}
+          <div className="w-1/3 border-r bg-gray-50">
+            <div className="p-4 border-b bg-white">
+              <h2 className="text-xl font-bold">Messages</h2>
+              <input
+                className="mt-3 w-full p-2 border rounded-lg"
+                placeholder="Search chats..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="p-2 overflow-y-auto h-[calc(100%-120px)]">
+              {loadingRooms ? (
+                <p className="text-center p-4 text-gray-400">Loading chats...</p>
+              ) : (
+                rooms.map((room) => (
+                  <div
+                    key={room._id}
+                    onClick={() => handleRoomSelect(room)}
+                    className={`flex gap-3 p-3 rounded-xl cursor-pointer mb-1 ${
+                      roomId === room._id
+                        ? "bg-blue-100"
+                        : "hover:bg-white"
+                    }`}
+                  >
+                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                      C
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Chat</h3>
+                      <p className="text-xs text-gray-500">
+                        Click to view messages
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Chat Area */}
+          <div className="w-2/3 flex flex-col">
+            {selectedCustomer ? (
+              <>
+                <div className="p-4 border-b font-bold">
+                  {selectedCustomer?.name || "User"}
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-6 bg-[#f0f2f5] space-y-4">
+                  {messages.map((msg, idx) => {
+                    const isMe =
+                      String(msg.senderId) === String(Admin_Id);
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex ${
+                          isMe ? "justify-end" : "justify-start"
+                        } gap-2`}
+                      >
+                        {!isMe && (
+                          <div className="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center">
+                            {getInitial(selectedCustomer?.name)}
+                          </div>
+                        )}
+
+                        <div
+                          className={`max-w-[70%] px-4 py-2 rounded-2xl ${
+                            isMe
+                              ? "bg-blue-600 text-white"
+                              : "bg-white text-gray-800"
+                          }`}
+                        >
+                          <p>{msg.message}</p>
+                          <span className="text-[10px] block text-right opacity-70">
+                            {formatTime(msg.createdAt)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {typingUser && (
+                    <div className="text-sm italic text-gray-400 px-10">
+                      typing...
+                    </div>
+                  )}
+
+                  <div ref={messagesEndRef} />
+                </div>
+
+                <div className="p-4 border-t flex gap-2 bg-white">
+                  <input
+                    className="flex-1 border rounded-full px-4 py-2"
+                    value={newMessage}
+                    onChange={(e) => {
+                      setNewMessage(e.target.value);
+                      emitTyping();
+                    }}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleSendMessage()
+                    }
+                    placeholder="Type a message..."
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    className="bg-blue-600 text-white p-3 rounded-full"
+                  >
+                    <FiSend />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-gray-400">
+                Select a chat
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
