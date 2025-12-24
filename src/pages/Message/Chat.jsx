@@ -41,8 +41,8 @@ const Chat = () => {
         const res = await axios.get(`${API_BASE}/rooms/${Admin_Id}`, {
           headers: { Authorization: `Bearer ${TOKEN}` },
         });
+
         setRooms(res.data?.data || []);
-        console.log(res.data?.data || [])
       } catch (err) {
         console.error("❌ Rooms fetch failed", err);
         setRooms([]);
@@ -67,28 +67,13 @@ const Chat = () => {
       withCredentials: true,
     });
 
-    // ✅ RECEIVE MESSAGE (replace optimistic)
     socketRef.current.on("message_received", (data) => {
-      setMessages((prev) => {
-        const exists = prev.find(
-          (m) =>
-            m.senderId === data.senderId &&
-            m.message === data.message
-        );
+  if (String(data?.senderId) === String(Admin_Id)) return;
 
-        if (exists) {
-          return prev.map((m) =>
-            m.senderId === data.senderId && m.message === data.message
-              ? data
-              : m
-          );
-        }
+  setMessages((prev) => [...prev, data]);
+});
 
-        return [...prev, data];
-      });
-    });
 
-    // ✅ TYPING INDICATOR
     socketRef.current.on("user_typing", ({ userId, isTyping }) => {
       if (String(userId) === String(Admin_Id)) return;
       setTypingUser(isTyping);
@@ -125,9 +110,8 @@ const Chat = () => {
         { headers: { Authorization: `Bearer ${TOKEN}` } }
       );
 
-      const list = res.data?.data || res.data || [];
+      const list = res.data?.data || [];
 
-      // ✅ SORT messages (old → new)
       const sorted = [...list].sort(
         (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
       );
@@ -146,6 +130,7 @@ const Chat = () => {
     socketRef.current.emit("typing", { roomId, isTyping: true });
 
     clearTimeout(typingTimeoutRef.current);
+
     typingTimeoutRef.current = setTimeout(() => {
       socketRef.current.emit("typing", { roomId, isTyping: false });
     }, 1500);
@@ -158,42 +143,29 @@ const Chat = () => {
 
     const messageText = newMessage;
 
-    // ✅ OPTIMISTIC UI
     setMessages((prev) => [
       ...prev,
-      {
-        message: messageText,
-        senderId: Admin_Id,
-      },
+      { message: messageText, senderId: Admin_Id, createdAt: new Date() },
     ]);
 
     setNewMessage("");
 
-    // ✅ ALWAYS SAVE IN DB
-    await sendMessageViaREST(roomId, messageText);
-
-    // ✅ SOCKET FOR REALTIME
-    if (socketRef.current?.connected) {
-      socketRef.current.emit("send_message", {
-        roomId,
-        message: messageText,
-      });
-    }
-  };
-
-  const sendMessageViaREST = async (roomId, message) => {
     const TOKEN = getAdminToken();
-    if (!TOKEN) return;
 
     try {
       await axios.post(
         `${API_BASE}/message`,
-        { roomId, message },
+        { roomId, message: messageText },
         { headers: { Authorization: `Bearer ${TOKEN}` } }
       );
     } catch (err) {
       console.error("❌ REST send failed", err);
     }
+
+    socketRef.current.emit("send_message", {
+      roomId,
+      message: messageText,
+    });
   };
 
   /* ================= HELPERS ================= */
@@ -206,48 +178,70 @@ const Chat = () => {
         })
       : "";
 
-  const getInitial = (name = "") => name.charAt(0).toUpperCase();
+  const getInitial = (name = "U") => name.charAt(0).toUpperCase();
+
+  const formatDateGroup = (date) => {
+    const d = new Date(date);
+    const today = new Date();
+
+    const isToday = d.toDateString() === today.toDateString();
+
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    const isYesterday = d.toDateString() === yesterday.toDateString();
+
+    if (isToday) return "Today";
+    if (isYesterday) return "Yesterday";
+
+    return d.toLocaleDateString();
+  };
 
   /* ================= UI ================= */
 
   return (
-    <div className="flex justify-center h-screen p-4 bg-gray-50">
+    <div className="flex justify-center h-full overflow-hidden">
       {isMobile ? (
         <MobileChat customers={rooms} />
       ) : (
-        <div className="w-full max-w-6xl bg-white flex rounded-2xl shadow-lg border h-[85vh] overflow-hidden">
+        <div className="w-full max-w-6xl flex rounded-2xl border h-[80vh] overflow-hidden">
           {/* Sidebar */}
-          <div className="w-1/3 border-r bg-gray-50">
-            <div className="p-4 border-b bg-white">
+          <div className="w-1/3 border-r bg-white">
+            <div className="p-4 border-b sticky top-0 z-10">
               <h2 className="text-xl font-bold">Messages</h2>
+
               <input
-                className="mt-3 w-full p-2 border rounded-lg"
+                className="mt-3 w-full p-2 rounded-xl bg-gray-100 focus:ring outline-none"
                 placeholder="Search chats..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <div className="p-2 overflow-y-auto h-[calc(100%-120px)]">
+            <div className="p-2 pt-6 overflow-y-auto space-y-2">
               {loadingRooms ? (
-                <p className="text-center p-4 text-gray-400">Loading chats...</p>
+                <p className="text-center p-4 text-gray-400">
+                  Loading chats...
+                </p>
               ) : (
                 rooms.map((room) => (
                   <div
                     key={room._id}
                     onClick={() => handleRoomSelect(room)}
-                    className={`flex gap-3 p-3 rounded-xl cursor-pointer mb-1 ${
-                      roomId === room._id
-                        ? "bg-blue-100"
-                        : "hover:bg-white"
-                    }`}
+                    className={`flex gap-3 p-3 rounded-xl cursor-pointer transition-all
+                      ${
+                        roomId === room._id
+                          ? "bg-blue-50 border border-blue-200"
+                          : "hover:bg-gray-100"
+                      }`}
                   >
-                    <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 text-white flex items-center justify-center font-semibold shadow">
                       C
                     </div>
-                    <div>
-                      <h3 className="font-semibold">Chat</h3>
-                      <p className="text-xs text-gray-500">
+
+                    <div className="flex flex-col">
+                      <h3 className="font-semibold text-sm">Chat</h3>
+                      <p className="text-[11px] text-gray-500">
                         Click to view messages
                       </p>
                     </div>
@@ -259,44 +253,88 @@ const Chat = () => {
 
           {/* Chat Area */}
           <div className="w-2/3 flex flex-col">
-            {selectedCustomer ? (
+            {!selectedCustomer ? (
+              <div className="flex-1 flex items-center justify-center text-gray-400">
+                Select a chat
+              </div>
+            ) : (
               <>
-                <div className="p-4 border-b font-bold">
-                  {selectedCustomer?.name || "User"}
+                {/* Header */}
+                <div className="p-4 border-b bg-white sticky top-0 z-10 flex justify-between">
+                  <span className="font-bold">
+                    {selectedCustomer?.name || "User"}
+                  </span>
+
+                  {typingUser && (
+                    <span className="text-xs text-blue-500">typing…</span>
+                  )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 bg-[#f0f2f5] space-y-4">
-                  {messages.map((msg, idx) => {
-                    const isMe =
-                      String(msg.senderId) === String(Admin_Id);
-                    return (
-                      <div
-                        key={idx}
-                        className={`flex ${
-                          isMe ? "justify-end" : "justify-start"
-                        } gap-2`}
-                      >
-                        {!isMe && (
-                          <div className="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center">
-                            {getInitial(selectedCustomer?.name)}
-                          </div>
-                        )}
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-6 bg-[#f3f4f7] space-y-3">
+                  {(() => {
+                    let lastDate = null;
 
-                        <div
-                          className={`max-w-[70%] px-4 py-2 rounded-2xl ${
-                            isMe
-                              ? "bg-blue-600 text-white"
-                              : "bg-white text-gray-800"
-                          }`}
-                        >
-                          <p>{msg.message}</p>
-                          <span className="text-[10px] block text-right opacity-70">
-                            {formatTime(msg.createdAt)}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                    return messages.map((msg, idx) => {
+                      const isMe =
+                        String(msg.senderId) === String(Admin_Id);
+
+                      const msgDate = new Date(
+                        msg.createdAt
+                      ).toDateString();
+
+                      const showDate = msgDate !== lastDate;
+                      lastDate = msgDate;
+
+                      return (
+                        <React.Fragment key={idx}>
+                          {showDate && (
+                            <div className="text-center text-xs text-gray-500 my-3">
+                              {formatDateGroup(msg.createdAt)}
+                            </div>
+                          )}
+
+                          <div
+                            className={`flex items-end gap-2 ${
+                              isMe
+                                ? "justify-end"
+                                : "justify-start"
+                            }`}
+                          >
+                            {!isMe && (
+                              <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-semibold">
+                                {getInitial(
+                                  selectedCustomer?.name
+                                )}
+                              </div>
+                            )}
+
+                            <div
+                              className={`max-w-[70%] px-4 py-2 rounded-2xl shadow
+                                ${
+                                  isMe
+                                    ? "bg-blue-600 text-white rounded-br-none"
+                                    : "bg-white text-gray-800 rounded-bl-none"
+                                }`}
+                            >
+                              <p>{msg.message}</p>
+
+                              <span className="text-[10px] block text-right opacity-60 mt-1">
+                                {formatTime(msg.createdAt)}
+                              </span>
+                            </div>
+
+                            {isMe && (
+                              <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-semibold">
+                                A
+                              </div>
+                            )}
+                          </div>
+                        </React.Fragment>
+                      );
+                    });
+                  })()}
+
 
                   {typingUser && (
                     <div className="text-sm italic text-gray-400 px-10">
@@ -307,31 +345,31 @@ const Chat = () => {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="p-4 border-t flex gap-2 bg-white">
-                  <input
-                    className="flex-1 border rounded-full px-4 py-2"
-                    value={newMessage}
-                    onChange={(e) => {
-                      setNewMessage(e.target.value);
-                      emitTyping();
-                    }}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && handleSendMessage()
-                    }
-                    placeholder="Type a message..."
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    className="bg-blue-600 text-white p-3 rounded-full"
-                  >
-                    <FiSend />
-                  </button>
+                {/* Input Bar */}
+                <div className="p-4 border-t bg-white">
+                  <div className="flex gap-2 rounded-full px-3 py-2 shadow-sm">
+                    <input
+                      className="flex-1 border rounded-full px-4 py-2"
+                      value={newMessage}
+                      onChange={(e) => {
+                        setNewMessage(e.target.value);
+                        emitTyping();
+                      }}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && handleSendMessage()
+                      }
+                      placeholder="Type a message..."
+                    />
+
+                    <button
+                      onClick={handleSendMessage}
+                      className="bg-blue-600 hover:bg-blue-700 transition text-white p-3 rounded-full"
+                    >
+                      <FiSend />
+                    </button>
+                  </div>
                 </div>
               </>
-            ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-400">
-                Select a chat
-              </div>
             )}
           </div>
         </div>

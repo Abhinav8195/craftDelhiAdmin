@@ -29,6 +29,9 @@ const DefaultLayout = ({ children,setIsAuthenticated }) => {
       case '/payment-management':
         setPageTitle('Payment Management');
         break;
+        case '/chat':
+        setPageTitle('Message ');
+        break;
       default:
         setPageTitle('');
     }
