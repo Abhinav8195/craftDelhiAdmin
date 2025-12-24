@@ -197,6 +197,22 @@ const Chat = () => {
     return d.toLocaleDateString();
   };
 
+
+   const getInitials = (name = "U") => {
+  if (!name) return "U";
+
+  const parts = name.trim().split(" ").filter(Boolean);
+
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase();
+  }
+
+  return (
+    parts[0].charAt(0).toUpperCase() +
+    parts[1].charAt(0).toUpperCase()
+  );
+};
+
   /* ================= UI ================= */
 
   return (
@@ -218,37 +234,51 @@ const Chat = () => {
               />
             </div>
 
-            <div className="p-2 pt-6 overflow-y-auto space-y-2">
-              {loadingRooms ? (
-                <p className="text-center p-4 text-gray-400">
-                  Loading chats...
-                </p>
-              ) : (
-                rooms.map((room) => (
-                  <div
-                    key={room._id}
-                    onClick={() => handleRoomSelect(room)}
-                    className={`flex gap-3 p-3 rounded-xl cursor-pointer transition-all
-                      ${
-                        roomId === room._id
-                          ? "bg-blue-50 border border-blue-200"
-                          : "hover:bg-gray-100"
-                      }`}
-                  >
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 text-white flex items-center justify-center font-semibold shadow">
-                      C
-                    </div>
+              <div className="p-2 pt-6 overflow-y-auto space-y-2">
+  {loadingRooms ? (
+    <p className="text-center p-4 text-gray-400">
+      Loading chats...
+    </p>
+  ) : rooms.length === 0 ? (
+    <p className="text-center p-4 text-gray-400">
+      No chats found
+    </p>
+  ) : (
+    rooms.map((room) => {
+      const otherUser = room?.participants?.find(
+        (p) => String(p?.userId) !== String(Admin_Id)
+      );
 
-                    <div className="flex flex-col">
-                      <h3 className="font-semibold text-sm">Chat</h3>
-                      <p className="text-[11px] text-gray-500">
-                        Click to view messages
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+      return (
+        <div
+          key={room._id}
+          onClick={() => handleRoomSelect(room)}
+          className={`flex gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+            roomId === room._id
+              ? "bg-blue-50 border border-blue-200"
+              : "hover:bg-gray-100"
+          }`}
+        >
+          {/* avatar */}
+          <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 text-white flex items-center justify-center font-semibold shadow">
+            {getInitial(otherUser?.name || "U")}
+          </div>
+
+          {/* name + context */}
+          <div className="flex flex-col">
+            <h3 className="font-semibold text-sm">
+              {otherUser?.name || "User"}
+            </h3>
+
+            <p className="text-[11px] text-gray-500">
+              {room?.title || "Chat"}
+            </p>
+          </div>
+        </div>
+      );
+    })
+  )}
+</div>
           </div>
 
           {/* Chat Area */}
@@ -303,7 +333,7 @@ const Chat = () => {
                           >
                             {!isMe && (
                               <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-semibold">
-                                {getInitial(
+                                {getInitials(
                                   selectedCustomer?.name
                                 )}
                               </div>
@@ -326,7 +356,7 @@ const Chat = () => {
 
                             {isMe && (
                               <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-semibold">
-                                A
+                                R
                               </div>
                             )}
                           </div>
