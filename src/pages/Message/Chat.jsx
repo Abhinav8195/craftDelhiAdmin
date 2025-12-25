@@ -271,6 +271,22 @@ const sendWithAttachment = async () => {
   );
 };
 
+
+const filteredRooms = rooms.filter((room) => {
+  const other = room?.participants?.find(
+    (p) => String(p?.userId) !== String(Admin_Id)
+  );
+
+  const name = other?.name || "";
+  const title = room?.title || "";
+
+  return (
+    name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+});
+
+
   /* ================= UI ================= */
 
   return (
@@ -305,7 +321,10 @@ const sendWithAttachment = async () => {
               <h2 className="text-xl font-bold">Messages</h2>
 
               <input
-                className="mt-3 w-full p-2 rounded-xl bg-gray-100 "
+                  className="mt-3 w-full p-2 rounded-xl bg-gray-100
+             border-none
+             focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+             outline-none"
                 placeholder="Search chats..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -322,7 +341,7 @@ const sendWithAttachment = async () => {
       No chats found
     </p>
   ) : (
-    rooms.map((room) => {
+    filteredRooms.map((room) => {
       const otherUser = room?.participants?.find(
         (p) => String(p?.userId) !== String(Admin_Id)
       );

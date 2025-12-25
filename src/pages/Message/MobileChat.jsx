@@ -83,15 +83,25 @@ const MobileChat = ({
 
           <h2 className="text-xl font-bold text-center">Messages</h2>
 
-          <div className="flex items-center gap-2 px-3 h-10 border rounded-full shadow-sm">
-            <MagnifyingGlassIcon className="w-5 h-5 text-gray-500" />
-            <input
-              className="flex-1 text-sm outline-none"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <div className="flex items-center gap-2 px-3 h-10 rounded-full shadow-sm bg-gray-100 
+            focus-within:outline-none focus-within:ring-0 focus-within:border-0">
+
+  <MagnifyingGlassIcon className="w-5 h-5 text-gray-500" />
+
+  <input
+    type="text"
+    className="flex-1 text-sm bg-transparent 
+               border-none outline-none focus:outline-none 
+               focus:ring-0 focus:border-0 
+               focus-visible:outline-none 
+               appearance-none"
+    placeholder="Search..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+  />
+</div>
+
+
 
           {loadingRooms ? (
             <p className="text-center text-gray-400">Loading chats…</p>
