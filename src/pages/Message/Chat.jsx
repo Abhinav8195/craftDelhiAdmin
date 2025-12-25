@@ -42,7 +42,7 @@ const Chat = () => {
       if (!TOKEN || !Admin_Id) return;
 
       try {
-        const res = await axios.get(`${API_BASE}/rooms/${Admin_Id}`, {
+        const res = await axios.get(`${API_BASE}/rooms`, {
           headers: { Authorization: `Bearer ${TOKEN}` },
         });
 
