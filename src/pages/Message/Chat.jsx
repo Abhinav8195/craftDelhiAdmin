@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiSend } from "react-icons/fi";
+import { FiPaperclip,FiSend } from "react-icons/fi";
 import MobileChat from "./MobileChat";
 import { io } from "socket.io-client";
 import axios from "axios";
@@ -29,6 +29,10 @@ const Chat = () => {
   const [typingUser, setTypingUser] = useState(false);
 
   const [isMobile] = useState(window.innerWidth <= 768);
+
+  const [attachment, setAttachment] = useState(null);
+  const [attachmentPreview, setAttachmentPreview] = useState(null);
+  const [attachmentName, setAttachmentName] = useState("");
 
   /* ================= FETCH ROOMS ================= */
 
@@ -168,6 +172,60 @@ const Chat = () => {
     });
   };
 
+   /* ================= SEND MESSAGE (TEXT ONLY BACKEND) ================= */
+
+  const sendTextOnly = async (text) => {
+    if (!text || !roomId) return;
+
+    const TOKEN = getAdminToken();
+
+    try {
+      await axios.post(
+        `${API_BASE}/message`,
+        { roomId, message: text },
+        { headers: { Authorization: `Bearer ${TOKEN}` } }
+      );
+    } catch (err) {
+      console.error("❌ REST send failed", err);
+    }
+
+    socketRef.current.emit("send_message", {
+      roomId,
+      message: text,
+    });
+  };
+
+const sendWithAttachment = async () => {
+    if (!roomId) return;
+
+    if (!newMessage.trim() && !attachment) return;
+
+    // add optimistically in UI
+    setMessages((prev) => [
+      ...prev,
+      {
+        senderId: Admin_Id,
+        message: newMessage,
+        fileName: attachmentName,
+        filePreview: attachmentPreview,
+        createdAt: new Date(),
+      },
+    ]);
+
+    // send text to backend (file upload can be added later)
+    if (newMessage.trim()) {
+      await sendTextOnly(newMessage.trim());
+    }
+
+    // clear states
+    setNewMessage("");
+    setAttachment(null);
+    setAttachmentPreview(null);
+    setAttachmentName("");
+  };
+
+
+
   /* ================= HELPERS ================= */
 
   const formatTime = (date) =>
@@ -218,7 +276,27 @@ const Chat = () => {
   return (
     <div className="flex justify-center h-full overflow-hidden">
       {isMobile ? (
-        <MobileChat customers={rooms} />
+       <MobileChat
+  rooms={rooms}
+  loadingRooms={loadingRooms}
+  messages={messages}
+  typingUser={typingUser}
+  selectedCustomer={selectedCustomer}
+  setSelectedCustomer={setSelectedCustomer}
+  handleRoomSelect={handleRoomSelect}
+  newMessage={newMessage}
+  setNewMessage={setNewMessage}
+  handleSendMessage={handleSendMessage}
+  emitTyping={emitTyping}
+  Admin_Id={Admin_Id}
+    attachment={attachment}
+  setAttachment={setAttachment}
+  attachmentPreview={attachmentPreview}
+  setAttachmentPreview={setAttachmentPreview}
+  attachmentName={attachmentName}
+  setAttachmentName={setAttachmentName}
+  sendWithAttachment={sendWithAttachment}
+/>
       ) : (
         <div className="w-full max-w-6xl flex rounded-2xl border h-[80vh] overflow-hidden">
           {/* Sidebar */}
@@ -227,7 +305,7 @@ const Chat = () => {
               <h2 className="text-xl font-bold">Messages</h2>
 
               <input
-                className="mt-3 w-full p-2 rounded-xl bg-gray-100 focus:ring outline-none"
+                className="mt-3 w-full p-2 rounded-xl bg-gray-100 "
                 placeholder="Search chats..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -291,13 +369,7 @@ const Chat = () => {
               <>
                 {/* Header */}
                 <div className="p-4 border-b bg-white sticky top-0 z-10 flex justify-between">
-                  <span className="font-bold">
-                    {selectedCustomer?.name || "User"}
-                  </span>
-
-                  {typingUser && (
-                    <span className="text-xs text-blue-500">typing…</span>
-                  )}
+                  <span className="font-bold">{selectedCustomer?.name || "User"}</span>
                 </div>
 
                 {/* Messages */}
@@ -347,7 +419,24 @@ const Chat = () => {
                                     : "bg-white text-gray-800 rounded-bl-none"
                                 }`}
                             >
-                              <p>{msg.message}</p>
+                              {/* IMAGE */}
+                              {msg.filePreview && (
+                                <img
+                                  src={msg.filePreview}
+                                  className="w-40 h-40 object-cover rounded mb-2"
+                                  alt="attachment"
+                                />
+                              )}
+
+                              {/* DOC */}
+                              {msg.fileName && !msg.filePreview && (
+                                <div className="text-sm mb-1">
+                                  📄 {msg.fileName}
+                                </div>
+                              )}
+
+                              {/* TEXT */}
+                              {msg.message && <p>{msg.message}</p>}
 
                               <span className="text-[10px] block text-right opacity-60 mt-1">
                                 {formatTime(msg.createdAt)}
@@ -375,25 +464,83 @@ const Chat = () => {
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input Bar */}
+                 {/* Input Bar */}
                 <div className="p-4 border-t bg-white">
-                  <div className="flex gap-2 rounded-full px-3 py-2 shadow-sm">
+                  {/* Hidden file input */}
+                  <input
+                    id="file-upload-desktop"
+                    type="file"
+                    className="hidden"
+                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+
+                      setAttachment(file);
+                      setAttachmentName(file.name);
+
+                      if (file.type.startsWith("image/")) {
+                        setAttachmentPreview(URL.createObjectURL(file));
+                      } else {
+                        setAttachmentPreview(null);
+                      }
+                    }}
+                  />
+
+                  {/* preview box */}
+                  {(attachment || attachmentPreview) && (
+                    <div className="mb-3 p-3 rounded-xl border bg-white flex items-center gap-3">
+                      {attachmentPreview && (
+                        <img
+                          src={attachmentPreview}
+                          className="w-16 h-16 rounded object-cover"
+                        />
+                      )}
+
+                      {!attachmentPreview && (
+                        <div className="text-sm">📄 {attachmentName}</div>
+                      )}
+
+                      <button
+                        className="ml-auto text-red-500"
+                        onClick={() => {
+                          setAttachment(null);
+                          setAttachmentPreview(null);
+                          setAttachmentName("");
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 rounded-full px-3 py-2 shadow-sm items-center">
+                    {/* clip icon */}
+                    <button
+                      onClick={() =>
+                        document.getElementById("file-upload-desktop").click()
+                      }
+                      className="text-gray-600 hover:text-blue-600 transition"
+                    >
+                      <FiPaperclip size={20} />
+                    </button>
+
                     <input
-                      className="flex-1 border rounded-full px-4 py-2"
+                      className="flex-1 border rounded-full px-4 py-2 outline-none"
                       value={newMessage}
                       onChange={(e) => {
                         setNewMessage(e.target.value);
                         emitTyping();
                       }}
                       onKeyDown={(e) =>
-                        e.key === "Enter" && handleSendMessage()
+                        e.key === "Enter" && sendWithAttachment()
                       }
                       placeholder="Type a message..."
                     />
 
                     <button
-                      onClick={handleSendMessage}
-                      className="bg-blue-600 hover:bg-blue-700 transition text-white p-3 rounded-full"
+                      onClick={sendWithAttachment}
+                      className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full"
                     >
                       <FiSend />
                     </button>

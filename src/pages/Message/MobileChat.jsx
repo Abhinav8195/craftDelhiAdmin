@@ -1,249 +1,288 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import {
-  MagnifyingGlassIcon,
   ArrowLeftIcon,
+  MagnifyingGlassIcon,
   PaperClipIcon,
-  CameraIcon,
-  PaperAirplaneIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
-const MobileChat = ({ customers }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
-  const [previewImage, setPreviewImage] = useState(null); // for image preview
-  const [viewImage, setViewImage] = useState(null);       // for viewing fullscreen
-  const [isImageOpen, setIsImageOpen] = useState(false);
-  const [file, setFile] = useState(null);                 // for document (pdf/docx)
-  const [fileName, setFileName] = useState('');            // store file name
+const MobileChat = ({
+  rooms,
+  loadingRooms,
+  messages,
+  typingUser,
+  selectedCustomer,
+  setSelectedCustomer,
+  handleRoomSelect,
+  newMessage,
+  setNewMessage,
+  emitTyping,
+  Admin_Id,
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // attachment props from Chat.jsx
+  attachment,
+  setAttachment,
+  attachmentPreview,
+  setAttachmentPreview,
+  attachmentName,
+  setAttachmentName,
+
+  sendWithAttachment,
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const messagesEndRef = useRef(null);
+
+  const filteredRooms = rooms.filter((room) =>
+    (room?.participants?.find(
+      (p) => String(p.userId) !== String(Admin_Id)
+    )?.name || "User")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
-  const lastMessageRef = useRef(null);  // Ref for the last message
-
-  const handleSendMessage = () => {
-    if (message.trim() || previewImage || file) {
-      const newMessage = {
-        text: message.trim(),
-        image: previewImage,
-        file: file,
-        sender: 'me',
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setMessage('');
-      setPreviewImage(null);
-      setFile(null);
-      setFileName('');
-    }
+  const getInitials = (name = "U") => {
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) return parts[0][0].toUpperCase();
+    return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
   };
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const formatTime = (date) =>
+    new Date(date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
-    setFileName(file.name);
+  const formatDateGroup = (date) => {
+    const d = new Date(date);
+    const today = new Date();
+    if (d.toDateString() === today.toDateString()) return "Today";
 
-    if (file.type.startsWith('image/')) {
-      setPreviewImage(URL.createObjectURL(file));
-      setFile(null);
-    } else if (
-      file.type === 'application/pdf' ||
-      file.type === 'application/msword' ||
-      file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ) {
-      setFile(URL.createObjectURL(file));
-      setPreviewImage(null);
-    } else {
-      alert('Please select a valid image or document (PDF/Word)');
-    }
-  };
+    const y = new Date();
+    y.setDate(today.getDate() - 1);
+    if (d.toDateString() === y.toDateString()) return "Yesterday";
 
-  const handleCameraClick = () => {
-    document.getElementById('file-upload').click();
-  };
-
-  const handleImageClick = (imageUrl) => {
-    setViewImage(imageUrl);
-    setIsImageOpen(true);
-  };
-
-  const closeImage = () => {
-    setIsImageOpen(false);
-    setViewImage(null);
+    return d.toLocaleDateString();
   };
 
   useEffect(() => {
-    if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]); // Scroll to the last message whenever messages change
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
-    <div className="w-full min-h-screen bg-white p-4">
-      {!selectedCustomer ? (
-        <>
-          {/* Heading */}
-          <h1 className="text-center text-2xl font-bold mb-4">My Chat</h1>
+   <div
+  className={`bg-white ${
+    selectedCustomer
+      ? "fixed inset-0 w-full h-screen flex flex-col z-50"
+      : "w-full min-h-screen"
+  }`}
+>
 
-          {/* Search Bar */}
-          <div className="flex items-center gap-2 w-full sm:w-[239px] px-3 h-10 bg-white border border-gray-300 rounded mb-4">
-            <MagnifyingGlassIcon  className="text-gray-500 w-5 h-5" />
+
+      {/* ================= LIST SCREEN ================= */}
+      {!selectedCustomer && (
+        <div className="p-4 space-y-4">
+
+          <h2 className="text-xl font-bold text-center">Messages</h2>
+
+          <div className="flex items-center gap-2 px-3 h-10 border rounded-full shadow-sm">
+            <MagnifyingGlassIcon className="w-5 h-5 text-gray-500" />
             <input
-              type="text"
+              className="flex-1 text-sm outline-none"
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-black text-xs bg-transparent outline-none border-none focus:outline-none focus:ring-0"
             />
           </div>
 
-          {/* Customer List */}
-          <div className="flex flex-col gap-4">
-            {filteredCustomers.map((customer, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setSelectedCustomer(customer);
-                  setSearchTerm('');
-                }}
-              >
-                <img
-                  src={customer.image}
-                  alt={customer.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div className="text-sm font-medium">{customer.name}</div>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Chat Header */}
-          <div className="flex items-center -ml-4 mb-4">
-            <ArrowLeftIcon
-              className="w-6 h-6 text-gray-600 cursor-pointer"
-              onClick={() => setSelectedCustomer(null)}
-            />
-            <h1 className="text-center flex-1 text-lg">{selectedCustomer.name}</h1>
-          </div>
+          {loadingRooms ? (
+            <p className="text-center text-gray-400">Loading chats…</p>
+          ) : filteredRooms.length === 0 ? (
+            <p className="text-center text-gray-400">No chats found</p>
+          ) : (
+            filteredRooms.map((room) => {
+              const other = room.participants?.find(
+                (p) => String(p.userId) !== String(Admin_Id)
+              );
 
-          {/* Chat Messages */}
-          <div className="flex flex-col gap-2 mb-20">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                ref={index === messages.length - 1 ? lastMessageRef : null} // Assign ref to the last message
-                className={`max-w-[70%] p-2 rounded-lg ${
-                  msg.sender === 'me' ? 'bg-blue-100 self-end' : 'bg-gray-100 self-start'
-                }`}
-              >
-                {msg.image && (
-                  <img
-                    src={msg.image}
-                    alt="preview"
-                    className="w-40 h-40 object-cover rounded-md mb-2 cursor-pointer"
-                    onClick={() => handleImageClick(msg.image)}
-                  />
-                )}
-                {msg.file && (
-                  <a href={msg.file} className="text-blue-600" download>
-                    Download File
-                  </a>
-                )}
-                {msg.text && <p className="text-sm">{msg.text}</p>}
-              </div>
-            ))}
-          </div>
-
-          {/* Message Input */}
-          <div className="fixed bottom-4 left-0 right-0 px-4 flex items-center gap-2">
-            {/* Attach Image */}
-            <label htmlFor="file-upload">
-              <PaperClipIcon className="w-6 h-6 text-gray-600 cursor-pointer" />
-            </label>
-            <input
-              id="file-upload"
-              type="file"
-              accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              className="hidden"
-              onChange={handleFileSelect}
-            />
-
-            {/* Camera Click */}
-            <CameraIcon
-              className="w-6 h-6 text-gray-600 cursor-pointer"
-              onClick={handleCameraClick}
-            />
-
-            {/* Text Input */}
-            <input
-              type="text"
-              placeholder="Type a message..."
-              className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-            />
-
-            {/* Send Button */}
-            <button onClick={handleSendMessage}>
-              <PaperAirplaneIcon className="w-6 h-6 text-blue-500 rotate-90" />
-            </button>
-          </div>
-
-          {/* Preview Selected Image or File */}
-          {(previewImage || file) && (
-            <div className="fixed bottom-20 left-4 right-4 bg-white p-4 border rounded-lg shadow-md flex items-center gap-4">
-              {previewImage && (
-                <img
-                  src={previewImage}
-                  alt="Preview"
-                  className="w-16 h-16 object-cover rounded"
-                />
-              )}
-              {file && (
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-12 bg-gray-200 flex justify-center items-center rounded">
-                    <span className="text-gray-700 text-2xl">📄</span>
+              return (
+                <div
+                  key={room._id}
+                  className="flex gap-3 items-center p-3 rounded-xl border cursor-pointer hover:bg-gray-100 active:scale-[.99] transition"
+                  onClick={() => handleRoomSelect(room)}
+                >
+                  <div className="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center font-semibold">
+                    {getInitials(other?.name || "U")}
                   </div>
-                  <div className="text-sm font-medium text-gray-700">
-                    {fileName || 'Document Selected'}
+
+                  <div>
+                    <p className="font-medium text-sm">{other?.name || "User"}</p>
+                    <p className="text-[11px] text-gray-500">
+                      {room?.title || "Chat"}
+                    </p>
                   </div>
                 </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
+      {/* ================= CHAT SCREEN ================= */}
+      {selectedCustomer && (
+  <div className="flex flex-col h-full">
+
+          {/* header */}
+          <div className="flex items-center gap-3 p-4 border-b sticky top-0 bg-white">
+            <ArrowLeftIcon
+              className="w-6 h-6 cursor-pointer"
+              onClick={() => setSelectedCustomer(null)}
+            />
+
+            <div className="flex flex-col">
+              <span className="font-semibold">
+                {selectedCustomer?.name || "User"}
+              </span>
+
+            </div>
+          </div>
+
+          {/* messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
+
+            {(() => {
+              let lastDate = null;
+
+              return messages.map((msg, idx) => {
+                const isMe = String(msg.senderId) === String(Admin_Id);
+                const msgDate = new Date(msg.createdAt).toDateString();
+                const showDate = msgDate !== lastDate;
+                lastDate = msgDate;
+
+                return (
+                  <React.Fragment key={idx}>
+                    {showDate && (
+                      <div className="text-center text-xs text-gray-500 my-2">
+                        {formatDateGroup(msg.createdAt)}
+                      </div>
+                    )}
+
+                    <div className={`flex ${isMe ? "justify-end" : "justify-start"} items-end gap-2`}>
+                      {!isMe && (
+                        <div className="w-7 h-7 rounded-full bg-purple-500 text-white text-xs flex items-center justify-center">
+                          {getInitials(selectedCustomer?.name)}
+                        </div>
+                      )}
+
+                      <div
+                        className={`max-w-[72%] px-3 py-2 rounded-2xl shadow 
+                        ${isMe ? "bg-blue-600 text-white rounded-br-none" : "bg-white rounded-bl-none"}`}
+                      >
+                        {msg.filePreview && (
+                          <img
+                            src={msg.filePreview}
+                            className="w-40 h-40 rounded-lg object-cover mb-2"
+                          />
+                        )}
+
+                        {msg.fileName && !msg.filePreview && (
+                          <div className="text-sm mb-1">📄 {msg.fileName}</div>
+                        )}
+
+                        {msg.message && <p className="text-sm">{msg.message}</p>}
+
+                        <div className="text-[10px] opacity-60 text-right">
+                          {formatTime(msg.createdAt)}
+                        </div>
+                      </div>
+
+                      {isMe && (
+                        <div className="w-7 h-7 rounded-full bg-green-500 text-white text-xs flex items-center justify-center">
+                          {getInitials(localStorage.getItem("craftdelhiseller_name") || "S")}
+                        </div>
+                      )}
+                    </div>
+                  </React.Fragment>
+                );
+              });
+            })()}
+
+            {typingUser && (
+                    <div className="text-sm italic text-gray-400 px-10">
+                      typing...
+                    </div>
+                  )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* attachment preview */}
+          {(attachment || attachmentPreview) && (
+            <div className="mx-3 mb-1 p-3 bg-white border rounded-xl flex gap-3 items-center">
+              {attachmentPreview ? (
+                <img src={attachmentPreview} className="w-16 h-16 rounded-lg object-cover" />
+              ) : (
+                <span>📄 {attachmentName}</span>
               )}
-              <XMarkIcon
-                className="w-5 h-5 text-gray-500 ml-auto cursor-pointer"
+
+              <button
+                className="ml-auto text-red-500"
                 onClick={() => {
-                  setPreviewImage(null);
-                  setFile(null);
-                  setFileName('');
+                  setAttachment(null);
+                  setAttachmentPreview(null);
+                  setAttachmentName("");
                 }}
-              />
+              >
+                Remove ✕
+              </button>
             </div>
           )}
 
-          {/* Full-Screen View of Clicked Image */}
-          {isImageOpen && viewImage && (
-            <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-70 flex justify-center items-center">
-              <img
-                src={viewImage}
-                alt="Full-Screen"
-                className="w-full h-auto max-w-full max-h-full object-contain"
-                onClick={closeImage}
-              />
-              <XMarkIcon
-                className="absolute top-4 right-4 w-8 h-8 text-white cursor-pointer"
-                onClick={closeImage}
-              />
-            </div>
-          )}
-        </>
+          {/* input */}
+          <div className="p-3 border-t bg-white flex gap-2 items-center">
+
+            <input
+              id="mobile-file-upload"
+              type="file"
+              className="hidden"
+              accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                setAttachment(file);
+                setAttachmentName(file.name);
+
+                if (file.type.startsWith("image/")) {
+                  setAttachmentPreview(URL.createObjectURL(file));
+                } else {
+                  setAttachmentPreview(null);
+                }
+              }}
+            />
+
+            <PaperClipIcon
+              className="w-6 h-6 text-gray-600"
+              onClick={() => document.getElementById("mobile-file-upload").click()}
+            />
+
+            <input
+              className="flex-1 border rounded-full px-4 py-2 outline-none"
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                emitTyping();
+              }}
+              onKeyDown={(e) => e.key === "Enter" && sendWithAttachment()}
+            />
+
+            <button
+              onClick={sendWithAttachment}
+              className="px-4 py-2 rounded-full bg-blue-600 text-white"
+            >
+              Send
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
