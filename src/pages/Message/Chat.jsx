@@ -24,9 +24,9 @@ const Chat = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [roomId, setRoomId] = useState(null);
 
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [typingUser, setTypingUser] = useState(false);
+  const [messagesByRoom, setMessagesByRoom] = useState({});
+    const [newMessage, setNewMessage] = useState("");
+    const [typingUser, setTypingUser] = useState({});
 
   const [isMobile] = useState(window.innerWidth <= 768);
 
@@ -71,10 +71,19 @@ const Chat = () => {
       withCredentials: true,
     });
 
-    socketRef.current.on("message_received", (data) => {
-  if (String(data?.senderId) === String(Admin_Id)) return;
+   socketRef.current.on("message_received", (data) => {
+  if (!data?.roomId) return;
 
-  setMessages((prev) => [...prev, data]);
+  // ignore my own already-added optimistic message
+  if (String(data.senderId) === String(Admin_Id)) return;
+
+  setMessagesByRoom(prev => {
+    const roomMessages = prev[data.roomId] || [];
+    return {
+      ...prev,
+      [data.roomId]: [...roomMessages, data],
+    };
+  });
 });
 
 
@@ -88,9 +97,9 @@ const Chat = () => {
 
   /* ================= AUTOSCROLL ================= */
 
-  useEffect(() => {
+   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messagesByRoom, roomId]);
 
   /* ================= ROOM SELECT ================= */
 
@@ -101,7 +110,6 @@ const Chat = () => {
 
     setSelectedCustomer(other || {});
     setRoomId(room._id);
-    setMessages([]);
     setTypingUser(false);
 
     const TOKEN = getAdminToken();
@@ -120,7 +128,10 @@ const Chat = () => {
         (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
       );
 
-      setMessages(sorted);
+      setMessagesByRoom(prev => ({
+  ...prev,
+  [room._id]: sorted
+}));
     } catch (err) {
       console.error("❌ Message load failed", err);
     }
@@ -147,10 +158,21 @@ const Chat = () => {
 
     const messageText = newMessage;
 
-    setMessages((prev) => [
-      ...prev,
-      { message: messageText, senderId: Admin_Id, createdAt: new Date() },
-    ]);
+   setMessagesByRoom(prev => {
+  const roomMessages = prev[roomId] || [];
+
+  return {
+    ...prev,
+    [roomId]: [
+      ...roomMessages,
+      {
+        message: messageText,
+        senderId: Admin_Id,
+        createdAt: new Date(),
+      },
+    ],
+  };
+});
 
     setNewMessage("");
 
@@ -201,8 +223,13 @@ const sendWithAttachment = async () => {
     if (!newMessage.trim() && !attachment) return;
 
     // add optimistically in UI
-    setMessages((prev) => [
-      ...prev,
+     setMessagesByRoom(prev => {
+  const roomMessages = prev[roomId] || [];
+
+  return {
+    ...prev,
+    [roomId]: [
+      ...roomMessages,
       {
         senderId: Admin_Id,
         message: newMessage,
@@ -210,7 +237,9 @@ const sendWithAttachment = async () => {
         filePreview: attachmentPreview,
         createdAt: new Date(),
       },
-    ]);
+    ],
+  };
+});
 
     // send text to backend (file upload can be added later)
     if (newMessage.trim()) {
@@ -295,7 +324,7 @@ const filteredRooms = rooms.filter((room) => {
        <MobileChat
   rooms={rooms}
   loadingRooms={loadingRooms}
-  messages={messages}
+  messages={messagesByRoom[roomId] || []}
   typingUser={typingUser}
   selectedCustomer={selectedCustomer}
   setSelectedCustomer={setSelectedCustomer}
@@ -395,6 +424,7 @@ const filteredRooms = rooms.filter((room) => {
                 <div className="flex-1 overflow-y-auto p-6 bg-[#f3f4f7] space-y-3">
                   {(() => {
                     let lastDate = null;
+                    const messages = messagesByRoom[roomId] || [];
 
                     return messages.map((msg, idx) => {
                       const isMe =
