@@ -71,7 +71,7 @@ const MobileChat = ({
    <div
   className={`bg-white ${
     selectedCustomer
-      ? "fixed inset-0 w-full h-screen flex flex-col z-50"
+      ? "fixed inset-0 w-full h-[100dvh] flex flex-col z-50"
       : "w-full min-h-screen"
   }`}
 >
@@ -141,7 +141,7 @@ const MobileChat = ({
   <div className="flex flex-col h-full">
 
           {/* header */}
-          <div className="flex items-center gap-3 p-4 border-b sticky top-0 bg-white">
+           <div className="flex items-center gap-3 p-4 border-b sticky  bg-white">
             <ArrowLeftIcon
               className="w-6 h-6 cursor-pointer"
               onClick={() => setSelectedCustomer(null)}
@@ -156,7 +156,7 @@ const MobileChat = ({
           </div>
 
           {/* messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50">
+           <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50 overscroll-contain">
 
             {(() => {
               let lastDate = null;
@@ -247,7 +247,7 @@ const MobileChat = ({
           )}
 
           {/* input */}
-          <div className="p-3 border-t bg-white flex gap-2 items-center">
+             <div className="p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] border-t bg-white flex gap-2 items-center">
 
             <input
               id="mobile-file-upload"
@@ -275,7 +275,7 @@ const MobileChat = ({
             />
 
             <input
-              className="flex-1 border rounded-full px-4 py-2 outline-none"
+              className="flex-1 border rounded-full px-4 py-2 outline-none text-base"
               placeholder="Type a message..."
               value={newMessage}
               onChange={(e) => {
