@@ -397,7 +397,7 @@ const filteredRooms = rooms.filter((room) => {
             </h3>
 
             <p className="text-[11px] text-gray-500">
-              {room?.title || "Chat"}
+              {room?.contextType || "Chat"}
             </p>
           </div>
         </div>
