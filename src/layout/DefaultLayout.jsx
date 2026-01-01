@@ -32,6 +32,9 @@ const DefaultLayout = ({ children,setIsAuthenticated }) => {
         case '/chat':
         setPageTitle('Message ');
         break;
+         case '/banner':
+        setPageTitle('Banner');
+        break;
       default:
         setPageTitle('');
     }

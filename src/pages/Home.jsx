@@ -46,7 +46,7 @@ const Home = ({ setIsAuthenticated }) => {
 
       localStorage.setItem('craftdelhiadmin_token', data.token);
       localStorage.setItem('user', JSON.stringify({ username }));
-      localStorage.setItem('name', 'Rajesh Kumar');
+      localStorage.setItem('Adminname', 'Rajesh Kumar');
 
       setIsAuthenticated(true);
       window.dispatchEvent(new Event('storage'));

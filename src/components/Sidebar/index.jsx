@@ -41,7 +41,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
     if (result.isConfirmed) {
       localStorage.removeItem('craftdelhiadmin_token');
       localStorage.removeItem('user');
-      localStorage.removeItem('name');
+      localStorage.removeItem('Adminname');
       localStorage.removeItem('craftdelhiadmin_tokenExpiry');
 
       if (setIsAuthenticated) {
@@ -70,7 +70,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
   };
 
   useEffect(() => {
-    const storedName = localStorage.getItem('name');
+    const storedName = localStorage.getItem('Adminname');
     if (storedName) {
       setUserName(storedName);
     }
@@ -278,6 +278,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
               </div>
             )}
             </NavLink>
+
+            <NavLink to="/banner"  onClick={handleLinkClick} className={({ isActive }) => {
+    const bgColor = isActive ? "bg-[#024a63]" : "";
+    return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
+  }}>
+     {({ isActive }) => (
+              <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
+                <div className="w-5 h-5 relative overflow-hidden">
+                  <img src={isActive? orderactive:IconWallet_05} alt="Order Management Icon" className="w-full h-full object-cover" />
+                </div>
+                <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? "text-[#ffffff]" : "text-[black]"}`}>Banner</div>
+              </div>
+            )}
+            </NavLink>
           </div>
 
           {/* Profile */}
@@ -286,9 +300,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
               <div className="w-5 h-5 relative overflow-hidden">
                 <img src={users} alt="User" className="w-full h-full object-cover" />
               </div>
-              <div className="grow shrink basis-0 text-[#36234e] text-xs font-medium font-['Montserrat'] leading-none">
-                Welcome {userName || 'Admin'}
-              </div>
+              <div className="grow shrink basis-0 text-[#36234e] text-xs font-medium font-['Montserrat'] leading-tight">
+              <span className="block">Welcome</span>
+              <span className="block font-semibold text-sm">{userName || 'Admin'}</span>
+            </div>
             </div>
             <div className="w-5 h-5 p-2.5 justify-center items-center gap-2 rounded-full inline-flex">
               <div className="w-5 h-5 rounded-full relative">
