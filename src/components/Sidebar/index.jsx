@@ -16,6 +16,7 @@ import packactive from '../../assets/images/packactive.png';
 import users from '../../assets/images/user.png';
 import { IoIosArrowForward } from 'react-icons/io';
 import Swal from "sweetalert2";
+import { FiGrid, FiImage,FiMessageSquare  } from "react-icons/fi";
 
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
@@ -265,33 +266,86 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
               )}
             </NavLink>
 
-             <NavLink to="/chat"  onClick={handleLinkClick} className={({ isActive }) => {
-    const bgColor = isActive ? "bg-[#024a63]" : "";
-    return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
-  }}>
-     {({ isActive }) => (
-              <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
-                <div className="w-5 h-5 relative overflow-hidden">
-                  <img src={isActive? orderactive:IconWallet_05} alt="Order Management Icon" className="w-full h-full object-cover" />
-                </div>
-                <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? "text-[#ffffff]" : "text-[black]"}`}>Messages</div>
-              </div>
-            )}
-            </NavLink>
+            <NavLink
+  to="/chat"
+  onClick={handleLinkClick}
+  className={({ isActive }) =>
+    `self-stretch px-3 py-4 rounded-lg flex items-center gap-3 transition-all ${
+      isActive ? "bg-[#024a63]" : ""
+    }`
+  }
+>
+  {({ isActive }) => (
+    <>
+      <FiMessageSquare
+        size={18}
+        className={`transition ${
+          isActive ? "text-white" : "text-gray-700"
+        }`}
+      />
+      <span
+        className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}
+      >
+        Messages
+      </span>
+    </>
+  )}
+</NavLink>
 
-            <NavLink to="/banner"  onClick={handleLinkClick} className={({ isActive }) => {
-    const bgColor = isActive ? "bg-[#024a63]" : "";
-    return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
-  }}>
-     {({ isActive }) => (
-              <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
-                <div className="w-5 h-5 relative overflow-hidden">
-                  <img src={isActive? orderactive:IconWallet_05} alt="Order Management Icon" className="w-full h-full object-cover" />
-                </div>
-                <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? "text-[#ffffff]" : "text-[black]"}`}>Banner</div>
-              </div>
-            )}
-            </NavLink>
+
+            <NavLink
+  to="/giftcategory"
+  onClick={handleLinkClick}
+  className={({ isActive }) =>
+    `self-stretch px-3 py-4 rounded-lg flex items-center gap-3 transition-all ${
+      isActive ? "bg-[#024a63]" : ""
+    }`
+  }
+>
+  {({ isActive }) => (
+    <>
+      <FiGrid
+        size={18}
+        className={`transition ${
+          isActive ? "text-white" : "text-black"
+        }`}
+      />
+      <span
+       className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}
+      >
+        Gift Category
+      </span>
+    </>
+  )}
+</NavLink>
+
+
+          <NavLink
+  to="/banner"
+  onClick={handleLinkClick}
+  className={({ isActive }) =>
+    `self-stretch px-3 py-4 rounded-lg flex items-center gap-3 transition-all ${
+      isActive ? "bg-[#024a63]" : ""
+    }`
+  }
+>
+  {({ isActive }) => (
+    <>
+      <FiImage
+        size={18}
+        className={`transition ${
+          isActive ? "text-white" : "text-black"
+        }`}
+      />
+      <span
+       className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}
+      >
+        Banner
+      </span>
+    </>
+  )}
+</NavLink>
+
           </div>
 
           {/* Profile */}

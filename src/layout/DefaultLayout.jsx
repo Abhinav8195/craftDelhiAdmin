@@ -35,6 +35,9 @@ const DefaultLayout = ({ children,setIsAuthenticated }) => {
          case '/banner':
         setPageTitle('Banner');
         break;
+        case '/giftcategory':
+        setPageTitle('Gift Category');
+        break;
       default:
         setPageTitle('');
     }

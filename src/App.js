@@ -19,6 +19,7 @@ import NotFound from './pages/NotFound';
 import AuthCheck from './AuthCheck'
 import Chat from './pages/Message/Chat';
 import Banner from './pages/Banner/Banner';
+import GiftCategory from './pages/Giftcategory/GiftCategory';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,6 +41,7 @@ function App() {
   <Route path="/payment-management" element={<PaymentManagement />} />
    <Route path="/chat" element={<Chat />} />
     <Route path="/banner" element={<Banner />} />
+    <Route path="/giftcategory" element={<GiftCategory />} />
 </Routes>
         
         </DefaultLayout>
