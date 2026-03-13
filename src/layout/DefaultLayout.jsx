@@ -38,6 +38,9 @@ const DefaultLayout = ({ children,setIsAuthenticated }) => {
         case '/giftcategory':
         setPageTitle('Gift Category');
         break;
+        case '/manage-categories':
+        setPageTitle('Manage Categories');
+        break;
       default:
         setPageTitle('');
     }
