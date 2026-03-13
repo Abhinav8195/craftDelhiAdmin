@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 const EditProduct = ({card1,product}) => {
 
   console.log(product)
+
+  console.log('product',product)
   const token = getAdminToken()
   const seller_id = 1;
 
@@ -62,7 +64,21 @@ useEffect(() => {
       setDescription(product.description || "");
       setCategory(product.category_id || "");
       setQuantity(product.stock || "");
-      setHashtags(product.slug ? product.slug.split(" ") : []);
+      // Parse hashtags from product.hashtags if available
+      let parsedHashtags = [];
+      if (product.hashtags) {
+        try {
+          const parsed = JSON.parse(product.hashtags);
+          if (Array.isArray(parsed)) {
+            parsedHashtags = parsed.map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+          }
+        } catch (e) {
+          console.error('Error parsing hashtags:', e);
+        }
+      } else if (product.slug) {
+        parsedHashtags = product.slug.split(" ");
+      }
+      setHashtags(parsedHashtags);
 
       // Gallery mapping
       if (product.gallery_images) {
@@ -179,7 +195,7 @@ const removeHashtag = (tag) => {
 
   // Hashtags format
   if (hashtags.length > 0) {
-    formData.append("slug", hashtags.join(" "));
+    formData.append("hashtags", JSON.stringify(hashtags.map(tag => tag.replace('#', ''))));
   }
 
   // Main Image
@@ -257,7 +273,27 @@ useEffect(() => {
   setWarranty(product.warranty_type || "");
   setVideoName(product.video_name || "");
   setReelName(product.reel_name || "");
-  setHashtags(product.slug ? product.slug.split(" ") : []);
+  // Parse hashtags from product.hashtags if available
+  let parsedHashtags = [];
+  if (product.hashtags) {
+    try {
+      let parsed = JSON.parse(product.hashtags);
+      if (typeof parsed === 'string') {
+        parsed = JSON.parse(parsed);
+      }
+      if (typeof parsed === 'string') {
+        parsed = JSON.parse(parsed);
+      }
+      if (Array.isArray(parsed)) {
+        parsedHashtags = parsed.map(tag => tag.startsWith('#') ? tag : `#${tag}`);
+      }
+    } catch (e) {
+      console.error('Error parsing hashtags:', e);
+    }
+  } else if (product.slug) {
+    parsedHashtags = product.slug.split(" ");
+  }
+  setHashtags(parsedHashtags);
 
   // gallery
   if (product.gallery_images) {
