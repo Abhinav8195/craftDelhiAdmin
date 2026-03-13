@@ -1,44 +1,46 @@
-  import React, { useEffect, useRef, useState } from 'react';
-  import { NavLink, useNavigate } from 'react-router-dom';
-  import iconImage from '../../assets/images/icon.png';
-  import IconPresentationChart_01 from '../../assets/images/IconPresentationChart_01.png';
-  import IconUsersEdit from '../../assets/images/IconUsersEdit.png';
-  import IconUserCheck_02 from '../../assets/images/IconUserCheck_02.png';
-  import IconPackage from '../../assets/images/IconPackage.png';
-  import IconWallet_05 from '../../assets/images/IconWallet_05.png';
-  import IconCoinsHand from '../../assets/images/IconCoinsHand.png';
-  import i1active from '../../assets/images/i1active.png';
-  import buyeractive from '../../assets/images/buyeractive.png';
-  import selleractive from '../../assets/images/selleractive.png';
-  import payactive from '../../assets/images/payactive.png';
-  import orderactive from '../../assets/images/orderactive.png';
-  import packactive from '../../assets/images/packactive.png';
-  import users from '../../assets/images/user.png';
-  import { IoIosArrowForward } from 'react-icons/io';
-  import Swal from "sweetalert2";
-  import { FiGrid, FiImage,FiMessageSquare  } from "react-icons/fi";
-  import { FiLayers } from "react-icons/fi";
+import React, { useEffect, useRef, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import Swal from "sweetalert2";
 
+// Import Lucide Icons (to replace exact legacy images with clean vectors)
+import { 
+  BarChart2, 
+  Users, 
+  UserCheck, 
+  Package, 
+  CreditCard, 
+  MessageSquare, 
+  Grid, 
+  Image as ImageIcon, 
+  Layers, 
+  LogOut,
+  X,
+  User
+} from "lucide-react";
 
-  const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
-    const trigger = useRef(null);
-    const sidebar = useRef(null);
-    const navigate = useNavigate();
-    const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
-    const [sidebarExpanded, setSidebarExpanded] = useState(
-      storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true'
-    );
-    const [userName, setUserName] = useState(null);
+import iconImage from '../../assets/images/icon.png';
 
-    const confirmLogout = () => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
+  const trigger = useRef(null);
+  const sidebar = useRef(null);
+  const navigate = useNavigate();
+  
+  const [userName, setUserName] = useState(null);
+
+  const confirmLogout = () => {
     Swal.fire({
       title: "Logout?",
       text: "Are you sure you want to logout?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#024a63",
-      cancelButtonColor: "#d33",
+      confirmButtonColor: "#4f46e5", // Indigo-600
+      cancelButtonColor: "#ef4444", // Red-500
       confirmButtonText: "Yes, Logout",
+      customClass: {
+        popup: 'rounded-2xl',
+        confirmButton: 'rounded-lg',
+        cancelButton: 'rounded-lg'
+      }
     }).then((result) => {
       if (result.isConfirmed) {
         localStorage.removeItem('craftdelhiadmin_token');
@@ -51,358 +53,162 @@
           window.dispatchEvent(new Event('storage'));
         }
 
-        Swal.fire({
-          title: "Logged Out",
-          text: "You have been successfully logged out.",
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-
         navigate('/');
       }
     });
   };
 
+  const handleLinkClick = () => {
+    // On mobile, close sidebar after clicking a link
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  };
 
-    const handleLinkClick = () => {
-      if (window.innerWidth < 1024) {
-        setSidebarOpen(false);
-      }
+  useEffect(() => {
+    const storedName = localStorage.getItem('Adminname');
+    if (storedName) {
+      setUserName(storedName);
+    }
+  }, []);
+
+  // Close on click outside (Mobile primarily)
+  useEffect(() => {
+    const clickHandler = ({ target }) => {
+      if (!sidebar.current || !trigger.current) return;
+      if (
+        !sidebarOpen ||
+        sidebar.current.contains(target) ||
+        trigger.current.contains(target)
+      )
+        return;
+      setSidebarOpen(false);
     };
+    document.addEventListener('click', clickHandler);
+    return () => document.removeEventListener('click', clickHandler);
+  });
 
-    useEffect(() => {
-      const storedName = localStorage.getItem('Adminname');
-      if (storedName) {
-        setUserName(storedName);
+  // Close if the esc key is pressed
+  useEffect(() => {
+    const keyHandler = ({ keyCode }) => {
+      if (!sidebarOpen || keyCode !== 27) return;
+      setSidebarOpen(false);
+    };
+    document.addEventListener('keydown', keyHandler);
+    return () => document.removeEventListener('keydown', keyHandler);
+  });
+
+  // Reusable NavItem component for consistency
+  const NavItem = ({ to, icon: Icon, label }) => (
+    <NavLink
+      to={to}
+      onClick={handleLinkClick}
+      className={({ isActive }) =>
+        `flex items-center gap-3 px-4 py-3 mx-2 rounded-xl text-sm font-medium transition-all duration-200 group ${
+          isActive
+            ? "bg-indigo-50 text-indigo-700 shadow-sm"
+            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+        }`
       }
-    }, []);
+    >
+      {({ isActive }) => (
+        <>
+          <Icon
+            className={`w-5 h-5 transition-transform duration-200 ${
+              isActive ? "text-indigo-600 scale-110" : "text-gray-400 group-hover:text-gray-600"
+            }`}
+          />
+          <span>{label}</span>
+        </>
+      )}
+    </NavLink>
+  );
 
-    // close on click outside
-    useEffect(() => {
-      const clickHandler = ({ target }) => {
-        if (!sidebar.current || !trigger.current) return;
-        if (
-          !sidebarOpen ||
-          sidebar.current.contains(target) ||
-          trigger.current.contains(target)
-        )
-          return;
-        setSidebarOpen(false);
-      };
-      document.addEventListener('click', clickHandler);
-      return () => document.removeEventListener('click', clickHandler);
-    });
+  return (
+    <>
+      {/* Mobile Backdrop */}
+      <div 
+        className={`fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setSidebarOpen(false)}
+      />
 
-    // close if the esc key is pressed
-    useEffect(() => {
-      const keyHandler = ({ keyCode }) => {
-        if (!sidebarOpen || keyCode !== 27) return;
-        setSidebarOpen(false);
-      };
-      document.addEventListener('keydown', keyHandler);
-      return () => document.removeEventListener('keydown', keyHandler);
-    });
-
-    useEffect(() => {
-      localStorage.setItem('sidebar-expanded', sidebarExpanded.toString());
-      if (sidebarExpanded) {
-        document.querySelector('body')?.classList.add('sidebar-expanded');
-      } else {
-        document.querySelector('body')?.classList.remove('sidebar-expanded');
-      }
-    }, [sidebarExpanded]);
-
-    return (
       <aside
         ref={sidebar}
-       className={`absolute left-0 top-0 z-50 flex flex-col overflow-x-hidden bg-[#ffffff] border border-[#D9D9D9] duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
-  sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-}`}
-        style={{
-          width: '280px',
-          height: '100vh',
-          padding: '16px',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          flexShrink: '0',
-        }}
+        className={`fixed left-0 top-0 z-50 flex flex-col h-screen w-72 bg-white border-r border-gray-100 shadow-xl lg:shadow-none lg:static lg:translate-x-0 transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* SIDEBAR HEADER */}
-        <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
+        <div className="flex items-center justify-between h-20 px-6 border-b border-gray-50 flex-shrink-0">
+          <div className="flex items-center gap-3">
+             <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center border border-indigo-100 p-1 shrink-0 overflow-hidden">
+               {/* Keep original logo if needed or replace with clean icon */}
+               <img src={iconImage} alt="Logo" className="w-full h-full object-contain" />
+             </div>
+             <div className="flex flex-col">
+                <span className="text-[20px] font-bold text-gray-900 leading-none mb-1 font-['Cinzel'] tracking-wide">CRAFT</span>
+                <span className="text-[14px] font-bold text-indigo-600 leading-none font-['Cormorant Garamond'] tracking-widest">DELHI</span>
+             </div>
+          </div>
+          
+          {/* Mobile close button */}
           <button
             ref={trigger}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-controls="sidebar"
-            aria-expanded={sidebarOpen}
-            className="block lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 lg:hidden"
           >
-            <svg
-              className="fill-current"
-              width="20"
-              height="18"
-              viewBox="0 0 20 18"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M19 8.175H2.98748L9.36248 1.6875C9.69998 1.35 9.69998 0.825 9.36248 0.4875C9.02498 0.15 8.49998 0.15 8.16248 0.4875L0.399976 8.3625C0.0624756 8.7 0.0624756 9.225 0.399976 9.5625L8.16248 17.4375C8.31248 17.5875 8.53748 17.7 8.76248 17.7C8.98748 17.7 9.17498 17.625 9.36248 17.475C9.69998 17.1375 9.69998 16.6125 9.36248 16.275L3.02498 9.8625H19C19.45 9.8625 19.825 9.4875 19.825 9.0375C19.825 8.55 19.45 8.175 19 8.175Z" />
-            </svg>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* SIDEBAR CONTENT */}
-        <div className="margin-auto flex flex-col overflow-y-auto duration-300 ease-linear">
-          <div className="w-[250px] flex flex-col h-full p-4 bg-white">
-            {/* Sidebar Header */}
-            <div className="self-stretch pr-3 pt-2 pb-4 justify-start items-start gap-3 inline-flex">
-              <div className="grow shrink basis-0 self-stretch flex-col justify-start items-start inline-flex">
-                <div className="self-stretch py-1 bg-white justify-start items-center gap-1 inline-flex">
-                  <div className="w-[40.17px] h-[40.68px] relative">
-                    <img src={iconImage} alt="Logo" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="w-[1.86px] h-[38.40px] bg-[#024a63] rounded-sm"></div>
-                  <div className="w-[88px] h-[48.96px] relative">
-                    <div className="w-[87px] h-[25.85px] left-0 top-0 absolute text-[#ee6f69] text-[24.89px] font-bold font-['Cinzel']">CRAFT</div>
-                    <div className="left-0 top-[22.96px] absolute text-[#024a63] text-[21.85px] font-bold font-['Cormorant Garamond'] tracking-[5.90px]">DELHI</div>
-                  </div>
-                </div>
-              </div>
+        {/* SIDEBAR NAVIGATION */}
+        <div className="flex-1 overflow-y-auto py-4 custom-scrollbar flex flex-col gap-1.5">
+          <NavItem to="/" icon={BarChart2} label="Dashboard" />
+          <NavItem to="/buyer-management" icon={Users} label="Buyer Management" />
+          <NavItem to="/seller-management" icon={UserCheck} label="Seller Management" />
+          <NavItem to="/product-management" icon={Package} label="Product Management" />
+          <NavItem to="/order-management" icon={Grid} label="Order Management" />
+          <NavItem to="/payment-management" icon={CreditCard} label="Payment Management" />
+          
+          <div className="my-2 mx-4 h-px bg-gray-100" /> {/* Divider */}
+          <div className="px-6 py-2">
+            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Store Content</h4>
+          </div>
+
+          <NavItem to="/giftcategory" icon={Layers} label="Gift Category" />
+          <NavItem to="/banner" icon={ImageIcon} label="Banner Manager" />
+          <NavItem to="/manage-categories" icon={Grid} label="Manage Categories" />
+          <NavItem to="/chat" icon={MessageSquare} label="Messages" />
+        </div>
+
+        {/* USER PROFILE SECTION */}
+        <div className="p-4 border-t border-gray-50 bg-gray-50/50 shrink-0">
+          <div 
+            onClick={confirmLogout} 
+            className="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-200 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all cursor-pointer group"
+          >
+            <div className="w-10 h-10 rounded-full bg-indigo-100 overflow-hidden shrink-0 border-2 border-white shadow-sm flex items-center justify-center relative">
+               <div className="absolute inset-0 bg-indigo-200 animate-ping opacity-20 rounded-full"></div>
+               <User className="w-5 h-5 text-indigo-600 relative z-10 animate-[pulse_3s_ease-in-out_infinite]" />
             </div>
-
-            {/* Sidebar Links */}
-           <div className="flex-1 w-full flex flex-col gap-1 overflow-y-auto pr-1 no-scrollbar">
-              <NavLink to="/" onClick={handleLinkClick} className={({ isActive }) => {
-                const bgColor = isActive ? 'bg-[#024a63]' : '';
-                return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
-              }}>
-                {({ isActive }) => (
-                  <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
-                    <div className="w-5 h-5 relative overflow-hidden">
-                      <img src={isActive ? IconPresentationChart_01 : i1active} alt="Dashboard" className="w-full h-full object-cover" />
-                    </div>
-                    <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}>
-                      Dashboard
-                    </div>
-                  </div>
-                )}
-              </NavLink>
-
-              <NavLink to="/buyer-management" onClick={handleLinkClick} className={({ isActive }) => {
-                const bgColor = isActive ? 'bg-[#024a63]' : '';
-                return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
-              }}>
-                {({ isActive }) => (
-                  <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
-                    <div className="w-5 h-5 relative overflow-hidden">
-                      <img src={isActive ? buyeractive : IconUsersEdit} alt="Buyer Management" className="w-full h-full object-cover" />
-                    </div>
-                    <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}>
-                      Buyer Management
-                    </div>
-                  </div>
-                )}
-              </NavLink>
-
-              <NavLink to="/seller-management" onClick={handleLinkClick} className={({ isActive }) => {
-                const bgColor = isActive ? 'bg-[#024a63]' : '';
-                return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
-              }}>
-                {({ isActive }) => (
-                  <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
-                    <div className="w-5 h-5 relative overflow-hidden">
-                      <img src={isActive ? selleractive : IconUserCheck_02} alt="Seller Management" className="w-full h-full object-cover" />
-                    </div>
-                    <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}>
-                      Seller Management
-                    </div>
-                  </div>
-                )}
-              </NavLink>
-
-              <NavLink to="/product-management" onClick={handleLinkClick} className={({ isActive }) => {
-                const bgColor = isActive ? 'bg-[#024a63]' : '';
-                return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
-              }}>
-                {({ isActive }) => (
-                  <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
-                    <div className="w-5 h-5 relative overflow-hidden">
-                      <img src={isActive ? packactive : IconPackage} alt="Product Management" className="w-full h-full object-cover" />
-                    </div>
-                    <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}>
-                      Product Management
-                    </div>
-                  </div>
-                )}
-              </NavLink>
-
-              <NavLink to="/order-management" onClick={handleLinkClick} className={({ isActive }) => {
-                const bgColor = isActive ? 'bg-[#024a63]' : '';
-                return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
-              }}>
-                {({ isActive }) => (
-                  <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
-                    <div className="w-5 h-5 relative overflow-hidden">
-                      <img src={isActive ? orderactive : IconWallet_05} alt="Order Management" className="w-full h-full object-cover" />
-                    </div>
-                    <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}>
-                      Order Management
-                    </div>
-                  </div>
-                )}
-              </NavLink>
-
-              <NavLink to="/payment-management" onClick={handleLinkClick} className={({ isActive }) => {
-                const bgColor = isActive ? 'bg-[#024a63]' : '';
-                return `self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex ${bgColor}`;
-              }}>
-                {({ isActive }) => (
-                  <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
-                    <div className="w-5 h-5 relative overflow-hidden">
-                      <img src={isActive ? payactive : IconCoinsHand} alt="Payment Management" className="w-full h-full object-cover" />
-                    </div>
-                    <div className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}>
-                      Payment Management
-                    </div>
-                  </div>
-                )}
-              </NavLink>
-
-              <NavLink
-    to="/chat"
-    onClick={handleLinkClick}
-    className={({ isActive }) =>
-      `self-stretch px-3 py-4 rounded-lg flex items-center gap-3 transition-all ${
-        isActive ? "bg-[#024a63]" : ""
-      }`
-    }
-  >
-    {({ isActive }) => (
-      <>
-        <FiMessageSquare
-          size={18}
-          className={`transition ${
-            isActive ? "text-white" : "text-gray-700"
-          }`}
-        />
-        <span
-          className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}
-        >
-          Messages
-        </span>
-      </>
-    )}
-  </NavLink>
-
-
-              <NavLink
-    to="/giftcategory"
-    onClick={handleLinkClick}
-    className={({ isActive }) =>
-      `self-stretch px-3 py-4 rounded-lg flex items-center gap-3 transition-all ${
-        isActive ? "bg-[#024a63]" : ""
-      }`
-    }
-  >
-    {({ isActive }) => (
-      <>
-        <FiGrid
-          size={18}
-          className={`transition ${
-            isActive ? "text-white" : "text-black"
-          }`}
-        />
-        <span
-        className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}
-        >
-          Gift Category
-        </span>
-      </>
-    )}
-  </NavLink>
-
-
-            <NavLink
-    to="/banner"
-    onClick={handleLinkClick}
-    className={({ isActive }) =>
-      `self-stretch px-3 py-4 rounded-lg flex items-center gap-3 transition-all ${
-        isActive ? "bg-[#024a63]" : ""
-      }`
-    }
-  >
-    {({ isActive }) => (
-      <>
-        <FiImage
-          size={18}
-          className={`transition ${
-            isActive ? "text-white" : "text-black"
-          }`}
-        />
-        <span
-        className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${isActive ? 'text-[#ffffff]' : 'text-[black]'}`}
-        >
-          Banner
-        </span>
-      </>
-    )}
-  </NavLink>
-
-
-  <NavLink
-    to="/manage-categories"
-    onClick={handleLinkClick}
-    className={({ isActive }) =>
-      `self-stretch px-3 py-4 rounded-lg flex items-center gap-3 transition-all duration-300 ${
-        isActive ? "bg-[#024a63]" : "hover:bg-gray-100"
-      }`
-    }
-  >
-    {({ isActive }) => (
-      <>
-        <FiLayers
-          size={18}
-          className={`transition-all duration-300 ${
-            isActive
-              ? "text-white scale-110"
-              : "text-black hover:text-[#024a63] hover:scale-110"
-          }`}
-        />
-        <span
-          className={`grow shrink basis-0 text-xs font-medium font-['Montserrat'] leading-none ${
-            isActive ? "text-white" : "text-black"
-          }`}
-        >
-          Manage Categories
-        </span>
-      </>
-    )}
-  </NavLink>
-
+            
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-500 font-medium">Logged in as</p>
+              <p className="text-sm font-bold text-gray-900 truncate">
+                {userName || 'Admin User'}
+              </p>
             </div>
-
-            {/* Profile */}
-            <div onClick={confirmLogout} className="self-stretch px-3 py-4 rounded-lg justify-start items-center gap-2 inline-flex cursor-pointer">
-              <div className="grow shrink basis-0 h-5 justify-start items-center gap-3 flex">
-                <div className="w-5 h-5 relative overflow-hidden">
-                  <img src={users} alt="User" className="w-full h-full object-cover" />
-                </div>
-                <div className="grow shrink basis-0 text-[#36234e] text-xs font-medium font-['Montserrat'] leading-tight">
-                <span className="block">Welcome</span>
-                <span className="block font-semibold text-sm">{userName || 'Admin'}</span>
-              </div>
-              </div>
-              <div className="w-5 h-5 p-2.5 justify-center items-center gap-2 rounded-full inline-flex">
-                <div className="w-5 h-5 rounded-full relative">
-                  <div className="w-5 h-5 absolute rounded-full ">
-                    <IoIosArrowForward />
-                  </div>
-                </div>
-              </div>
+            
+            <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-red-50 transition-colors shrink-0">
+              <LogOut className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" />
             </div>
           </div>
         </div>
       </aside>
-    );
-  };
+    </>
+  );
+};
 
-  export default Sidebar;
+export default Sidebar;
