@@ -80,12 +80,20 @@ const Home = ({ setIsAuthenticated }) => {
 
   return (
     <div
-      className="h-screen w-full bg-cover bg-center flex justify-center items-center relative"
-      style={{ backgroundImage: `url(${bgImage})` }}
+      className="h-screen w-full bg-cover bg-center flex justify-center items-center relative overflow-hidden"
     >
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center"
+        style={{ 
+          backgroundImage: `url(${bgImage})`,
+          animation: 'zoomInOut 20s infinite alternate ease-in-out'
+        }}
+      />
+      <div className="absolute inset-0 bg-black/10 z-0" />
+
       <form
         onSubmit={handleSubmit}
-        className="w-[604px] p-5 bg-white rounded-[20px] shadow-lg flex flex-col items-center gap-5"
+        className="w-[604px] p-5 bg-white rounded-[20px] shadow-2xl flex flex-col items-center gap-5 z-10 animate-fade-up relative"
       >
         {/* Logo Section */}
         <div className="flex items-center gap-2.5 self-stretch px-3 py-1 bg-white rounded-[100px] justify-center">
@@ -191,20 +199,24 @@ const Home = ({ setIsAuthenticated }) => {
         </div>
       </form>
 
-      <div className="absolute bottom-0 left-0 sm:block">
-        <img
-          src={Frame}
-          alt="Bottom Left"
-          className="w-[120px] md:w-[200px] lg:w-[318px] h-[90px] md:h-[150px] lg:h-[224.30px] object-fill"
-        />
+      <div className="absolute bottom-0 left-0 sm:block animate-fade-left z-0">
+        <div className="animate-float">
+          <img
+            src={Frame}
+            alt="Bottom Left"
+            className="w-[120px] md:w-[200px] lg:w-[318px] h-[90px] md:h-[150px] lg:h-[224.30px] object-fill opacity-90 hover:opacity-100 transition-opacity duration-500"
+          />
+        </div>
       </div>
 
-      <div className="absolute bottom-0 right-0 sm:block">
-        <img
-          src={fram1}
-          alt="Bottom Right"
-          className="w-[120px] md:w-[200px] lg:w-[318px] h-[90px] md:h-[150px] lg:h-[224.30px] object-fill"
-        />
+      <div className="absolute bottom-0 right-0 sm:block animate-fade-right z-0">
+        <div className="animate-float" style={{ animationDelay: '2s' }}>
+          <img
+            src={fram1}
+            alt="Bottom Right"
+            className="w-[120px] md:w-[200px] lg:w-[318px] h-[90px] md:h-[150px] lg:h-[224.30px] object-fill opacity-90 hover:opacity-100 transition-opacity duration-500"
+          />
+        </div>
       </div>
     </div>
   );
