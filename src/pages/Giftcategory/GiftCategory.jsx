@@ -45,7 +45,6 @@ const GiftCategory = () => {
 
   const [form, setForm] = useState({
     title: "",
-    slug: "",
     description: "",
     gift_image: null,
   });
@@ -72,7 +71,6 @@ const GiftCategory = () => {
     setActionLoading(true);
     const formData = new FormData();
     formData.append("title", form.title);
-    formData.append("slug", form.slug);
     formData.append("description", form.description);
     if (form.gift_image) formData.append("gift_image", form.gift_image);
 
@@ -97,7 +95,6 @@ const GiftCategory = () => {
     setEditingId(cat.id);
     setForm({
       title: cat.title,
-      slug: cat.slug,
       description: cat.description || "",
       gift_image: null,
     });
@@ -133,7 +130,6 @@ const GiftCategory = () => {
     setImagePreview(null);
     setForm({
       title: "",
-      slug: "",
       description: "",
       gift_image: null,
     });
@@ -194,30 +190,15 @@ const GiftCategory = () => {
               required
               value={form.title}
               onChange={(e) => {
-                const value = e.target.value;
                 setForm({
                   ...form,
-                  title: value,
-                  slug: value.toLowerCase().replace(/\s+/g, "-"),
+                  title: e.target.value,
                 });
               }}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">Slug (URL)</label>
-            <input
-              type="text"
-              placeholder="e.g. birthday-gifts"
-              required
-              value={form.slug}
-              onChange={(e) =>
-                setForm({ ...form, slug: e.target.value })
-              }
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-            />
-          </div>
 
           <div className="md:col-span-2 space-y-1">
              <label className="text-sm font-medium text-gray-700">Description</label>
@@ -363,9 +344,6 @@ const GiftCategory = () => {
                   <h3 className="font-bold text-gray-900 text-lg mb-1 leading-tight line-clamp-1" title={cat.title}>
                     {cat.title}
                   </h3>
-                  <p className="text-xs font-medium text-indigo-500 bg-indigo-50 self-start px-2 py-0.5 rounded-md mb-3">
-                    /{cat.slug}
-                  </p>
                   
                   <p className="text-sm text-gray-500 line-clamp-2 mt-auto">
                     {cat.description || "No description provided."}
