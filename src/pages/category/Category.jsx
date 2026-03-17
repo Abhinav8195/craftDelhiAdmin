@@ -50,7 +50,7 @@ const Category = () => {
   // Form states
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingSubcategory, setEditingSubcategory] = useState(null);
-  const [catForm, setCatForm] = useState({ name: '', image: null });
+  const [catForm, setCatForm] = useState({ name: '', description: '', image: null });
   const [catImagePreview, setCatImagePreview] = useState(null);
   const [subCatForm, setSubCatForm] = useState({ name: '' });
 
@@ -122,6 +122,7 @@ const Category = () => {
     try {
       const formData = new FormData();
       formData.append(editingCategory ? 'name' : 'categoryName', catForm.name);
+      formData.append('category_description', catForm.description);
       if (catForm.image) {
         formData.append('category_image', catForm.image);
       }
@@ -173,7 +174,7 @@ const Category = () => {
   const closeCatModal = () => {
     setIsCatModalOpen(false);
     setEditingCategory(null);
-    setCatForm({ name: '', image: null });
+    setCatForm({ name: '', description: '', image: null });
     setCatImagePreview(null);
   };
 
@@ -307,7 +308,11 @@ const Category = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           setEditingCategory(cat);
-                          setCatForm({ name: cat.name, image: null });
+                          setCatForm({
+                            name: cat.name,
+                            description: cat.description || cat.category_description || '',
+                            image: null,
+                          });
                           if (cat.category_image) setCatImagePreview(cat.category_image);
                           setIsCatModalOpen(true);
                         }}
@@ -434,6 +439,17 @@ const Category = () => {
               placeholder="e.g. Laptops"
               value={catForm.name}
               onChange={(e) => setCatForm({ ...catForm, name: capitalizeWords(e.target.value) })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category Description</label>
+            <textarea
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              placeholder="Brief description about this category"
+              value={catForm.description}
+              onChange={(e) => setCatForm({ ...catForm, description: e.target.value })}
             />
           </div>
 
