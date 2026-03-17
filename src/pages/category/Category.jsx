@@ -53,6 +53,9 @@ const Category = () => {
   const [catForm, setCatForm] = useState({ name: '' });
   const [subCatForm, setSubCatForm] = useState({ name: '' });
 
+  const capitalizeWords = (text) =>
+    text.replace(/\b\w/g, (c) => c.toUpperCase());
+
   // ---------------------------------------------------------------------------------
   // Data Fetching
   // ---------------------------------------------------------------------------------
@@ -413,7 +416,7 @@ const Category = () => {
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
               placeholder="e.g. Laptops"
               value={catForm.name}
-              onChange={(e) => setCatForm({ ...catForm, name: e.target.value })}
+              onChange={(e) => setCatForm({ ...catForm, name: capitalizeWords(e.target.value) })}
             />
           </div>
           <div className="flex gap-3 justify-end pt-2">
@@ -461,7 +464,7 @@ const Category = () => {
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
               placeholder="e.g. Gaming Laptops"
               value={subCatForm.name}
-              onChange={(e) => setSubCatForm({ ...subCatForm, name: e.target.value })}
+              onChange={(e) => setSubCatForm({ ...subCatForm, name: capitalizeWords(e.target.value) })}
             />
           </div>
           <div className="flex gap-3 justify-end pt-2">
