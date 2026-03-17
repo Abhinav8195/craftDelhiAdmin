@@ -50,7 +50,8 @@ const Category = () => {
   // Form states
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingSubcategory, setEditingSubcategory] = useState(null);
-  const [catForm, setCatForm] = useState({ name: '' });
+  const [catForm, setCatForm] = useState({ name: '', image: null });
+  const [catImagePreview, setCatImagePreview] = useState(null);
   const [subCatForm, setSubCatForm] = useState({ name: '' });
 
   const capitalizeWords = (text) =>
@@ -119,8 +120,14 @@ const Category = () => {
     setActionLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append(editingCategory ? 'name' : 'categoryName', catForm.name);
+      if (catForm.image) {
+        formData.append('category_image', catForm.image);
+      }
+
       if (editingCategory) {
-        const { data } = await updateCategory(editingCategory.id, { name: catForm.name });
+        const { data } = await updateCategory(editingCategory.id, formData);
         if (data.status) {
           toast.success(data.message);
           fetchCategories();
@@ -129,10 +136,9 @@ const Category = () => {
           toast.error(data.message);
         }
       } else {
-        // Create expects 'categoryName', not 'name'
-        const { data } = await createCategory({ categoryName: catForm.name });
+        const { data } = await createCategory(formData);
         // The API returns message successfully without data.status, so check for success text or category object
-        if (data.category || data.message?.includes('success')) {
+        if (data.category || data.message?.includes('success') || data.status) {
           toast.success("Category created successfully");
           fetchCategories();
           closeCatModal();
@@ -167,7 +173,8 @@ const Category = () => {
   const closeCatModal = () => {
     setIsCatModalOpen(false);
     setEditingCategory(null);
-    setCatForm({ name: '' });
+    setCatForm({ name: '', image: null });
+    setCatImagePreview(null);
   };
 
   // ---------------------------------------------------------------------------------
@@ -284,14 +291,24 @@ const Category = () => {
                         : 'bg-white border-transparent hover:border-gray-100 hover:bg-gray-50 text-gray-700'
                     }`}
                   >
-                    <div className="font-medium truncate max-w-[200px]">{cat.name}</div>
+                    <div className="flex items-center gap-3 truncate">
+                      {cat.category_image ? (
+                         <img src={cat.category_image} alt={cat.name} className="w-10 h-10 rounded-lg object-cover shadow-sm" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <FolderTree className="w-5 h-5 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="font-medium truncate max-w-[150px]">{cat.name}</div>
+                    </div>
                     
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setEditingCategory(cat);
-                          setCatForm({ name: cat.name });
+                          setCatForm({ name: cat.name, image: null });
+                          if (cat.category_image) setCatImagePreview(cat.category_image);
                           setIsCatModalOpen(true);
                         }}
                         className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
@@ -418,6 +435,51 @@ const Category = () => {
               value={catForm.name}
               onChange={(e) => setCatForm({ ...catForm, name: capitalizeWords(e.target.value) })}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category Image</label>
+            <div className="flex items-center gap-4">
+              {catImagePreview && (
+                <div className="relative group">
+                  <img
+                    src={catImagePreview}
+                    alt="Preview"
+                    className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCatForm({ ...catForm, image: null });
+                      setCatImagePreview(null);
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+              <div className="flex-1">
+                <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-2">
+                    <Plus className="w-6 h-6 text-gray-400" />
+                    <p className="text-xs text-gray-500 mt-1">Upload Image</p>
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setCatForm({ ...catForm, image: file });
+                        setCatImagePreview(URL.createObjectURL(file));
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
           <div className="flex gap-3 justify-end pt-2">
             <button
