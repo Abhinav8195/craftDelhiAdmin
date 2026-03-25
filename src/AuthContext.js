@@ -23,10 +23,9 @@ export const AuthProvider = ({ children }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const profileData = response.data?.data?.[0]; // Backend returns { success: true, data: [ { ... } ] }
+      const profileData = response.data?.data?.[0]; 
 
       if (profileData && (profileData.role === 1 || profileData.role === "admin")) {
-        // Combine first_name and last_name for convenience
         const adminProfile = {
           ...profileData,
           name: `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim() || profileData.email
@@ -39,7 +38,6 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("❌ Auth profile fetch failed:", error.message);
-      // Fallback for development if API is not exactly as expected
       setUser({ role: 1, name: "Admin" }); 
     } finally {
       setLoading(false);
@@ -52,16 +50,13 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (token, userData) => {
     localStorage.setItem("craftdelhiadmin_token", token);
-    // Optimistically set the initial data from login
     setUser(userData);
-    // Immediately verify with /auth/me to get complete/updated profile
     await fetchUser();
   };
 
   const logout = () => {
     localStorage.removeItem("craftdelhiadmin_token"); 
     setUser(null);
-    // Force redirect to login page
     window.location.href = "/";
   };
 
