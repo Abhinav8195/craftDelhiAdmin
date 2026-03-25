@@ -183,7 +183,7 @@ const MobileChat = ({
                       )}
 
                       <div
-                        className={`max-w-[72%] px-3 py-2 rounded-2xl shadow 
+                        className={`max-w-[72%] px-3 py-2 rounded-2xl shadow break-words whitespace-pre-wrap
                         ${isMe ? "bg-blue-600 text-white rounded-br-none" : "bg-white rounded-bl-none"}`}
                       >
                         {msg.filePreview && (
@@ -206,7 +206,7 @@ const MobileChat = ({
 
                       {isMe && (
                         <div className="w-7 h-7 rounded-full bg-green-500 text-white text-xs flex items-center justify-center">
-                          {getInitials(localStorage.getItem("craftdelhiseller_name") || "S")}
+                          {getInitials(localStorage.getItem("craftdelhiadmin_name") || "A")}
                         </div>
                       )}
                     </div>

@@ -25,8 +25,9 @@ const Chat = () => {
   const [roomId, setRoomId] = useState(null);
 
   const [messagesByRoom, setMessagesByRoom] = useState({});
-    const [newMessage, setNewMessage] = useState("");
-    const [typingUser, setTypingUser] = useState({});
+  const [newMessage, setNewMessage] = useState("");
+  const [typingUser, setTypingUser] = useState(false);
+  const activeRoomRef = useRef(null);
 
   const [isMobile] = useState(window.innerWidth <= 768);
 
@@ -58,6 +59,10 @@ const Chat = () => {
     fetchRooms();
   }, []);
 
+  useEffect(() => {
+    activeRoomRef.current = roomId;
+  }, [roomId]);
+
   /* ================= SOCKET INIT ================= */
 
   useEffect(() => {
@@ -67,8 +72,18 @@ const Chat = () => {
     socketRef.current = io("https://backend.craftdelhi.com", {
       path: "/chat/socket.io",
       auth: { token: TOKEN },
-      transports: ["polling", "websocket"],
+      transports: ["websocket", "polling"],
       withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+    });
+
+    socketRef.current.on("connect", () => {
+      console.log("✅ Socket connected:", socketRef.current.id);
+    });
+
+    socketRef.current.on("connect_error", (err) => {
+      console.error("❌ Socket connection error:", err.message);
     });
 
    socketRef.current.on("message_received", (data) => {
@@ -87,12 +102,17 @@ const Chat = () => {
 });
 
 
-    socketRef.current.on("user_typing", ({ userId, isTyping }) => {
+    socketRef.current.on("user_typing", ({ userId, isTyping, roomId: typingRoomId }) => {
       if (String(userId) === String(Admin_Id)) return;
+      if (String(typingRoomId) !== String(activeRoomRef.current)) return;
       setTypingUser(isTyping);
     });
 
-    return () => socketRef.current?.disconnect();
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
   }, []);
 
   /* ================= AUTOSCROLL ================= */
@@ -461,7 +481,7 @@ const filteredRooms = rooms.filter((room) => {
                             )}
 
                             <div
-                              className={`max-w-[70%] px-4 py-2 rounded-2xl shadow
+                              className={`max-w-[70%] px-4 py-2 rounded-2xl shadow break-words whitespace-pre-wrap
                                 ${
                                   isMe
                                     ? "bg-blue-600 text-white rounded-br-none"
