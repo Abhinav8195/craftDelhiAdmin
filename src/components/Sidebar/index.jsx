@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
+import { AuthContext } from '../../AuthContext';
 
 // Import Lucide Icons (to replace exact legacy images with clean vectors)
 import { 
@@ -20,12 +21,11 @@ import {
 
 import iconImage from '../../assets/images/icon.png';
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const trigger = useRef(null);
   const sidebar = useRef(null);
   const navigate = useNavigate();
-  
-  const [userName, setUserName] = useState(null);
+  const { user, logout } = useContext(AuthContext);
 
   const confirmLogout = () => {
     Swal.fire({
@@ -43,16 +43,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem('craftdelhiadmin_token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('Adminname');
-        localStorage.removeItem('craftdelhiadmin_tokenExpiry');
-
-        if (setIsAuthenticated) {
-          setIsAuthenticated(false);
-          window.dispatchEvent(new Event('storage'));
-        }
-
+        logout();
         navigate('/');
       }
     });
@@ -65,12 +56,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
     }
   };
 
-  useEffect(() => {
-    const storedName = localStorage.getItem('Adminname');
-    if (storedName) {
-      setUserName(storedName);
-    }
-  }, []);
 
   // Close on click outside (Mobile primarily)
   useEffect(() => {
@@ -197,7 +182,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, setIsAuthenticated }) => {
             <div className="flex-1 min-w-0">
               <p className="text-xs text-gray-500 font-medium">Logged in as</p>
               <p className="text-sm font-bold text-gray-900 truncate">
-                {userName || 'Admin User'}
+                {user?.name || 'Admin User'}
               </p>
             </div>
             

@@ -4,9 +4,12 @@ import iconImage from '../assets/images/icon.png';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import fram1 from '../assets/images/fram1.png';
 import Frame from '../assets/images/Frame.png';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../AuthContext';
+import { useContext } from 'react';
 
-const Home = ({ setIsAuthenticated }) => {
+const Home = () => {
+  const { login } = useContext(AuthContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -44,12 +47,10 @@ const Home = ({ setIsAuthenticated }) => {
         return;
       }
 
-      localStorage.setItem('craftdelhiadmin_token', data.token);
-      localStorage.setItem('user', JSON.stringify({ username }));
-      localStorage.setItem('Adminname', 'Rajesh Kumar');
-
-      setIsAuthenticated(true);
-      window.dispatchEvent(new Event('storage'));
+      // Use centralized login from AuthContext
+      // This will set the token, initial data, and trigger /auth/me verification
+      await login(data.token, { email: username, role: 1 });
+      
       navigate('/');
     } else if (data.message?.includes('Pending approval')) {
       setError('⏳ Your account is pending admin approval.');

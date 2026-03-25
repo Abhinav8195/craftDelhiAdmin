@@ -9,55 +9,60 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("craftdelhiadmin_token");
+  const fetchUser = async () => {
+    const token = localStorage.getItem("craftdelhiadmin_token");
 
-      if (!token) {
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/admin/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const profileData = response.data?.data?.[0]; // Backend returns { success: true, data: [ { ... } ] }
+
+      if (profileData && (profileData.role === 1 || profileData.role === "admin")) {
+        // Combine first_name and last_name for convenience
+        const adminProfile = {
+          ...profileData,
+          name: `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim() || profileData.email
+        };
+        
+        setUser(adminProfile);
+      } else {
+        console.warn("⚠️ Unauthorized role or missing data:", profileData?.role);
         setUser(null);
-        setLoading(false);
-        return;
       }
+    } catch (error) {
+      console.error("❌ Auth profile fetch failed:", error.message);
+      // Fallback for development if API is not exactly as expected
+      setUser({ role: 1, name: "Admin" }); 
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_BASE_URL}auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        // Backend currently returns role: 1 for admin
-        if (response.data.role === 1 || response.data.role === "admin") {
-          setUser(response.data);
-        } else {
-          // Only remove token if we explicitly get a response that says the role is wrong
-          console.warn("⚠️ Unauthorized role detected:", response.data.role);
-          setUser(null);
-          // localStorage.removeItem("craftdelhiadmin_token"); // Keep token for now to avoid accidental logouts
-        }
-      } catch (error) {
-        console.error("❌ Auth profile fetch failed (this is expected if backend hasn't added /auth/me yet):", error.message);
-        // Do NOT remove token here. If the API is missing or down, we should still trust the local token
-        // until we get a definitive 401 or 403 from a real API call.
-        setUser({ role: 1 }); // Fallback to avoid breaking UI state
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {
     fetchUser();
   }, []);
 
-  const login = (token, userData) => {
+  const login = async (token, userData) => {
     localStorage.setItem("craftdelhiadmin_token", token);
+    // Optimistically set the initial data from login
     setUser(userData);
-    console.log("✅ Login successful, token saved:", token);
+    // Immediately verify with /auth/me to get complete/updated profile
+    await fetchUser();
   };
 
   const logout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      localStorage.removeItem("craftdelhiadmin_token"); 
-      setUser(null);
-      window.location.href = "/";
-    }
+    localStorage.removeItem("craftdelhiadmin_token"); 
+    setUser(null);
+    // Force redirect to login page
+    window.location.href = "/";
   };
 
   return (
