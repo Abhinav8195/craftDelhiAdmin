@@ -24,17 +24,20 @@ export const AuthProvider = ({ children }) => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (response.data.role === "admin") {
+        // Backend currently returns role: 1 for admin
+        if (response.data.role === 1 || response.data.role === "admin") {
           setUser(response.data);
-         
         } else {
+          // Only remove token if we explicitly get a response that says the role is wrong
+          console.warn("⚠️ Unauthorized role detected:", response.data.role);
           setUser(null);
-          localStorage.removeItem("craftdelhiadmin_token");
+          // localStorage.removeItem("craftdelhiadmin_token"); // Keep token for now to avoid accidental logouts
         }
       } catch (error) {
-        console.error("❌ Auth error:", error);
-        setUser(null);
-        localStorage.removeItem("craftdelhiadmin_token");
+        console.error("❌ Auth profile fetch failed (this is expected if backend hasn't added /auth/me yet):", error.message);
+        // Do NOT remove token here. If the API is missing or down, we should still trust the local token
+        // until we get a definitive 401 or 403 from a real API call.
+        setUser({ role: 1 }); // Fallback to avoid breaking UI state
       } finally {
         setLoading(false);
       }

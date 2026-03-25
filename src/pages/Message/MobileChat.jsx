@@ -206,7 +206,7 @@ const MobileChat = ({
 
                       {isMe && (
                         <div className="w-7 h-7 rounded-full bg-green-500 text-white text-xs flex items-center justify-center">
-                          {getInitials(localStorage.getItem("craftdelhiadmin_name") || "A")}
+                          {getInitials(localStorage.getItem("Adminname") || "A")}
                         </div>
                       )}
                     </div>
