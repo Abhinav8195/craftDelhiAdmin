@@ -31,7 +31,7 @@ const ProductTable = ({ card1 }) => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          `${process.env.REACT_APP_BASE_URL}/admin/totalproductsforadmin`,
+          `${process.env.REACT_APP_BASE_URL}admin/totalproductsforadmin`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (res.data?.status) setProducts(res.data.data || []);

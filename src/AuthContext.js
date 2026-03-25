@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("craftdelhiadmin_token");
 
       if (!token) {
         setUser(null);
@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       try {
-        const response = await axios.get("https://craftdelhibackend.onrender.com/api/auth/me", {
+        const response = await axios.get(`${process.env.REACT_APP_BASE_URL}auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -29,12 +29,12 @@ export const AuthProvider = ({ children }) => {
          
         } else {
           setUser(null);
-          localStorage.removeItem("token");
+          localStorage.removeItem("craftdelhiadmin_token");
         }
       } catch (error) {
         console.error("❌ Auth error:", error);
         setUser(null);
-        localStorage.removeItem("token");
+        localStorage.removeItem("craftdelhiadmin_token");
       } finally {
         setLoading(false);
       }
@@ -44,14 +44,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (token, userData) => {
-    localStorage.setItem("token", token);
+    localStorage.setItem("craftdelhiadmin_token", token);
     setUser(userData);
     console.log("✅ Login successful, token saved:", token);
   };
 
   const logout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
-      localStorage.removeItem("token"); 
+      localStorage.removeItem("craftdelhiadmin_token"); 
       setUser(null);
       window.location.href = "/";
     }

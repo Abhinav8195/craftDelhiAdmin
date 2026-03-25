@@ -7,8 +7,8 @@ import { getAdminToken } from "../../utils/auth";
 
 /* ================= CONFIG ================= */
 
-const API_BASE = "https://backend.craftdelhi.com/chat";
-const Admin_Id = "23";
+const API_BASE = process.env.REACT_APP_CHAT_API_BASE;
+const Admin_Id = process.env.REACT_APP_ADMIN_ID;
 
 /* ================= COMPONENT ================= */
 
@@ -69,7 +69,7 @@ const Chat = () => {
     const TOKEN = getAdminToken();
     if (!TOKEN) return;
 
-    socketRef.current = io("https://backend.craftdelhi.com", {
+    socketRef.current = io(process.env.REACT_APP_SOCKET_URL, {
       path: "/chat/socket.io",
       auth: { token: TOKEN },
       transports: ["websocket", "polling"],

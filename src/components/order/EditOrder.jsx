@@ -62,7 +62,7 @@ const EditOrder = ({ card1, orderData}) => {
   setLoading(true);
 
   try {
-    const response = await fetch(`https://backend.craftdelhi.com/backend/api/order/updatedetails/${orderData.id}`, {
+    const response = await fetch(`${process.env.REACT_APP_BASE_URL}order/updatedetails/${orderData.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
