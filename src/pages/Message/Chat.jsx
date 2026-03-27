@@ -347,109 +347,141 @@ const filteredRooms = rooms.filter((room) => {
   /* ================= UI ================= */
 
   return (
-    <div className="flex justify-center h-full overflow-hidden">
+    <div className="flex justify-center h-full overflow-hidden bg-gray-50 ">
+      <style>
+        {`
+          @keyframes fadeUpMsg {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .message-anim {
+            animation: fadeUpMsg 0.25s ease-out forwards;
+          }
+          
+          /* Custom scrollbar for minimum clutter */
+          .scrollbar-hide::-webkit-scrollbar {
+            width: 4px;
+          }
+          .scrollbar-hide::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .scrollbar-hide::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 4px;
+          }
+          .scrollbar-hide:hover::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+          }
+        `}
+      </style>
+
       {isMobile ? (
        <MobileChat
-  rooms={rooms}
-  loadingRooms={loadingRooms}
-  messages={messagesByRoom[roomId] || []}
-  typingUser={typingUser}
-  selectedCustomer={selectedCustomer}
-  setSelectedCustomer={setSelectedCustomer}
-  handleRoomSelect={handleRoomSelect}
-  newMessage={newMessage}
-  setNewMessage={setNewMessage}
-  handleSendMessage={handleSendMessage}
-  emitTyping={emitTyping}
-  Admin_Id={Admin_Id}
-    attachment={attachment}
-  setAttachment={setAttachment}
-  attachmentPreview={attachmentPreview}
-  setAttachmentPreview={setAttachmentPreview}
-  attachmentName={attachmentName}
-  setAttachmentName={setAttachmentName}
-  sendWithAttachment={sendWithAttachment}
-/>
+          rooms={rooms}
+          loadingRooms={loadingRooms}
+          messages={messagesByRoom[roomId] || []}
+          typingUser={typingUser}
+          selectedCustomer={selectedCustomer}
+          setSelectedCustomer={setSelectedCustomer}
+          handleRoomSelect={handleRoomSelect}
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+          handleSendMessage={handleSendMessage}
+          emitTyping={emitTyping}
+          Admin_Id={Admin_Id}
+          attachment={attachment}
+          setAttachment={setAttachment}
+          attachmentPreview={attachmentPreview}
+          setAttachmentPreview={setAttachmentPreview}
+          attachmentName={attachmentName}
+          setAttachmentName={setAttachmentName}
+          sendWithAttachment={sendWithAttachment}
+        />
       ) : (
-        <div className="w-full max-w-6xl flex rounded-2xl border h-[80vh] overflow-hidden">
+        <div className="w-full max-w-6xl flex rounded-2xl shadow-sm border border-gray-200 h-[80vh] bg-white overflow-hidden">
           {/* Sidebar */}
-          <div className="w-1/3 border-r bg-white">
-            <div className="p-4 border-b sticky top-0 z-10">
-              <h2 className="text-xl font-bold">Messages</h2>
+          <div className="w-1/3 border-r flex flex-col h-full bg-[#fcfcfc]">
+            <div className="px-5 py-6 border-b border-gray-100 flex-shrink-0">
+              <h2 className="text-2xl font-semibold text-gray-800 tracking-tight">Messages</h2>
 
-              <input
-                  className="mt-3 w-full p-2 rounded-xl bg-gray-100
-             border-none
-             focus:border-blue-500 focus:ring-2 focus:ring-blue-200
-             outline-none"
-                placeholder="Search chats..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <div className="relative mt-5">
+                <input
+                  className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-gray-100 border border-transparent focus:bg-white focus:border-gray-300 focus:ring-4 focus:ring-gray-50 transition-all outline-none text-sm text-gray-700 placeholder-gray-400"
+                  placeholder="Search conversations..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
 
-              <div className="p-2 pt-6 overflow-y-auto space-y-2">
-  {loadingRooms ? (
-    <p className="text-center p-4 text-gray-400">
-      Loading chats...
-    </p>
-  ) : rooms.length === 0 ? (
-    <p className="text-center p-4 text-gray-400">
-      No chats found
-    </p>
-  ) : (
-    filteredRooms.map((room) => {
-      const otherUser = room?.participants?.find(
-        (p) => String(p?.userId) !== String(Admin_Id)
-      );
+            <div className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-hide">
+              {loadingRooms ? (
+                <div className="flex justify-center items-center h-full">
+                  <p className="text-sm text-gray-400 animate-pulse">Loading chats...</p>
+                </div>
+              ) : rooms.length === 0 ? (
+                <div className="flex justify-center items-center h-full">
+                  <p className="text-sm text-gray-400">No conversations</p>
+                </div>
+              ) : (
+                filteredRooms.map((room) => {
+                  const otherUser = room?.participants?.find(
+                    (p) => String(p?.userId) !== String(Admin_Id)
+                  );
 
-      return (
-        <div
-          key={room._id}
-          onClick={() => handleRoomSelect(room)}
-          className={`flex gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-            roomId === room._id
-              ? "bg-blue-50 border border-blue-200"
-              : "hover:bg-gray-100"
-          }`}
-        >
-          {/* avatar */}
-          <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-600 to-indigo-500 text-white flex items-center justify-center font-semibold shadow">
-            {getInitial(otherUser?.name || "U")}
-          </div>
+                  return (
+                    <div
+                      key={room._id}
+                      onClick={() => handleRoomSelect(room)}
+                      className={`flex gap-3 px-4 py-3 rounded-xl cursor-pointer transition-colors duration-200 items-center ${
+                        roomId === room._id
+                          ? "bg-blue-50/60"
+                          : "hover:bg-gray-50"
+                      }`}
+                    >
+                      {/* avatar */}
+                      <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-medium flex-shrink-0">
+                        {getInitial(otherUser?.name || "U")}
+                      </div>
 
-          {/* name + context */}
-          <div className="flex flex-col">
-            <h3 className="font-semibold text-sm">
-              {otherUser?.name || "User"}
-            </h3>
-
-            <p className="text-[11px] text-gray-500">
-              {room?.contextType || "Chat"}
-            </p>
-          </div>
-        </div>
-      );
-    })
-  )}
-</div>
+                      {/* name + context */}
+                      <div className="flex flex-col flex-1 overflow-hidden">
+                        <div className="flex justify-between items-center w-full">
+                             <h3 className="font-semibold text-gray-900 text-[14px] truncate">
+                               {otherUser?.name || "User"}
+                             </h3>
+                        </div>
+                        <p className="text-[11px] text-gray-500 truncate uppercase mt-0.5 tracking-wide">
+                          {room?.contextType || "PRODUCT"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
 
           {/* Chat Area */}
-          <div className="w-2/3 flex flex-col">
+          <div className="w-2/3 flex flex-col h-full bg-[#f8f9fc]">
             {!selectedCustomer ? (
-              <div className="flex-1 flex items-center justify-center text-gray-400">
-                Select a chat
+              <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+                   <FiSend className="text-gray-300 text-2xl" />
+                </div>
+                <p className="text-sm font-medium">Select a conversation to start messaging</p>
               </div>
             ) : (
               <>
                 {/* Header */}
-                <div className="p-4 border-b bg-white sticky top-0 z-10 flex justify-between">
-                  <span className="font-bold">{selectedCustomer?.name || "User"}</span>
+                <div className="px-6 py-4 bg-white border-b border-gray-100 flex-shrink-0 flex items-center gap-4 z-10">
+                   <div className="flex flex-col">
+                      <span className="font-bold text-gray-900 tracking-tight">{selectedCustomer?.name || "User"}</span>
+                   </div>
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 bg-[#f3f4f7] space-y-3">
+                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 scrollbar-hide">
                   {(() => {
                     let lastDate = null;
                     const messages = messagesByRoom[roomId] || [];
@@ -468,60 +500,61 @@ const filteredRooms = rooms.filter((room) => {
                       return (
                         <React.Fragment key={idx}>
                           {showDate && (
-                            <div className="text-center text-xs text-gray-500 my-3">
-                              {formatDateGroup(msg.createdAt)}
+                            <div className="flex justify-center my-6">
+                              <span className="text-gray-500 text-[11px] font-medium tracking-wide">
+                                {formatDateGroup(msg.createdAt)}
+                              </span>
                             </div>
                           )}
 
                           <div
-                            className={`flex items-end gap-2 ${
+                            className={`flex items-start gap-2.5 message-anim w-full ${
                               isMe
                                 ? "justify-end"
                                 : "justify-start"
                             }`}
                           >
                             {!isMe && (
-                              <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-semibold">
-                                {getInitials(
-                                  selectedCustomer?.name
-                                )}
+                              <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0 shadow-sm mt-1">
+                                {getInitials(selectedCustomer?.name)}
                               </div>
                             )}
 
-                            <div
-                              className={`max-w-[70%] px-4 py-2 rounded-2xl shadow break-words whitespace-pre-wrap
-                                ${
-                                  isMe
-                                    ? "bg-blue-600 text-white rounded-br-none"
-                                    : "bg-white text-gray-800 rounded-bl-none"
-                                }`}
-                            >
-                              {/* IMAGE */}
-                              {msg.filePreview && (
-                                <img
-                                  src={msg.filePreview}
-                                  className="w-40 h-40 object-cover rounded mb-2"
-                                  alt="attachment"
-                                />
-                              )}
+                            <div className={`flex flex-col ${isMe ? "items-end" : "items-start"} max-w-[70%]`}>
+                              <div
+                                className={`px-4 py-2.5 rounded-2xl shadow-sm break-words whitespace-pre-wrap text-[14px] leading-relaxed
+                                  ${
+                                    isMe
+                                      ? "bg-blue-600 text-white rounded-tr-sm"
+                                      : "bg-white text-gray-800 rounded-tl-sm border border-gray-100"
+                                  }`}
+                              >
+                                {/* IMAGE */}
+                                {msg.filePreview && (
+                                  <img
+                                    src={msg.filePreview}
+                                    className="w-48 h-48 object-cover rounded-xl mb-2"
+                                    alt="attachment"
+                                  />
+                                )}
 
-                              {/* DOC */}
-                              {msg.fileName && !msg.filePreview && (
-                                <div className="text-sm mb-1">
-                                  📄 {msg.fileName}
-                                </div>
-                              )}
+                                {/* DOC */}
+                                {msg.fileName && !msg.filePreview && (
+                                  <div className={`text-sm mb-1 flex items-center gap-2 ${isMe ? 'text-gray-100' : 'text-gray-500'}`}>
+                                    <FiPaperclip /> {msg.fileName}
+                                  </div>
+                                )}
 
-                              {/* TEXT */}
-                              {msg.message && <p>{msg.message}</p>}
-
-                              <span className="text-[10px] block text-right opacity-60 mt-1">
+                                {/* TEXT */}
+                                {msg.message && <span>{msg.message}</span>}
+                              </div>
+                              <div className="text-[10px] mt-1 text-gray-400">
                                 {formatTime(msg.createdAt)}
-                              </span>
+                              </div>
                             </div>
-
+                            
                             {isMe && (
-                              <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-sm font-semibold">
+                              <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0 shadow-sm mt-1">
                                 R
                               </div>
                             )}
@@ -531,10 +564,16 @@ const filteredRooms = rooms.filter((room) => {
                     });
                   })()}
 
-
                   {typingUser && (
-                    <div className="text-sm italic text-gray-400 px-10">
-                      typing...
+                    <div className="flex items-start gap-2.5 message-anim">
+                       <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0 shadow-sm mt-1">
+                           {getInitials(selectedCustomer?.name)}
+                       </div>
+                       <div className="bg-white px-4 py-3 rounded-2xl rounded-tl-sm border border-gray-100 shadow-sm flex items-center gap-1.5 h-10 w-16">
+                          <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                          <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                          <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+                       </div>
                     </div>
                   )}
 
@@ -542,7 +581,7 @@ const filteredRooms = rooms.filter((room) => {
                 </div>
 
                  {/* Input Bar */}
-                <div className="p-4 border-t bg-white">
+                <div className="p-4 bg-white border-t border-gray-100 flex-shrink-0">
                   {/* Hidden file input */}
                   <input
                     id="file-upload-desktop"
@@ -566,21 +605,23 @@ const filteredRooms = rooms.filter((room) => {
 
                   {/* preview box */}
                   {(attachment || attachmentPreview) && (
-                    <div className="mb-3 p-3 rounded-xl border bg-white flex items-center gap-3">
+                    <div className="mb-3 p-2 rounded-xl border border-gray-200 bg-gray-50 flex items-center gap-3 animate-pulse">
                       {attachmentPreview && (
                         <img
                           src={attachmentPreview}
-                          className="w-16 h-16 rounded object-cover"
+                          className="w-12 h-12 rounded-lg object-cover shadow-sm"
                           alt="preview"
                         />
                       )}
 
                       {!attachmentPreview && (
-                        <div className="text-sm">📄 {attachmentName}</div>
+                        <div className="text-sm font-medium text-gray-600 flex items-center gap-2">
+                            <FiPaperclip /> {attachmentName}
+                        </div>
                       )}
 
                       <button
-                        className="ml-auto text-red-500"
+                        className="ml-auto text-gray-400 hover:text-red-500 transition-colors p-2"
                         onClick={() => {
                           setAttachment(null);
                           setAttachmentPreview(null);
@@ -592,23 +633,23 @@ const filteredRooms = rooms.filter((room) => {
                     </div>
                   )}
 
-                  <div className="flex gap-3 rounded-full px-3 py-2 shadow-sm items-center">
+                  <div className="flex gap-2 items-center bg-white border border-gray-300 rounded-full p-1.5 pr-1.5 focus-within:border-gray-400 transition-all shadow-sm">
                     {/* clip icon */}
                     <button
                       onClick={() =>
                         document.getElementById("file-upload-desktop").click()
                       }
-                      className="text-gray-600 hover:text-blue-600 transition"
+                      className="text-gray-400 hover:text-gray-700 p-2.5 rounded-full transition-all flex-shrink-0"
                     >
-                      <FiPaperclip size={20} />
+                      <FiPaperclip size={18} />
                     </button>
 
                     <input
-                      className="flex-1 border rounded-full px-4 py-2 outline-none"
+                      className="flex-1 bg-transparent px-2 py-2 outline-none text-[15px] text-gray-800 placeholder-gray-400 border-none focus:outline-none focus:border-none focus:ring-0"
                       value={newMessage}
                       onChange={(e) => {
-                        setNewMessage(e.target.value);
-                        emitTyping();
+                         setNewMessage(e.target.value);
+                         emitTyping();
                       }}
                       onKeyDown={(e) =>
                         e.key === "Enter" && sendWithAttachment()
@@ -618,9 +659,10 @@ const filteredRooms = rooms.filter((room) => {
 
                     <button
                       onClick={sendWithAttachment}
-                      className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full"
+                      disabled={!newMessage.trim() && !attachment}
+                      className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white w-9 h-9 rounded-full shadow-sm transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0"
                     >
-                      <FiSend />
+                      <FiSend size={18} className="translate-y-[1px] -translate-x-[1px]" />
                     </button>
                   </div>
                 </div>
