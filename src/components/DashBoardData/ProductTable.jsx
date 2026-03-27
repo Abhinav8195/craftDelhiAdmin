@@ -37,33 +37,61 @@ const ProductTable = ({ card1, products, reload }) => {
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const statusColors = {
-    0: "#ffc600",
-    1: "#69d297",
-    2: "#fe0000"
-  };
+  const statusStyle = (s) =>
+    s === 1
+      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+      : s === 0
+      ? "bg-amber-100 text-amber-700 border-amber-200"
+      : "bg-rose-100 text-rose-700 border-rose-200";
 
-  const handleSelectStatus = async (index, newStatus) => {
-    const token = getAdminToken();
-    const productId = filteredProducts[index].id;
+ const handleSelectStatus = async (index, newStatus) => {
+  const product = filteredProducts[index];
 
-    try {
-      const response = await axios.put(
-        `${process.env.REACT_APP_BASE_URL}admin/update-product-approval`,
-        { productId, status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  if (!product) return;
 
-      if (response.data.success) {
-        toast.success("Status updated");
-        reload();
-      } else toast.error("Failed to update");
-    } catch {
-      toast.error("Error updating");
+  try {
+    // 👉 Reject case (future me modal laga sakta hai)
+    if (newStatus === 2) {
+      await updateProductStatus(product.id, 2);
+    } else {
+      await updateProductStatus(product.id, newStatus);
     }
 
+  } catch (err) {
+    console.error("Status update error:", err);
+  } finally {
     setDropdownOpen(null);
-  };
+  }
+};
+
+const updateProductStatus = async (
+  productId,
+  status,
+  reject_reason = "",
+  reject_description = ""
+) => {
+  const token = getAdminToken();
+
+  try {
+    await axios.put(
+      `${process.env.REACT_APP_BASE_URL}admin/update-product-approval/${productId}`,
+      {
+        status,
+        reject_reason,
+        reject_description,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    toast.success("Status Updated");
+
+    // 👉 best for your case (props se aa raha hai data)
+    reload();
+
+  } catch (err) {
+    toast.error("Failed to update");
+  }
+};
 
   return (
     <motion.div className="md:px-1 mt-8" initial="hidden" animate="visible" variants={container}>
@@ -107,60 +135,101 @@ const ProductTable = ({ card1, products, reload }) => {
         <h2 className="text-xl font-bold text-black">Products Pending Approval</h2>
         <div className="relative w-full sm:w-[260px]">
           <input
-            placeholder="Search product..."
+            placeholder="Search pending products..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 pl-3 pr-10 text-sm border border-gray-300 rounded focus:ring focus:ring-blue-200"
+            className="w-full h-10 pl-4 pr-10 text-sm bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
           />
-          <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
         </div>
       </div>
 
-      <div className="border rounded-lg shadow overflow-hidden">
-        <div className="overflow-auto max-h-[500px]">
-          <table className="min-w-full text-sm">
-            <thead className="bg-[#36234e] text-white text-xs uppercase tracking-wider">
+      {/* TABLE */}
+      <div className="border border-gray-100 rounded-2xl shadow-xl bg-white overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-[#36234e] text-white">
               <tr>
-                <th className="px-4 py-3 text-left">ID</th>
-                <th className="px-4 py-3 text-left">Product</th>
-                <th className="px-4 py-3 text-left">Image</th>
-                <th className="px-4 py-3 text-left">Seller</th>
-                <th className="px-4 py-3 text-left">Status</th>
+                <th className="px-5 py-4 font-bold text-xs uppercase tracking-widest">ID</th>
+                <th className="px-5 py-4 font-bold text-xs uppercase tracking-widest">Product</th>
+                <th className="px-5 py-4 font-bold text-xs uppercase tracking-widest">Image</th>
+                <th className="px-5 py-4 font-bold text-xs uppercase tracking-widest">Seller</th>
+                <th className="px-5 py-4 font-bold text-xs uppercase tracking-widest w-40">Status</th>
               </tr>
             </thead>
 
-            <motion.tbody variants={container}>
-              {filteredProducts.map((product, index) => (
-                <motion.tr key={index} variants={row} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3">{product.id}</td>
-                  <td className="px-4 py-3 truncate max-w-[160px]">{product.name}</td>
-                  <td className="px-4 py-3"><img alt="" src={product.productImage} className="w-12 h-12 rounded border object-cover" /></td>
-                  <td className="px-4 py-3 truncate max-w-[120px]">{product.seller}</td>
-
-                  <td className="px-4 py-3 relative">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-1 rounded text-white text-xs" style={{ backgroundColor: statusColors[0] }}>Pending</span>
-
-                      <button onClick={() => setDropdownOpen(dropdownOpen === index ? null : index)}>
-                        <IoIosArrowDown className="text-gray-600" />
-                      </button>
-
-                      {dropdownOpen === index && (
-                        <div className="absolute z-50 bg-white shadow border rounded w-28 top-9">
-                          <div onClick={() => handleSelectStatus(index, 1)} className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Approve</div>
-                          <div onClick={() => handleSelectStatus(index, 2)} className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Reject</div>
-                          <div onClick={() => handleSelectStatus(index, 0)} className="px-3 py-2 hover:bg-gray-100 cursor-pointer">Pending</div>
-                        </div>
-                      )}
-                    </div>
+            <tbody className="divide-y divide-gray-50">
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-20 text-gray-500 font-medium text-lg">
+                    ✨ All caught up! No pending approvals.
                   </td>
-                </motion.tr>
-              ))}
+                </tr>
+              ) : (
+                filteredProducts.map((product, index) => (
+                  <tr key={product.id || index} className="hover:bg-blue-50/30 transition-colors">
+                    <td className="px-5 py-4 font-medium text-gray-500">{product.id}</td>
+                    <td className="px-5 py-4 font-bold text-gray-900 max-w-[200px] truncate">{product.name}</td>
+                    <td className="px-5 py-4">
+                      <div className="relative w-12 h-12 group">
+                        <img 
+                          alt="" 
+                          src={product.productImage} 
+                          className="w-full h-full rounded-xl border border-gray-100 object-cover shadow-sm transition-transform group-hover:scale-110" 
+                        />
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-gray-600 font-medium max-w-[150px] truncate">{product.seller}</td>
 
-              {filteredProducts.length === 0 && (
-                <motion.tr><td colSpan="5" className="text-center py-6 text-gray-500">No products found</td></motion.tr>
+                    <td className="px-5 py-4 relative">
+                      <div className="relative flex items-center gap-2 w-max">
+                        <div className={`px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm flex items-center gap-1.5 transition-all ${statusStyle(0)}`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                          Pending
+                        </div>
+
+                        <div className="relative">
+                          <button 
+                            onClick={() => setDropdownOpen(dropdownOpen === index ? null : index)}
+                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                          >
+                            <IoIosArrowDown size={18} className="text-gray-400 hover:text-black" />
+                          </button>
+
+                          {dropdownOpen === index && (
+                            <div className={`absolute right-0 w-32 bg-white border border-gray-100 shadow-2xl rounded-xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${
+                              index >= filteredProducts.length - 2 ? "bottom-full mb-2" : "top-8"
+                            }`}>
+                              <button 
+                                onClick={() => handleSelectStatus(index, 1)} 
+                                className="px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 w-full text-left flex items-center gap-2 transition-colors border-b border-gray-50"
+                              >
+                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                Approve
+                              </button>
+                              <button 
+                                onClick={() => handleSelectStatus(index, 2)} 
+                                className="px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-rose-50 hover:text-rose-700 w-full text-left flex items-center gap-2 transition-colors border-b border-gray-50"
+                              >
+                                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                                Reject
+                              </button>
+                              <button 
+                                onClick={() => handleSelectStatus(index, 0)} 
+                                className="px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-amber-50 hover:text-amber-700 w-full text-left flex items-center gap-2 transition-colors"
+                              >
+                                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                                Pending
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
               )}
-            </motion.tbody>
+            </tbody>
           </table>
         </div>
       </div>

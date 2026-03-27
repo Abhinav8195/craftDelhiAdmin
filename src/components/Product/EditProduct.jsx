@@ -28,8 +28,6 @@ const EditProduct = ({card1,product}) => {
     const [dimensions, setDimensions] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [categories, setCategories] = useState([]);
-    const [newCategory, setNewCategory] = useState("");
-    const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [hashtags, setHashtags] = useState([]);
   const [hashtagInput, setHashtagInput] = useState("");
   const [images, setImages] = useState([
@@ -92,27 +90,6 @@ useEffect(() => {
     }
   }, [product]);
 
-const handleAddCategory = async () => {
-  if (!newCategory.trim()) return toast.error("Enter category name");
-
-  try {
-    const body = { categoryName: newCategory, sellerId: seller_id };
-
-    const res = await axios.post(
-      `${process.env.REACT_APP_BASE_URL}categories/create`,
-      body,
-      { headers: { Authorization: `${token}` } }
-    );
-
-    toast.success(res.data.message);
-    setNewCategory("");
-    setShowCategoryModal(false);
-    fetchCategories();
-  } catch (error) {
-    console.error(error);
-    toast.error("Failed to create category");
-  }
-};
 
 const formatHashtags = (value) => {
   return value
@@ -509,48 +486,11 @@ useEffect(() => {
             <option key={cat.id} value={cat.id}>{cat.name}</option>
           ))}
         </select>
-    
-        <button
-          onClick={() => setShowCategoryModal(true)}
-          className="px-3 bg-[#024a63] text-white rounded"
-        >
-          +
-        </button>
       </div>
     </div>
     
             </div>
     
-            {showCategoryModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-        <div className="bg-white p-5 rounded-lg w-80 space-y-3 shadow-lg">
-          <h3 className="text-lg font-bold mb-2">Add New Category</h3>
-    
-          <input
-            type="text"
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Enter Category Name"
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-          />
-    
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => setShowCategoryModal(false)}
-              className="px-4 py-1 bg-gray-400 text-white rounded"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleAddCategory}
-              className="px-4 py-1 bg-[#024a63] text-white rounded"
-            >
-              Add
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
     
             {/* Quantity & Dimensions */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

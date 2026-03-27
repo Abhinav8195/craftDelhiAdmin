@@ -154,16 +154,22 @@ const handleTrashUser = async (reason, description) => {
 
 
 
+  const statusStyle = (s) =>
+    s === 1
+      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+      : s === 0
+      ? "bg-amber-100 text-amber-700 border-amber-200"
+      : "bg-rose-100 text-rose-700 border-rose-200";
 
   return (
-    <div className="px-4 md:px-8 lg:px-1 mt-0 lg:mt-[30px]">
-      <div className="h-[589px] flex flex-col gap-3 overflow-auto w-full">
-        <div className="w-full flex flex-wrap justify-between items-center gap-3">
-          <div className="text-black text-2xl font-bold">Total Users</div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <div className="w-full sm:w-[206px]">
-               <select
-              className="w-full h-10 text-xs bg-white border border-gray-300 rounded px-2"
+    <div className="px-5 mt-6">
+      {/* TOP BAR */}
+      <div className="w-full flex flex-wrap justify-between items-center gap-3 mb-5">
+        <div className="text-black text-2xl font-bold">Total Users</div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <div className="w-full sm:w-[206px]">
+            <select
+              className="w-full h-10 text-xs bg-white border border-gray-300 rounded px-2 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all font-medium"
               onChange={(e) => setFilterStatus(e.target.value)}
             >
               <option value="all">All Users</option>
@@ -171,144 +177,129 @@ const handleTrashUser = async (reason, description) => {
               <option value="0">Inactive</option>
               <option value="2">Trash</option>
             </select>
-            </div>
-            <div className="w-full sm:w-[239px] flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white">
-              <input
-                placeholder="Search user..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none"
-              />
-              <FaSearch className="text-gray-500 text-sm" />
-            </div>
+          </div>
+          <div className="w-full sm:w-[239px] flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
+            <input
+              placeholder="Search user..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none"
+            />
+            <FaSearch className="text-gray-500 text-sm" />
           </div>
         </div>
+      </div>
 
-         {updatedUsers.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full text-center text-gray-500 py-20 text-lg font-semibold"
-          >
-            😕 No Users Found...
-          </motion.div>
-        ):(
-           <div className="w-full justify-start items-start gap-px inline-flex overflow-auto">
-          <div className="w-[130px] flex-col gap-px inline-flex">
-            <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] flex items-center">
-              <div className="text-white text-[8px] sm:text-[10px] font-bold uppercase tracking-widest">
-                User ID
-              </div>
-            </div>
-            {updatedUsers.map((user, index) => (
-              <div key={index} className="h-[88px] p-3 bg-white flex items-center">
-                <div className="text-black text-[10px] font-medium">{user.userId}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="grow flex-col gap-px inline-flex">
-            <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] flex items-center">
-              <div className="text-white text-[8px] sm:text-[10px] font-bold uppercase tracking-widest">
-                Name
-              </div>
-            </div>
-            {updatedUsers.map((user, index) => (
-              <div key={index} className="h-[88px] p-3 bg-white flex items-center">
-                <div className="text-black text-[10px] font-medium">{user.name}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="grow flex-col gap-px inline-flex">
-            <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] flex items-center">
-              <div className="text-white text-[8px] sm:text-[10px] font-bold uppercase tracking-widest">
-                Email Address
-              </div>
-            </div>
-            {updatedUsers.map((user, index) => (
-              <div key={index} className="h-[88px] p-3 bg-white flex items-center">
-                <div className="text-black text-[10px] font-medium">{user.email}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="grow flex-col gap-px inline-flex">
-            <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] flex items-center">
-              <div className="text-white text-[8px] sm:text-[10px] font-bold uppercase tracking-widest">
-                Phone Number
-              </div>
-            </div>
-            {updatedUsers.map((user, index) => (
-              <div key={index} className="h-[88px] p-3 bg-white flex items-center">
-                <div className="text-black text-[10px] font-medium">{user.phone}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="grow flex-col gap-px inline-flex">
-            <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] flex items-center">
-              <div className="text-white text-[8px] sm:text-[10px] font-bold uppercase tracking-widest">
-                Status
-              </div>
-            </div>
-
-            {updatedUsers.map((user, index) => (
-              <div key={index} className="h-[88px] p-3 bg-white flex items-center gap-2">
-                 <span
-                  className={`px-2 py-1 rounded text-white text-[10px] font-medium
-                    ${user.status === 1 ? "bg-green-600" : user.status === 0 ? "bg-yellow-500" : "bg-gray-600"}`}
+      {/* TABLE */}
+      <div className="border rounded-xl shadow-lg bg-white overflow-x-auto">
+        <table className="w-full min-w-[1000px] text-left">
+          <thead className="bg-[#36234e] text-white">
+            <tr>
+              {["User ID", "Name", "Email Address", "Phone Number", "Status", "Actions"].map((h) => (
+                <th 
+                  key={h} 
+                  className={`p-3 text-xs uppercase tracking-wider ${
+                    h === "Status" ? "w-40" : h === "Actions" ? "w-24" : ""
+                  }`}
                 >
-                  {user.status === 1 ? "Active" : user.status === 0 ? "Inactive" : "Trashed"}
-                </span>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
 
+          <tbody className="divide-y divide-gray-100">
+            {updatedUsers.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center py-20 text-gray-500 text-lg font-semibold">
+                  😕 No Users Found...
+                </td>
+              </tr>
+            ) : (
+              updatedUsers.map((user, index) => (
+                <tr key={user.userId || index} className="border-b hover:bg-[#f8f6ff] transition duration-200">
+                  <td className="p-4 text-[12px] font-medium text-gray-700">{user.userId}</td>
+                  <td className="p-4 text-[12px] text-gray-900 font-semibold">{user.name}</td>
+                  <td className="p-4 text-[12px] text-gray-600">{user.email}</td>
+                  <td className="p-4 text-[12px] text-gray-600">{user.phone}</td>
 
-                <div className="relative w-4 h-4">
-                  <IoIosArrowDown onClick={() => toggleDropdown(index)} />
-                  {dropdownOpen === index && (
-                    <div className="absolute left-0 top-full z-50 bg-white border border-gray-300 mt-1 rounded w-[90px] shadow-md text-[10px]">
+                  {/* STATUS */}
+                  <td className="p-4 w-40 relative">
+                    <div className="relative flex items-center gap-2 w-max">
+                      <div className={`px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm flex items-center gap-1.5 transition-all ${statusStyle(user.status)}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          user.status === 1 ? "bg-emerald-500" :
+                          user.status === 0 ? "bg-amber-500" : "bg-rose-500"
+                        }`} />
+                        {user.status === 1 ? "Active" : user.status === 0 ? "Inactive" : "Trashed"}
+                      </div>
 
-                      <div className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => handleSelectStatus(index, 1)}>Active</div>
+                      <div className="relative">
+                        <button onClick={() => toggleDropdown(index)} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                          <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
+                        </button>
 
-                      <div className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => handleSelectStatus(index, 0)}>Inactive</div>
-
-                      <div className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={() => handleSelectStatus(index, 2)}>Trash</div>
+                        {dropdownOpen === index && (
+                          <div className={`absolute right-0 w-32 bg-white border border-gray-100 shadow-xl rounded-xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${
+                            index >= updatedUsers.length - 2 ? "bottom-full mb-2" : "top-8"
+                          }`}>
+                            <button 
+                              onClick={() => handleSelectStatus(index, 1)} 
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 w-full text-left flex items-center gap-2 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                              Active
+                            </button>
+                            <button 
+                              onClick={() => handleSelectStatus(index, 0)} 
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-700 w-full text-left flex items-center gap-2 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-amber-500" />
+                              Inactive
+                            </button>
+                            <button 
+                              onClick={() => handleSelectStatus(index, 2)} 
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-rose-50 hover:text-rose-700 w-full text-left flex items-center gap-2 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-rose-500" />
+                              Trash
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+                  </td>
 
-          <div className="grow flex-col gap-px inline-flex items-center">
-            <div className="self-stretch p-3 h-10 sm:h-12 bg-[#36234e] flex items-center">
-              <div className="text-white text-[8px] sm:text-[10px] font-bold uppercase tracking-widest">
-                Actions
-              </div>
-            </div>
-            {updatedUsers.map((user, index) => (
-              <div key={index} className="h-[88px] gap-5 p-3 bg-white flex items-center justify-center">
-                <button onClick={() => openModal(user)}><FaRegEye /></button>
-                <button onClick={() => card1(user)}>
-                <LuPenLine />
-              </button>
-                {/* <button onClick={() => openDeleteModal(user)}><FaTrash /></button> */}
-              </div>
-            ))}
-          </div>
-        </div>
-        )}
-
-       
+                  {/* ACTIONS */}
+                  <td className="p-4 w-24 text-center">
+                    <div className="flex items-center gap-4 justify-center">
+                      <button 
+                        onClick={() => openModal(user)}
+                        className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 transition-colors"
+                        title="View Details"
+                      >
+                        <FaRegEye size={18} />
+                      </button>
+                      <button 
+                        onClick={() => card1(user)}
+                        className="p-1.5 rounded-lg hover:bg-indigo-50 text-indigo-600 transition-colors"
+                        title="Edit User"
+                      >
+                        <LuPenLine size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
       {selectedUser && (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50">
-          <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 backdrop-blur-lg" onClick={closeModal} />
-          <div className="relative w-[883px] h-[712px] p-5 bg-white rounded-2xl shadow-2xl border border-[#d9d9d9] flex flex-col z-50">
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center z-50 p-4">
+          <div className="absolute top-0 left-0 w-full h-full bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={closeModal} />
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col z-50 animate-in fade-in zoom-in duration-300">
             <BuyerDetails user={selectedUser} close={closeModal} />
           </div>
         </div>

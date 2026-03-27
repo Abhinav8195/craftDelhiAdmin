@@ -166,160 +166,153 @@ const [search, setSearch] = useState("");
 };
 
 
-  const getStatusInfo = (status) =>
-    ({
-      0: { text: "Pending" },
-      1: { text: "Approved" },
-      2: { text: "Rejected" },
-    }[status] || { text: "Unknown" });
+  const statusStyle = (s) =>
+    s === 1
+      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+      : s === 0
+      ? "bg-amber-100 text-amber-700 border-amber-200"
+      : "bg-rose-100 text-rose-700 border-rose-200";
 
   return (
     <div className="px-5 mt-6">
       {/* Top Bar */}
-       <div className="w-full flex flex-wrap justify-between items-center gap-3 mb-5">
-                <div className="text-black text-2xl font-bold">Seller Management</div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <div className="w-full sm:w-[206px]">
-                     <select
-                    className="w-full h-10 text-xs bg-white border border-gray-300 rounded px-2"
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                  >
-                    <option value="all">All Users</option>
-                    <option value="1">Active</option>
-                    <option value="0">Inactive</option>
-                    <option value="2">Trash</option>
-                  </select>
-                  </div>
-                 <div className="w-full sm:w-[239px] flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white">
-              <input
-                placeholder="Search user..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none"
-              />
-              <FaSearch className="text-gray-500 text-sm" />
-            </div>
-
-                </div>
-              </div>
+      <div className="w-full flex flex-wrap justify-between items-center gap-3 mb-5">
+        <div className="text-black text-2xl font-bold">Seller Management</div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <div className="w-full sm:w-[206px]">
+            <select
+              className="w-full h-10 text-xs bg-white border border-gray-300 rounded px-2 outline-none focus:ring-2 focus:ring-blue-500/10 transition-all font-medium"
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All Users</option>
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+              <option value="2">Trash</option>
+            </select>
+          </div>
+          <div className="w-full sm:w-[239px] flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
+            <input
+              placeholder="Search user..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none"
+            />
+            <FaSearch className="text-gray-500 text-sm" />
+          </div>
+        </div>
+      </div>
 
       {/* TABLE */}
-     <div className="border rounded-xl shadow-lg bg-white backdrop-blur-lg overflow-x-auto">
-
-       <table className="w-full min-w-[750px] text-left">
+      <div className="border rounded-xl shadow-lg bg-white overflow-x-auto">
+        <table className="w-full min-w-[1000px] text-left">
           <thead className="bg-[#36234e] text-white">
             <tr>
               {["User ID", "Name", "Email", "Phone", "City", "Status", "Actions"].map((h) => (
-                <th key={h} className="p-3 text-xs uppercase tracking-wider">
+                <th 
+                  key={h} 
+                  className={`p-3 text-xs uppercase tracking-wider ${
+                    h === "Status" ? "w-40" : h === "Actions" ? "w-24" : ""
+                  }`}
+                >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
 
-          {/* Body */}
-          <motion.tbody variants={tableContainer} initial="hidden" animate="show">
-  {filteredUsers.length === 0 ? (
-    <tr>
-      <td
-        colSpan="7"
-        className="text-center py-6 text-gray-500 text-sm font-medium"
-      >
-        🚫 No seller found
-      </td>
-    </tr>
-  ) : (
-    filteredUsers.map((user, index) => {
-      const { text } = getStatusInfo(user.status);
+          <tbody className="divide-y divide-gray-100">
+            {filteredUsers.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center py-20 text-gray-500 text-lg font-semibold">
+                  😕 No Seller Found...
+                </td>
+              </tr>
+            ) : (
+              filteredUsers.map((user, index) => (
+                <tr key={user.userId || index} className="border-b hover:bg-[#f8f6ff] transition duration-200">
+                  <td className="p-4 text-[12px] font-medium text-gray-700">{user.userId}</td>
+                  <td className="p-4 text-[12px] text-gray-900 font-semibold">{user.fullName}</td>
+                  <td className="p-4 text-[12px] text-gray-600">{user.email}</td>
+                  <td className="p-4 text-[12px] text-gray-600">{user.phone}</td>
+                  <td className="p-4 text-[12px] text-gray-600">{user.city}</td>
 
-      return (
-        <motion.tr
-          key={index}
-           variants={tableRow}
-  initial="hidden"
-  animate="show"
-  
-          className="border-b hover:bg-[#f8f6ff] transition duration-200"
-        >
-          <td className="p-4 text-[12px] font-medium text-gray-700">{user.userId}</td>
-          <td className="p-4 text-[12px] font-semibold text-gray-900">{user.fullName}</td>
-          <td className="p-4 text-[12px] text-gray-600">{user.email}</td>
-          <td className="p-4 text-[12px]">{user.phone}</td>
-          <td className="p-4 text-[12px]">{user.city}</td>
+                  {/* STATUS */}
+                  <td className="p-4 w-40 relative">
+                    <div className="relative flex items-center gap-2 w-max">
+                      <div className={`px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm flex items-center gap-1.5 transition-all ${statusStyle(user.status)}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          user.status === 1 ? "bg-emerald-500" :
+                          user.status === 0 ? "bg-amber-500" : "bg-rose-500"
+                        }`} />
+                        {user.status === 1 ? "Approved" : user.status === 0 ? "Pending" : "Rejected"}
+                      </div>
 
-          {/* Status Badge */}
-          <td className="p-4">
-            <div className="relative flex items-center gap-2">
-              <motion.div
-                whileHover={{ scale: 1.06 }}
-                className={`px-3 py-1 rounded-full text-[10px] font-semibold text-white border shadow
-                  ${
-                    user.status === 1
-                      ? "bg-green-500"
-                      : user.status === 2
-                      ? "bg-red-500"
-                      : "bg-yellow-400 text-black"
-                  }`}
-              >
-                {text}
-              </motion.div>
+                      <div className="relative">
+                        <button onClick={() => toggleDropdown(index)} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                          <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
+                        </button>
 
-             <div className="relative">
-  <button onClick={() => toggleDropdown(index)}>
-    <IoIosArrowDown size={18} className="text-gray-500 cursor-pointer hover:text-black" />
-  </button>
+                        {dropdownOpen === index && (
+                          <div className={`absolute right-0 w-32 bg-white border border-gray-100 shadow-xl rounded-xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${
+                            index >= filteredUsers.length - 2 ? "bottom-full mb-2" : "top-8"
+                          }`}>
+                            <button 
+                              onClick={() => handleSelectStatus(index, 1)} 
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 w-full text-left flex items-center gap-2 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                              Approve
+                            </button>
+                            <button 
+                              onClick={() => handleSelectStatus(index, 0)} 
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-700 w-full text-left flex items-center gap-2 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-amber-500" />
+                              Pending
+                            </button>
+                            <button 
+                              onClick={() => handleSelectStatus(index, 2)} 
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-rose-50 hover:text-rose-700 w-full text-left flex items-center gap-2 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-rose-500" />
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
 
-  {dropdownOpen === index && (
-    <div className="absolute top-6 right-0 w-32 bg-white border shadow-md rounded-md z-50">
-      <button
-        onClick={() => handleSelectStatus(index, 0)}
-        className="px-4 py-2 w-full text-left text-sm hover:bg-gray-100"
-      >
-        Pending
-      </button>
-      <button
-        onClick={() => handleSelectStatus(index, 1)}
-        className="px-4 py-2 w-full text-left text-sm hover:bg-gray-100"
-      >
-        Approve
-      </button>
-      <button
-        onClick={() => handleSelectStatus(index, 2)}
-        className="px-4 py-2 w-full text-left text-sm hover:bg-gray-100 text-red-500"
-      >
-        Reject
-      </button>
-    </div>
-  )}
-</div>
-
-            </div>
-          </td>
-
-          {/* Actions */}
-          <td className="p-4 w-[120px]">
-            <div className="flex justify-center items-center gap-4">
-              <motion.button whileHover={{ scale: 1.15 }} onClick={() => card1({ ...user })}>
-                <LuPenLine size={18} className="text-blue-600 hover:text-blue-800" />
-              </motion.button>
-
-              <motion.button whileHover={{ scale: 1.15 }} onClick={() => openDeleteModal(user)}>
-                <FaTrash size={18} className="text-red-500 hover:text-red-700" />
-              </motion.button>
-            </div>
-          </td>
-        </motion.tr>
-      );
-    })
-  )}
-</motion.tbody>
-
+                  {/* ACTIONS */}
+                  <td className="p-4 w-24">
+                    <div className="flex items-center gap-4 justify-center">
+                      <motion.button 
+                        whileHover={{ scale: 1.15 }} 
+                        onClick={() => card1({ ...user })}
+                        className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 transition-colors"
+                        title="Edit Seller"
+                      >
+                        <LuPenLine size={18} />
+                      </motion.button>
+                      <motion.button 
+                        whileHover={{ scale: 1.15 }} 
+                        onClick={() => openDeleteModal(user)}
+                        className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-600 transition-colors"
+                        title="Reject/Delete Seller"
+                      >
+                        <FaTrash size={18} />
+                      </motion.button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
         </table>
       </div>
 
       {DeleteUser && (
-       <BuyerDelete user={DeleteUser} close={closeDeleteModal} onDelete={handleRejectSeller} />
-
+        <BuyerDelete user={DeleteUser} close={closeDeleteModal} onDelete={handleRejectSeller} />
       )}
     </div>
   );

@@ -144,7 +144,12 @@ const handleReject = async (product, reason, desc) => {
             <tr>
               {["ID", "Name", "Image", "Category", "Price", "Status", "Actions"].map(
                 (h) => (
-                  <th key={h} className="p-3 text-xs uppercase tracking-wider">
+                  <th 
+                    key={h} 
+                    className={`p-3 text-xs uppercase tracking-wider ${
+                      h === "Status" ? "w-40" : h === "Actions" ? "w-20" : ""
+                    }`}
+                  >
                     {h}
                   </th>
                 )
@@ -152,7 +157,7 @@ const handleReject = async (product, reason, desc) => {
             </tr>
           </thead>
 
-          <motion.tbody variants={tableContainer} initial="hidden" animate="show">
+          <tbody className="divide-y divide-gray-100">
             {filteredProducts.length === 0 ? (
               <tr>
                 <td
@@ -164,9 +169,8 @@ const handleReject = async (product, reason, desc) => {
               </tr>
             ) : (
               filteredProducts.map((product, index) => (
-                <motion.tr
-                  key={index}
-                  variants={tableRow}
+                <tr
+                  key={product.id || index}
                   className="border-b hover:bg-[#f8f6ff] transition duration-200"
                 >
                   <td className="p-4 text-[12px] font-medium text-gray-700">
@@ -184,8 +188,8 @@ const handleReject = async (product, reason, desc) => {
                   <td className="p-4 text-[12px] font-semibold">₹{product.price}</td>
 
                   {/* STATUS */}
-                  <td className="p-4">
-                    <div className="relative flex items-center gap-2">
+                  <td className="p-4 w-40 relative">
+                    <div className="relative flex items-center gap-2 w-max">
                       <div
                         className={`px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm flex items-center gap-1.5 transition-all ${statusStyle(
                           product.admin_approval
@@ -250,10 +254,10 @@ const handleReject = async (product, reason, desc) => {
                       </motion.button>
                     </div>
                   </td>
-                </motion.tr>
+                </tr>
               ))
             )}
-          </motion.tbody>
+          </tbody>
         </table>
       </div>
 
