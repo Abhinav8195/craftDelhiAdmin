@@ -20,10 +20,10 @@ const tableRow = {
 
 const statusStyle = (s) =>
   s === 1
-    ? "bg-green-500 text-white"
+    ? "bg-emerald-100 text-emerald-700 border-emerald-200"
     : s === 0
-    ? "bg-yellow-400 text-black"
-    : "bg-red-500 text-white";
+    ? "bg-amber-100 text-amber-700 border-amber-200"
+    : "bg-rose-100 text-rose-700 border-rose-200";
 
 const OrderTable = ({ card1 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -150,7 +150,7 @@ const OrderTable = ({ card1 }) => {
   return (
     <div className="px-5 mt-6">
       {/* TOP BAR */}
-      <div className="w-full flex flex-wrap justify-between items-center mb-5 gap-3">
+      <div className="w-full flex flex-wrap justify-between items-center gap-3 mb-5">
         <div className="text-black text-2xl font-bold">Order Management</div>
 
         <div className="flex gap-2 w-full sm:w-auto">
@@ -158,14 +158,14 @@ const OrderTable = ({ card1 }) => {
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="h-10 text-xs border border-gray-300 rounded px-3 bg-white"
+            className="w-full sm:w-[150px] flex items-center gap-2 border border-gray-300 rounded px-3 h-10 bg-white text-xs outline-none focus:outline-none focus:ring-0"
           />
 
-          <div className="w-full sm:w-[180px]">
+          <div className="w-full sm:w-[150px] border border-gray-300 rounded h-10 bg-white">
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(Number(e.target.value))}
-              className="w-full h-10 text-xs border border-gray-300 rounded px-3 bg-white"
+              onChange={(e) => setFilterStatus(e.target.value === "" ? "" : Number(e.target.value))}
+              className="w-full h-full text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0 px-3 text-gray-700"
             >
               <option value="">Payment Status</option>
               <option value="0">Pending</option>
@@ -174,12 +174,12 @@ const OrderTable = ({ card1 }) => {
             </select>
           </div>
 
-          <div className="flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white">
+          <div className="w-full sm:w-[239px] flex items-center gap-2 border border-gray-300 rounded px-2 h-10 bg-white">
             <input
               placeholder="Search Order..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="text-xs bg-transparent outline-none"
+              className="flex-1 text-xs bg-transparent border-none outline-none focus:outline-none focus:ring-0"
             />
             <FaSearch className="text-gray-500 text-sm" />
           </div>
@@ -201,75 +201,112 @@ const OrderTable = ({ card1 }) => {
                 "Status",
                 "Actions",
               ].map((h) => (
-                <th key={h} className="p-3 text-xs uppercase tracking-wide">
+                <th 
+                  key={h} 
+                  className={`p-3 text-xs uppercase tracking-wider ${
+                    h === "Status" ? "w-40" : h === "Actions" ? "w-20" : ""
+                  }`}
+                >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
 
-          <motion.tbody variants={tableContainer} initial="hidden" animate="show">
+          <motion.tbody variants={tableContainer} initial="hidden" animate="show" className="divide-y divide-gray-100">
             {filteredOrders.length === 0 ? (
               <tr>
-                <td colSpan="8" className="py-6 text-center text-gray-500">
+                <td colSpan="8" className="text-center py-6 text-gray-500 text-sm font-medium">
                   🚫 No Orders Found
                 </td>
               </tr>
             ) : (
               filteredOrders.map((order, index) => (
-                <motion.tr key={order.id} variants={tableRow} className="border-b hover:bg-[#f8f6ff] transition">
-                  <td className="p-4 text-[12px] font-semibold">{order.order_uid}</td>
-                  <td className="p-4 text-[12px]">{order.items[0].product_id}</td>
-                  <td className="p-4 text-[12px] font-medium">{order.items[0].product.name}</td>
+                <motion.tr 
+                  key={order.id} 
+                  variants={tableRow} 
+                  className="border-b hover:bg-[#f8f6ff] transition duration-200"
+                >
+                  <td className="p-4 text-[12px] font-medium text-gray-700">{order.order_uid}</td>
+                  <td className="p-4 text-[12px] text-gray-900">{order.items[0]?.product_id}</td>
+                  <td className="p-4 text-[12px] text-gray-900">{order.items[0]?.product?.name}</td>
 
                   <td className="p-4">
-                    <img src={order.items[0].product.main_image_url} alt="product" className="w-12 h-12 rounded-lg object-cover" />
+                    <img src={order.items[0]?.product?.main_image_url} alt="product" className="w-12 h-12 rounded-lg object-cover" />
                   </td>
 
-                  <td className="p-4 text-[12px]">
+                  <td className="p-4 text-[12px] text-gray-900">
                     {new Date(order.created_at).toLocaleDateString()}
                   </td>
 
-                  <td className="p-4 text-[12px] font-semibold">₹{order.items[0].price}</td>
+                  <td className="p-4 text-[12px] font-semibold">₹{order.items[0]?.price}</td>
 
                   {/* STATUS */}
-                  <td className="p-4">
-                    <div className="relative flex items-center gap-2">
-                      <div className={`px-3 py-1 rounded-full text-[10px] font-semibold border shadow ${statusStyle(order.payment_status)}`}>
+                  <td className="p-4 w-40 relative">
+                    <div className="relative flex items-center gap-2 w-max">
+                      <div className={`px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm flex items-center gap-1.5 transition-all ${statusStyle(order.payment_status)}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          order.payment_status === 1 ? "bg-emerald-500" :
+                          order.payment_status === 0 ? "bg-amber-500" : "bg-rose-500"
+                        }`} />
                         {order.payment_status === 1 ? "Paid" : order.payment_status === 0 ? "Pending" : "Refund"}
                       </div>
 
-                      <button onClick={() => toggleDropdown(index)}>
-                        <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
-                      </button>
+                      <div className="relative">
+                        <button onClick={() => toggleDropdown(index)}>
+                          <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
+                        </button>
 
-                      {dropdownOpen === index && (
-                        <div className="absolute top-6 right-0 w-32 bg-white rounded-md shadow border z-50">
-                          {[{ id: 0, label: "Pending" }, { id: 1, label: "Paid" }, { id: 2, label: "Refund" }].map((opt) => (
+                        {dropdownOpen === index && (
+                          <div className={`absolute right-0 w-36 bg-white border border-gray-100 shadow-xl rounded-xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${
+                            index >= filteredOrders.length - 2 ? "bottom-full mb-2" : "top-8"
+                          }`}>
                             <button
-                              key={opt.id}
-                              className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                              onClick={() => handleSelectStatus(order.id, opt.id)}
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-700 w-full text-left flex items-center gap-2 transition-colors"
+                              onClick={() => handleSelectStatus(order.id, 0)}
                             >
-                              {opt.label}
+                              <span className="w-2 h-2 rounded-full bg-amber-500" />
+                              Pending
                             </button>
-                          ))}
-                        </div>
-                      )}
+                            <button
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 w-full text-left flex items-center gap-2 transition-colors"
+                              onClick={() => handleSelectStatus(order.id, 1)}
+                            >
+                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                              Paid
+                            </button>
+                            <button
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-rose-50 hover:text-rose-700 w-full text-left flex items-center gap-2 transition-colors"
+                              onClick={() => handleSelectStatus(order.id, 2)}
+                            >
+                              <span className="w-2 h-2 rounded-full bg-rose-500" />
+                              Refund
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
 
                   {/* ACTIONS */}
-                  <td className="p-4 flex gap-3 mt-3">
-                    <LuPenLine 
-  onClick={() => card1(1, order)} 
-  className="text-blue-600 cursor-pointer hover:text-blue-900"
-/>
-
-                    <FaTrash
-                      className="text-red-500 cursor-pointer hover:text-red-700"
-                      onClick={() => setDeleteUser(order)}
-                    />
+                  <td className="p-4">
+                    <div className="flex items-center gap-4 h-full">
+                      <motion.button 
+                        whileHover={{ scale: 1.15 }} 
+                        onClick={() => card1(1, order)} 
+                        className="p-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+                      >
+                        <LuPenLine className="text-blue-600" size={18} />
+                      </motion.button>
+                      
+                      <motion.button 
+                        whileHover={{ scale: 1.15 }} 
+                        onClick={() => setDeleteUser(order)} 
+                        className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                      >
+                        <FaTrash className="text-red-500" size={18} />
+                      </motion.button>
+                    </div>
                   </td>
                 </motion.tr>
               ))
