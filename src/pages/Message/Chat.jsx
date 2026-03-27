@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { FiPaperclip,FiSend } from "react-icons/fi";
 import MobileChat from "./MobileChat";
 import { io } from "socket.io-client";
@@ -18,6 +18,9 @@ const Chat = () => {
   const typingTimeoutRef = useRef(null);
 
   const [rooms, setRooms] = useState([]);
+  const roomsRef = useRef([]);
+  useEffect(() => { roomsRef.current = rooms; }, [rooms]);
+  
   const [loadingRooms, setLoadingRooms] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -36,28 +39,28 @@ const Chat = () => {
   const [attachmentName, setAttachmentName] = useState("");
 
   /* ================= FETCH ROOMS ================= */
+ 
+  const fetchRooms = useCallback(async () => {
+    const TOKEN = getAdminToken();
+    if (!TOKEN || !Admin_Id) return;
+ 
+    try {
+      const res = await axios.get(`${API_BASE}/rooms`, {
+        headers: { Authorization: `Bearer ${TOKEN}` },
+      });
+ 
+      setRooms(res.data?.data || []);
+    } catch (err) {
+      console.error("❌ Rooms fetch failed", err);
+      setRooms([]);
+    } finally {
+      setLoadingRooms(false);
+    }
+  }, []); 
 
   useEffect(() => {
-    const fetchRooms = async () => {
-      const TOKEN = getAdminToken();
-      if (!TOKEN || !Admin_Id) return;
-
-      try {
-        const res = await axios.get(`${API_BASE}/rooms`, {
-          headers: { Authorization: `Bearer ${TOKEN}` },
-        });
-
-        setRooms(res.data?.data || []);
-      } catch (err) {
-        console.error("❌ Rooms fetch failed", err);
-        setRooms([]);
-      } finally {
-        setLoadingRooms(false);
-      }
-    };
-
     fetchRooms();
-  }, []);
+  }, [fetchRooms]);
 
   useEffect(() => {
     activeRoomRef.current = roomId;
@@ -86,20 +89,25 @@ const Chat = () => {
       console.error("❌ Socket connection error:", err.message);
     });
 
-   socketRef.current.on("message_received", (data) => {
-  if (!data?.roomId) return;
-
-  // ignore my own already-added optimistic message
-  if (String(data.senderId) === String(Admin_Id)) return;
-
-  setMessagesByRoom(prev => {
-    const roomMessages = prev[data.roomId] || [];
-    return {
-      ...prev,
-      [data.roomId]: [...roomMessages, data],
-    };
-  });
-});
+    socketRef.current.on("message_received", (data) => {
+      if (!data?.roomId) return;
+  
+      // ignore my own already-added optimistic message
+      if (String(data.senderId) === String(Admin_Id)) return;
+  
+      setMessagesByRoom(prev => {
+        const roomMessages = prev[data.roomId] || [];
+        return {
+          ...prev,
+          [data.roomId]: [...roomMessages, data],
+        };
+      });
+  
+      // If this room isn't in our current list, refresh rooms
+      if (!roomsRef.current.find(r => r._id === data.roomId)) {
+        fetchRooms();
+      }
+    });
 
 
     socketRef.current.on("user_typing", ({ userId, isTyping, roomId: typingRoomId }) => {
@@ -563,6 +571,7 @@ const filteredRooms = rooms.filter((room) => {
                         <img
                           src={attachmentPreview}
                           className="w-16 h-16 rounded object-cover"
+                          alt="preview"
                         />
                       )}
 

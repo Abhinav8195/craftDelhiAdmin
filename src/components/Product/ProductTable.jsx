@@ -114,10 +114,10 @@ const handleReject = async (product, reason, desc) => {
 
   const statusStyle = (s) =>
     s === 1
-      ? "bg-green-500 text-white"
+      ? "bg-emerald-100 text-emerald-700 border-emerald-200"
       : s === 0
-      ? "bg-yellow-400 text-black"
-      : "bg-red-500 text-white";
+      ? "bg-amber-100 text-amber-700 border-amber-200"
+      : "bg-rose-100 text-rose-700 border-rose-200";
 
   return (
     <div className="px-5 mt-6">
@@ -187,10 +187,14 @@ const handleReject = async (product, reason, desc) => {
                   <td className="p-4">
                     <div className="relative flex items-center gap-2">
                       <div
-                        className={`px-3 py-1 rounded-full text-[10px] font-semibold border shadow ${statusStyle(
+                        className={`px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm flex items-center gap-1.5 transition-all ${statusStyle(
                           product.admin_approval
                         )}`}
                       >
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          product.admin_approval === 1 ? "bg-emerald-500" :
+                          product.admin_approval === 0 ? "bg-amber-500" : "bg-rose-500"
+                        }`} />
                         {product.admin_approval === 1
                           ? "Approved"
                           : product.admin_approval === 0
@@ -204,14 +208,28 @@ const handleReject = async (product, reason, desc) => {
                         </button>
 
                         {dropdownOpen === index && (
-                          <div className="absolute top-6 right-0 w-32 bg-white border shadow-md rounded-md z-50">
-                            <button onClick={() => handleSelectStatus(index, 0)} className="px-4 py-2 text-sm hover:bg-gray-100 w-full text-left">
+                          <div className={`absolute right-0 w-36 bg-white border border-gray-100 shadow-xl rounded-xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${
+                            index >= filteredProducts.length - 2 ? "bottom-full mb-2" : "top-8"
+                          }`}>
+                            <button 
+                              onClick={() => handleSelectStatus(index, 0)} 
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-700 w-full text-left flex items-center gap-2 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-amber-500" />
                               Pending
                             </button>
-                            <button onClick={() => handleSelectStatus(index, 1)} className="px-4 py-2 text-sm hover:bg-gray-100 w-full text-left">
+                            <button 
+                              onClick={() => handleSelectStatus(index, 1)} 
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 w-full text-left flex items-center gap-2 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
                               Approve
                             </button>
-                            <button onClick={() => handleSelectStatus(index, 2)} className="px-4 py-2 text-sm hover:bg-gray-100 text-red-500 w-full text-left">
+                            <button 
+                              onClick={() => handleSelectStatus(index, 2)} 
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-rose-50 hover:text-rose-700 w-full text-left flex items-center gap-2 transition-colors"
+                            >
+                              <span className="w-2 h-2 rounded-full bg-rose-500" />
                               Reject
                             </button>
                           </div>
@@ -221,13 +239,16 @@ const handleReject = async (product, reason, desc) => {
                   </td>
 
                   {/* ACTIONS */}
-                  <td className="p-4 flex gap-4 mt-3">
-                    <motion.button whileHover={{ scale: 1.15 }} onClick={() => card1(product)}>
-                      <LuPenLine className="text-blue-600 hover:text-blue-800" size={18} />
-                    </motion.button>
-                    {/* <motion.button whileHover={{ scale: 1.15 }} onClick={() => openDeleteModal(product)}>
-                      <FaTrash className="text-red-500 hover:text-red-700" size={18} />
-                    </motion.button> */}
+                  <td className="p-4">
+                    <div className="flex items-center gap-4 h-full">
+                      <motion.button 
+                        whileHover={{ scale: 1.15 }} 
+                        onClick={() => card1(product)}
+                        className="p-1.5 rounded-lg hover:bg-blue-50 transition-colors"
+                      >
+                        <LuPenLine className="text-blue-600" size={18} />
+                      </motion.button>
+                    </div>
                   </td>
                 </motion.tr>
               ))
