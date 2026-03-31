@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import image from '../../assets/images/image.png'
 import { IoIosChatbubbles } from "react-icons/io";
 import { getAdminToken } from '../../utils/auth';
+import { toast } from "react-toastify";
 
 const EditOrder = ({ card1, orderData }) => {
   console.log("Received Order:", orderData);
@@ -30,13 +31,11 @@ const EditOrder = ({ card1, orderData }) => {
 
   useEffect(() => {
     if (orderData) {
-      let paymentLabel = orderData.payment_status === 1 ? "paid" :
-        orderData.payment_status === 2 ? "refund" : "pending";
 
       setForm({
         order_uid: orderData?.order_uid || "",
         product_id: orderData?.items?.[0]?.product_id || "",
-        payment_status: paymentLabel,
+        payment_status: orderData.payment_status ?? 0,
         product_name: product?.name || "",
         created_at: orderData?.created_at
           ? new Date(orderData.created_at).toISOString().split("T")[0]
@@ -69,7 +68,7 @@ const EditOrder = ({ card1, orderData }) => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          payment_status: form.payment_status,
+          payment_status: Number(form.payment_status),
           shipping_address_id: orderData.shipping_address_id,
           order_status: orderData.order_status,
           payment_method: orderData.payment_method,
@@ -87,7 +86,7 @@ const EditOrder = ({ card1, orderData }) => {
 
       if (!response.ok) throw new Error("Failed to update order");
 
-      alert("Order Updated Successfully!");
+      toast.success("Order Updated Successfully 🎉");
 
       card1(null); // close modal  
     } catch (error) {
@@ -157,15 +156,19 @@ const EditOrder = ({ card1, orderData }) => {
             {/* Payment Status */}
             <div className="flex flex-col gap-1">
               <label className="text-black text-[10px] font-bold uppercase tracking-widest">Payment Status</label>
-              <select className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-xs text-black"
-                value={form.payment_status || ""}
-                onChange={(e) => setForm({ ...form, payment_status: e.target.value })}
-              >
-                <option value="">Select Status</option>
-                <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
-                <option value="refund">Refund</option>
-              </select>
+              <select
+  className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-xs text-black"
+  value={form.payment_status ?? ""}
+  onChange={(e) =>
+    setForm({ ...form, payment_status: Number(e.target.value) })
+  }
+>
+  <option value="">Select Status</option>
+  <option value={0}>Pending</option>
+  <option value={1}>Paid</option>
+  <option value={2}>Refund</option>
+  <option value={4}>Cancelled</option>
+</select>
             </div>
           </div>
 

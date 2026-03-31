@@ -23,6 +23,8 @@ const statusStyle = (s) =>
     ? "bg-emerald-100 text-emerald-700 border-emerald-200"
     : s === 0
     ? "bg-amber-100 text-amber-700 border-amber-200"
+    : s === 4
+    ? "bg-red-100 text-red-700 border-red-200"
     : "bg-rose-100 text-rose-700 border-rose-200";
 
 const OrderTable = ({ card1 }) => {
@@ -171,6 +173,7 @@ const OrderTable = ({ card1 }) => {
               <option value="0">Pending</option>
               <option value="1">Paid</option>
               <option value="2">Refund</option>
+              <option value="4">Cancelled</option>
             </select>
           </div>
 
@@ -247,9 +250,12 @@ const OrderTable = ({ card1 }) => {
                       <div className={`px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm flex items-center gap-1.5 transition-all ${statusStyle(order.payment_status)}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${
                           order.payment_status === 1 ? "bg-emerald-500" :
-                          order.payment_status === 0 ? "bg-amber-500" : "bg-rose-500"
+                          order.payment_status === 0 ? "bg-amber-500" : 
+                          order.payment_status === 4 ? "bg-red-500" : "bg-rose-500"
                         }`} />
-                        {order.payment_status === 1 ? "Paid" : order.payment_status === 0 ? "Pending" : "Refund"}
+                        {order.payment_status === 1 ? "Paid" : 
+                         order.payment_status === 0 ? "Pending" : 
+                         order.payment_status === 4 ? "Cancelled" : "Refund"}
                       </div>
 
                       <div className="relative">
@@ -281,6 +287,13 @@ const OrderTable = ({ card1 }) => {
                             >
                               <span className="w-2 h-2 rounded-full bg-rose-500" />
                               Refund
+                            </button>
+                            <button
+                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-red-50 hover:text-red-700 w-full text-left flex items-center gap-2 transition-colors"
+                              onClick={() => handleSelectStatus(order.id, 4)}
+                            >
+                              <span className="w-2 h-2 rounded-full bg-red-500" />
+                              Cancelled
                             </button>
                           </div>
                         )}
