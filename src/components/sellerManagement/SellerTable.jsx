@@ -203,7 +203,7 @@ const [search, setSearch] = useState("");
       </div>
 
       {/* TABLE */}
-      <div className="border rounded-xl shadow-lg bg-white overflow-x-auto">
+      <div className="border rounded-xl shadow-lg bg-white overflow-hidden h-[200px] flex flex-col">
         <table className="w-full min-w-[1000px] text-left">
           <thead className="bg-[#36234e] text-white">
             <tr>
@@ -253,31 +253,33 @@ const [search, setSearch] = useState("");
                         </button>
 
                         {dropdownOpen === index && (
-                          <div className={`absolute right-0 w-32 bg-white border border-gray-100 shadow-xl rounded-xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${
-                            index >= filteredUsers.length - 2 ? "bottom-full mb-2" : "top-8"
-                          }`}>
-                            <button 
-                              onClick={() => handleSelectStatus(index, 1)} 
-                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 w-full text-left flex items-center gap-2 transition-colors"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                              Approve
-                            </button>
-                            <button 
-                              onClick={() => handleSelectStatus(index, 0)} 
-                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-700 w-full text-left flex items-center gap-2 transition-colors"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-amber-500" />
-                              Pending
-                            </button>
-                            <button 
-                              onClick={() => handleSelectStatus(index, 2)} 
-                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-rose-50 hover:text-rose-700 w-full text-left flex items-center gap-2 transition-colors"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-rose-500" />
-                              Reject
-                            </button>
-                          </div>
+    <div className="absolute right-0 top-full mt-2 w-32 bg-white border border-gray-100 shadow-xl rounded-xl z-[9999] py-1">
+      
+      <button
+        onClick={() => handleSelectStatus(index, 1)}
+        className="px-4 py-2 text-xs text-gray-600 hover:bg-emerald-50 w-full text-left flex items-center gap-2"
+      >
+        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+        Approve
+      </button>
+
+      <button
+        onClick={() => handleSelectStatus(index, 0)}
+        className="px-4 py-2 text-xs text-gray-600 hover:bg-amber-50 w-full text-left flex items-center gap-2"
+      >
+        <span className="w-2 h-2 rounded-full bg-amber-500" />
+        Pending
+      </button>
+
+      <button
+        onClick={() => handleSelectStatus(index, 2)}
+        className="px-4 py-2 text-xs text-gray-600 hover:bg-rose-50 w-full text-left flex items-center gap-2"
+      >
+        <span className="w-2 h-2 rounded-full bg-rose-500" />
+        Reject
+      </button>
+
+    </div>
                         )}
                       </div>
                     </div>

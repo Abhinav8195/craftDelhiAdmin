@@ -182,104 +182,112 @@ const Chat = () => {
   /* ================= SEND MESSAGE ================= */
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !roomId) return;
-
-    const messageText = newMessage;
-
-   setMessagesByRoom(prev => {
-  const roomMessages = prev[roomId] || [];
-
-  return {
-    ...prev,
-    [roomId]: [
-      ...roomMessages,
-      {
-        message: messageText,
-        senderId: Admin_Id,
-        createdAt: new Date(),
-      },
-    ],
-  };
-});
-
-    setNewMessage("");
-
-    const TOKEN = getAdminToken();
-
-    try {
-      await axios.post(
-        `${API_BASE}/message`,
-        { roomId, message: messageText },
-        { headers: { Authorization: `Bearer ${TOKEN}` } }
-      );
-    } catch (err) {
-      console.error("❌ REST send failed", err);
-    }
-
-    socketRef.current.emit("send_message", {
-      roomId,
-      message: messageText,
-    });
-  };
-
-   /* ================= SEND MESSAGE (TEXT ONLY BACKEND) ================= */
-
-  const sendTextOnly = async (text) => {
-    if (!text || !roomId) return;
-
-    const TOKEN = getAdminToken();
-
-    try {
-      await axios.post(
-        `${API_BASE}/message`,
-        { roomId, message: text },
-        { headers: { Authorization: `Bearer ${TOKEN}` } }
-      );
-    } catch (err) {
-      console.error("❌ REST send failed", err);
-    }
-
-    socketRef.current.emit("send_message", {
-      roomId,
-      message: text,
-    });
-  };
-
-const sendWithAttachment = async () => {
     if (!roomId) return;
 
-    if (!newMessage.trim() && !attachment) return;
-
-    // add optimistically in UI
-     setMessagesByRoom(prev => {
-  const roomMessages = prev[roomId] || [];
-
-  return {
-    ...prev,
-    [roomId]: [
-      ...roomMessages,
-      {
-        senderId: Admin_Id,
-        message: newMessage,
-        fileName: attachmentName,
-        filePreview: attachmentPreview,
-        createdAt: new Date(),
-      },
-    ],
-  };
-});
-
-    // send text to backend (file upload can be added later)
+    // Send text message if any
     if (newMessage.trim()) {
-      await sendTextOnly(newMessage.trim());
+      const messageText = newMessage;
+
+      setMessagesByRoom(prev => {
+        const roomMessages = prev[roomId] || [];
+        return {
+          ...prev,
+          [roomId]: [
+            ...roomMessages,
+            {
+              message: messageText,
+              senderId: Admin_Id,
+              createdAt: new Date(),
+            },
+          ],
+        };
+      });
+
+      setNewMessage("");
+
+      const TOKEN = getAdminToken();
+
+      try {
+        await axios.post(
+          `${API_BASE}/message`,
+          { roomId, message: messageText },
+          { headers: { Authorization: `Bearer ${TOKEN}` } }
+        );
+
+        socketRef.current.emit("send_message", {
+          roomId,
+          message: messageText,
+        });
+      } catch (err) {
+        console.error("❌ REST send failed", err);
+      }
     }
 
+    // Send attachment if any
+    if (attachment) {
+      await handleSendAttachment();
+    }
+  };
+
+  /* ================= SEND ATTACHMENT ================= */
+
+  const handleSendAttachment = async () => {
+    if (!attachment || !roomId) return;
+
+    const TOKEN = getAdminToken();
+    const formData = new FormData();
+    formData.append("roomId", roomId);
+    formData.append("file", attachment);
+
+    // add optimistically in UI
+    const fileNameStored = attachmentName;
+    const filePrevStored = attachmentPreview;
+
+    setMessagesByRoom(prev => {
+      const roomMessages = prev[roomId] || [];
+      return {
+        ...prev,
+        [roomId]: [
+          ...roomMessages,
+          {
+            senderId: Admin_Id,
+            fileName: fileNameStored,
+            filePreview: filePrevStored,
+            createdAt: new Date(),
+          },
+        ],
+      };
+    });
+
     // clear states
-    setNewMessage("");
     setAttachment(null);
     setAttachmentPreview(null);
     setAttachmentName("");
+
+    try {
+      await axios.post(
+        `${API_BASE}/message`, // Using existing endpoint but with FormData
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      socketRef.current.emit("send_message", {
+        roomId,
+        fileName: fileNameStored,
+        filePreview: filePrevStored,
+      });
+    } catch (err) {
+      console.error("❌ REST attachment send failed", err);
+    }
   };
+
+
+
 
 
 
@@ -313,7 +321,15 @@ const sendWithAttachment = async () => {
   };
 
 
-   const getInitials = (name = "U") => {
+  const isImageURL = (url) => {
+    return (
+      typeof url === "string" &&
+      (url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null ||
+        url.includes("chat_media"))
+    );
+  };
+
+  const getInitials = (name = "U") => {
   if (!name) return "U";
 
   const parts = name.trim().split(" ").filter(Boolean);
@@ -393,9 +409,8 @@ const filteredRooms = rooms.filter((room) => {
           setAttachment={setAttachment}
           attachmentPreview={attachmentPreview}
           setAttachmentPreview={setAttachmentPreview}
-          attachmentName={attachmentName}
           setAttachmentName={setAttachmentName}
-          sendWithAttachment={sendWithAttachment}
+          sendWithAttachment={handleSendMessage}
         />
       ) : (
         <div className="w-full max-w-6xl flex rounded-2xl shadow-sm border border-gray-200 h-[80vh] bg-white overflow-hidden">
@@ -529,24 +544,25 @@ const filteredRooms = rooms.filter((room) => {
                                       : "bg-white text-gray-800 rounded-tl-sm border border-gray-100"
                                   }`}
                               >
-                                {/* IMAGE */}
-                                {msg.filePreview && (
+                                {/* IMAGE (Optimistic or S3 URL) */}
+                                {(msg.filePreview || (msg.message && isImageURL(msg.message))) && (
                                   <img
-                                    src={msg.filePreview}
-                                    className="w-48 h-48 object-cover rounded-xl mb-2"
+                                    src={msg.filePreview || msg.message}
+                                    className="w-48 h-48 object-cover rounded-xl mb-2 cursor-pointer hover:opacity-90 transition-opacity"
                                     alt="attachment"
+                                    onClick={() => window.open(msg.filePreview || msg.message, "_blank")}
                                   />
                                 )}
 
-                                {/* DOC */}
-                                {msg.fileName && !msg.filePreview && (
+                                {/* DOC (Optimistic or stored placeholder) */}
+                                {msg.fileName && !msg.filePreview && !isImageURL(msg.message) && (
                                   <div className={`text-sm mb-1 flex items-center gap-2 ${isMe ? 'text-gray-100' : 'text-gray-500'}`}>
                                     <FiPaperclip /> {msg.fileName}
                                   </div>
                                 )}
 
-                                {/* TEXT */}
-                                {msg.message && <span>{msg.message}</span>}
+                                {/* TEXT (Hide if it's the image URL itself) */}
+                                {msg.message && !isImageURL(msg.message) && <span>{msg.message}</span>}
                               </div>
                               <div className="text-[10px] mt-1 text-gray-400">
                                 {formatTime(msg.createdAt)}
@@ -652,13 +668,13 @@ const filteredRooms = rooms.filter((room) => {
                          emitTyping();
                       }}
                       onKeyDown={(e) =>
-                        e.key === "Enter" && sendWithAttachment()
+                        e.key === "Enter" && handleSendMessage()
                       }
                       placeholder="Type a message..."
                     />
 
                     <button
-                      onClick={sendWithAttachment}
+                      onClick={handleSendMessage}
                       disabled={!newMessage.trim() && !attachment}
                       className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white w-9 h-9 rounded-full shadow-sm transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0"
                     >

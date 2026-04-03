@@ -181,7 +181,7 @@ const updateProductStatus = async (
                     </td>
                     <td className="px-5 py-4 text-gray-600 font-medium max-w-[150px] truncate">{product.seller}</td>
 
-                    <td className="px-5 py-4 relative">
+                    <td className={`px-5 py-4 relative ${dropdownOpen === index ? "z-[50]" : ""}`}>
                       <div className="relative flex items-center gap-2 w-max">
                         <div className={`px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm flex items-center gap-1.5 transition-all ${statusStyle(0)}`}>
                           <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
@@ -198,7 +198,7 @@ const updateProductStatus = async (
 
                           {dropdownOpen === index && (
                             <div className={`absolute right-0 w-32 bg-white border border-gray-100 shadow-2xl rounded-xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${
-                              index >= filteredProducts.length - 2 ? "bottom-full mb-2" : "top-8"
+                              index >= filteredProducts.length - 2 && index > 0 ? "bottom-full mb-2" : "top-8"
                             }`}>
                               <button 
                                 onClick={() => handleSelectStatus(index, 1)} 

@@ -63,6 +63,14 @@ const MobileChat = ({
     return d.toLocaleDateString();
   };
 
+  const isImageURL = (url) => {
+    return (
+      typeof url === "string" &&
+      (url.match(/\.(jpeg|jpg|gif|png|webp)$/i) != null ||
+        url.includes("chat_media"))
+    );
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -186,18 +194,23 @@ const MobileChat = ({
                         className={`max-w-[72%] px-3 py-2 rounded-2xl shadow break-words whitespace-pre-wrap
                         ${isMe ? "bg-blue-600 text-white rounded-br-none" : "bg-white rounded-bl-none"}`}
                       >
-                        {msg.filePreview && (
+                        {/* IMAGE (Optimistic or S3 URL) */}
+                        {(msg.filePreview || (msg.message && isImageURL(msg.message))) && (
                           <img
-                            src={msg.filePreview}
-                            className="w-40 h-40 rounded-lg object-cover mb-2"
+                            src={msg.filePreview || msg.message}
+                            className="w-40 h-40 rounded-lg object-cover mb-2 cursor-pointer"
+                            onClick={() => window.open(msg.filePreview || msg.message, "_blank")}
+                            alt="attachment"
                           />
                         )}
 
-                        {msg.fileName && !msg.filePreview && (
+                        {/* DOC */}
+                        {msg.fileName && !msg.filePreview && !isImageURL(msg.message) && (
                           <div className="text-sm mb-1">📄 {msg.fileName}</div>
                         )}
 
-                        {msg.message && <p className="text-sm">{msg.message}</p>}
+                        {/* TEXT */}
+                        {msg.message && !isImageURL(msg.message) && <p className="text-sm">{msg.message}</p>}
 
                         <div className="text-[10px] opacity-60 text-right">
                           {formatTime(msg.createdAt)}
