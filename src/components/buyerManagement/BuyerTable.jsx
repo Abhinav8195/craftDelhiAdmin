@@ -22,40 +22,34 @@ const BuyerTable = ({ card1 }) => {
   const token = getAdminToken();
 
   useEffect(() => {
-    const fetchBuyers = async () => {
-      try {
-        const res = await axios.get(`${process.env.REACT_APP_BASE_URL}admin/buyers-view`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.data.success) {
-          const buyers = res.data.data.map(buyer => ({
-            userId: buyer.user_id,
-            first_name: buyer.first_name || "",
-            last_name: buyer.last_name || "",
-            name: `${buyer.first_name || ""} ${buyer.last_name || ""}`.trim(),
-            email: buyer.email || "",
-            phone: buyer.phone_number || "",
-            profileImage: buyer.profile_image || "",
-            date_of_birth: buyer.date_of_birth || "",
-            gender: buyer.gender || "",
-            city: buyer.city || "",
-            street: buyer.street || "",
-            state: buyer.state || "",
-            country: buyer.country || "",
-            postal_code: buyer.postal_code || "",
-           status: Number(buyer.user_status),
-          }));
+  const fetchBuyers = async () => {
+    try {
+      const res = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}admin/buyers-view`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-          setUsers(buyers);
-          setUpdatedUsers(buyers);
-        }
-      } catch (error) {
-        console.error("Error fetching buyers:", error);
+      let buyers = [];
+
+      if (res.data.success) {
+        buyers = res.data.data.map(buyer => ({
+          userId: buyer.user_id,
+          name: `${buyer.first_name || ""} ${buyer.last_name || ""}`.trim(),
+          email: buyer.email || "",
+          phone: buyer.phone_number || "",
+          status: Number(buyer.user_status),
+        }));
       }
-    };
+setUsers([...buyers]);
+      setUpdatedUsers([...buyers]);
 
-    fetchBuyers();
-  }, []);
+    } catch (error) {
+      console.error("Error fetching buyers:", error);
+    }
+  };
+
+  fetchBuyers();
+}, []);
 
   const openModal = (user) => setSelectedUser(user);
   const closeModal = () => setSelectedUser(null);
@@ -151,6 +145,12 @@ const handleTrashUser = async (reason, description) => {
   closeDeleteModal(); 
 };
 
+const getDropdownPosition = (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const spaceBelow = window.innerHeight - rect.bottom;
+
+  return spaceBelow < 150 ? "bottom-full mb-2" : "top-8";
+};
 
 
 
@@ -191,7 +191,7 @@ const handleTrashUser = async (reason, description) => {
       </div>
 
       {/* TABLE */}
-      <div className="border rounded-xl shadow-lg bg-white overflow-x-auto">
+      <div className="border rounded-xl shadow-lg bg-white overflow-x-auto min-h-[250px]">
         <table className="w-full min-w-[1000px] text-left">
           <thead className="bg-[#36234e] text-white">
             <tr>
@@ -235,14 +235,26 @@ const handleTrashUser = async (reason, description) => {
                       </div>
 
                       <div className="relative">
-                        <button onClick={() => toggleDropdown(index)} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
-                          <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
-                        </button>
+                        <button
+  onClick={(e) => {
+    if (dropdownOpen?.index === index) {
+      setDropdownOpen(null); // close
+    } else {
+      setDropdownOpen({
+        index,
+        position: getDropdownPosition(e),
+      });
+    }
+  }}
+  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+>
+  <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
+</button>
 
-                        {dropdownOpen === index && (
-                          <div className={`absolute right-0 w-32 bg-white border border-gray-100 shadow-xl rounded-xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${
-                            index >= updatedUsers.length - 2 ? "bottom-full mb-2" : "top-8"
-                          }`}>
+                        {dropdownOpen?.index === index && (
+  <div
+    className={`absolute right-0 w-36 bg-white border border-gray-100 shadow-2xl rounded-xl z-[9999] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${dropdownOpen.position}`}
+  >
                             <button 
                               onClick={() => handleSelectStatus(index, 1)} 
                               className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 w-full text-left flex items-center gap-2 transition-colors"
