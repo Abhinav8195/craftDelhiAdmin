@@ -34,7 +34,7 @@ const ProductTable = ({ card1 }) => {
           `${process.env.REACT_APP_BASE_URL}admin/totalproductsforadmin`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        if (res.data?.status) setProducts(res.data.data || []);
+        if (res.data?.status) setProducts((res.data.data || []));
       } catch (error) {
         console.error("Error fetching products", error);
       }
@@ -138,7 +138,7 @@ const handleReject = async (product, reason, desc) => {
       </div>
 
       {/* TABLE */}
-      <div className="border rounded-xl shadow-lg bg-white overflow-x-auto">
+      <div className="border rounded-xl shadow-lg bg-white overflow-x-auto min-h-[300px]">
         <table className="w-full min-w-[900px] text-left">
           <thead className="bg-[#36234e] text-white">
             <tr>
@@ -206,39 +206,46 @@ const handleReject = async (product, reason, desc) => {
                           : "Rejected"}
                       </div>
 
-                      <div className="relative">
-                        <button onClick={() => toggleDropdown(index)}>
-                          <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
-                        </button>
-
-                        {dropdownOpen === index && (
-                          <div className={`absolute right-0 w-36 bg-white border border-gray-100 shadow-xl rounded-xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in duration-200 ${
-                            index >= filteredProducts.length - 2 ? "bottom-full mb-2" : "top-8"
-                          }`}>
-                            <button 
-                              onClick={() => handleSelectStatus(index, 0)} 
-                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-700 w-full text-left flex items-center gap-2 transition-colors"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-amber-500" />
-                              Pending
-                            </button>
-                            <button 
-                              onClick={() => handleSelectStatus(index, 1)} 
-                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 w-full text-left flex items-center gap-2 transition-colors"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                              Approve
-                            </button>
-                            <button 
-                              onClick={() => handleSelectStatus(index, 2)} 
-                              className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-rose-50 hover:text-rose-700 w-full text-left flex items-center gap-2 transition-colors"
-                            >
-                              <span className="w-2 h-2 rounded-full bg-rose-500" />
-                              Reject
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                     <div className="relative">
+                                             <button onClick={() => toggleDropdown(index)} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                                               <IoIosArrowDown size={18} className="text-gray-500 hover:text-black" />
+                                             </button>
+                     
+                                        {dropdownOpen === index && (
+                       <div
+                         className={`absolute right-0 w-36 bg-white border border-gray-100 shadow-2xl rounded-xl z-[9999] py-1 overflow-hidden animate-in fade-in zoom-in duration-200
+                         ${
+                           filteredProducts.length > 2 && index >= filteredProducts.length - 2
+                             ? "bottom-full mb-2"
+                             : "top-8"
+                         }`}
+                       >
+                         <button
+                           onClick={() => handleSelectStatus(index, 1)}
+                           className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 w-full text-left flex items-center gap-2 transition-colors"
+                         >
+                           <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                           Approve
+                         </button>
+                     
+                         <button
+                           onClick={() => handleSelectStatus(index, 0)}
+                           className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-700 w-full text-left flex items-center gap-2 transition-colors"
+                         >
+                           <span className="w-2 h-2 rounded-full bg-amber-500" />
+                           Pending
+                         </button>
+                     
+                         <button
+                           onClick={() => handleSelectStatus(index, 2)}
+                           className="px-4 py-2.5 text-xs font-medium text-gray-600 hover:bg-rose-50 hover:text-rose-700 w-full text-left flex items-center gap-2 transition-colors"
+                         >
+                           <span className="w-2 h-2 rounded-full bg-rose-500" />
+                           Reject
+                         </button>
+                       </div>
+                     )}
+                                           </div>
                     </div>
                   </td>
 
