@@ -20,12 +20,14 @@ const tableRow = {
   show: { opacity: 1, y: 0 },
 };
 
-const ProductTable = ({ card1 }) => {
+const ProductTable = ({ card1,filterType }) => {
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [products, setProducts] = useState([]);
   const [deleteProduct, setDeleteProduct] = useState(null);
   const [search, setSearch] = useState("");
   const token = getAdminToken();
+
+ 
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -104,10 +106,21 @@ const handleReject = async (product, reason, desc) => {
 
 
 
+const filteredProducts = products.filter((product) => {
+  // ✅ status filter
+  if (filterType === "pending" && product.admin_approval !== 0) {
+    return false;
+  }
 
-  const filteredProducts = products.filter((p) =>
-    (p.name?.toLowerCase() || "").includes(search.toLowerCase())
-  );
+  // ✅ search filter
+  if (
+    !(product.name?.toLowerCase() || "").includes(search.toLowerCase())
+  ) {
+    return false;
+  }
+
+  return true;
+});
 
   const openDeleteModal = (product) => setDeleteProduct(product);
   const closeDeleteModal = () => setDeleteProduct(null);

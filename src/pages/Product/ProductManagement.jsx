@@ -9,6 +9,11 @@ import { TbHourglassHigh } from "react-icons/tb";
 
 const ProductManagement = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [filterType, setFilterType] = useState("all"); 
+
+  const handleFilterClick = (type) => {
+  setFilterType(type);
+};
 
   const [stats, setStats] = useState({
     total_products: 0,
@@ -75,8 +80,8 @@ const ProductManagement = () => {
   };
 
   const cardItems = [
-    { label: "Total Products", value: stats.total_products, bg: "from-[#ffe2e6]", icon: <FaBoxOpen className="text-red-500 text-4xl" /> },
-    { label: "Pending Products", value: stats.pending_products, bg: "from-[#fff4de]", icon: <TbHourglassHigh className="text-yellow-600 text-4xl" /> },
+    { label: "Total Products", value: stats.total_products,type: "all", bg: "from-[#ffe2e6]", icon: <FaBoxOpen className="text-red-500 text-4xl" /> },
+    { label: "Pending Products", value: stats.pending_products,type: "pending", bg: "from-[#fff4de]", icon: <TbHourglassHigh className="text-yellow-600 text-4xl" /> },
   ];
 
   return (
@@ -91,6 +96,7 @@ const ProductManagement = () => {
             {cardItems.map((card, i) => (
               <motion.div
                 key={i}
+                onClick={() => handleFilterClick(card.type)}
                 custom={i}
                 initial="hidden"
                 animate="visible"
@@ -115,7 +121,7 @@ const ProductManagement = () => {
             transition={{ delay: 0.7, duration: 0.8 }}
             className="mt-6"
           >
-            <ProductTable card1={handleCardClick} />
+            <ProductTable card1={handleCardClick} filterType={filterType} />
           </motion.div>
         </>
       )}
