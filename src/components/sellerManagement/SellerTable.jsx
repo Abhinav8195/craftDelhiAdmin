@@ -197,7 +197,7 @@ const SellerTable = ({ card1 }) => {
         <table className="w-full min-w-[1000px] text-left">
           <thead className="bg-[#36234e] text-white">
             <tr>
-              {["User ID", "Name", "Email", "Phone", "City", "Status", "Actions"].map((h) => (
+              {["User ID", "Name", "Email", "Phone", "City", "Approvel Status", "Actions"].map((h) => (
                 <th
                   key={h}
                   className={`p-3 text-xs uppercase tracking-wider ${h === "Status" ? "w-40" : h === "Actions" ? "w-24" : ""
