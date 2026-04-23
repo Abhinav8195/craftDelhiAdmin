@@ -131,10 +131,18 @@ const Chat = () => {
       // Sync with Sidebar Badge
       window.dispatchEvent(new CustomEvent('sync_unread_count', { detail: count }));
 
-      setRooms(prev => prev.map(room => ({
-        ...room,
-        unreadCount: data.countsByRoom[room._id] || 0
-      })));
+      const existingIds = roomsRef.current.map(r => String(r._id));
+      const incomingIds = Object.keys(data.countsByRoom || {});
+      const hasNewRoom = incomingIds.some(id => !existingIds.includes(id));
+
+      if (hasNewRoom) {
+        fetchRooms();
+      } else {
+        setRooms(prev => prev.map(room => ({
+          ...room,
+          unreadCount: data.countsByRoom[room._id] || 0
+        })));
+      }
     });
 
     socketRef.current.emit("get_unseen_count");
