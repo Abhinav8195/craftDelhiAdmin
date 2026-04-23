@@ -30,6 +30,7 @@ const Chat = () => {
   const [messagesByRoom, setMessagesByRoom] = useState({});
   const [newMessage, setNewMessage] = useState("");
   const [typingUser, setTypingUser] = useState(false);
+  const [totalUnseen, setTotalUnseen] = useState(0);
   const activeRoomRef = useRef(null);
 
   const [isMobile] = useState(window.innerWidth <= 768);
@@ -107,7 +108,30 @@ const Chat = () => {
       if (!roomsRef.current.find(r => r._id === data.roomId)) {
         fetchRooms();
       }
+
+      // If we are already in this room, mark it as read immediately
+      if (data.roomId === activeRoomRef.current) {
+        if (socketRef.current) {
+          socketRef.current.emit("mark_room_read", { roomId: data.roomId });
+        }
+      }
     });
+
+    socketRef.current.on("unseen_count_updated", (data) => {
+      console.log("📊 Admin Unseen updated:", data);
+      const count = data.totalUnseen || 0;
+      setTotalUnseen(count);
+      
+      // Sync with Sidebar Badge
+      window.dispatchEvent(new CustomEvent('sync_unread_count', { detail: count }));
+
+      setRooms(prev => prev.map(room => ({
+        ...room,
+        unreadCount: data.countsByRoom[room._id] || 0
+      })));
+    });
+
+    socketRef.current.emit("get_unseen_count");
 
 
     socketRef.current.on("user_typing", ({ userId, isTyping, roomId: typingRoomId }) => {
@@ -157,9 +181,15 @@ const Chat = () => {
       );
 
       setMessagesByRoom(prev => ({
-  ...prev,
-  [room._id]: sorted
-}));
+        ...prev,
+        [room._id]: sorted
+      }));
+
+      // Local clear for snappy UI
+      setRooms(prev => prev.map(r => r._id === room._id ? { ...r, unreadCount: 0 } : r));
+      if (socketRef.current) {
+        socketRef.current.emit("mark_room_read", { roomId: room._id });
+      }
     } catch (err) {
       console.error("❌ Message load failed", err);
     }
@@ -187,7 +217,8 @@ const Chat = () => {
     // Send text message if any
     if (newMessage.trim()) {
       const messageText = newMessage;
-
+      const tempId = "admin-" + Date.now() + Math.random().toString(36).substring(7);
+      
       setMessagesByRoom(prev => {
         const roomMessages = prev[roomId] || [];
         return {
@@ -198,6 +229,7 @@ const Chat = () => {
               message: messageText,
               senderId: Admin_Id,
               createdAt: new Date(),
+              tempId,
             },
           ],
         };
@@ -205,21 +237,23 @@ const Chat = () => {
 
       setNewMessage("");
 
-      const TOKEN = getAdminToken();
-
-      try {
-        await axios.post(
-          `${API_BASE}/message`,
-          { roomId, message: messageText },
-          { headers: { Authorization: `Bearer ${TOKEN}` } }
-        );
-
+      if (socketRef.current && socketRef.current.connected) {
         socketRef.current.emit("send_message", {
           roomId,
           message: messageText,
+          tempId,
         });
-      } catch (err) {
-        console.error("❌ REST send failed", err);
+      } else {
+        const TOKEN = getAdminToken();
+        try {
+          await axios.post(
+            `${API_BASE}/message`,
+            { roomId, message: messageText, tempId },
+            { headers: { Authorization: `Bearer ${TOKEN}` } }
+          );
+        } catch (err) {
+          console.error("❌ REST send failed", err);
+        }
       }
     }
 
@@ -265,8 +299,8 @@ const Chat = () => {
     setAttachmentName("");
 
     try {
-      await axios.post(
-        `${API_BASE}/message`, // Using existing endpoint but with FormData
+      const res = await axios.post(
+        `${API_BASE}/message`,
         formData,
         {
           headers: {
@@ -276,11 +310,18 @@ const Chat = () => {
         }
       );
 
-      socketRef.current.emit("send_message", {
-        roomId,
-        fileName: fileNameStored,
-        filePreview: filePrevStored,
-      });
+      const serverMsg = res.data?.data || res.data || {};
+      const persistentUrl = serverMsg.attachmentUrl || serverMsg.message || serverMsg.fileUrl || serverMsg.filePath;
+
+      if (socketRef.current && socketRef.current.connected) {
+        socketRef.current.emit("send_message", {
+          roomId,
+          fileName: fileNameStored,
+          filePreview: persistentUrl || filePrevStored,
+          message: persistentUrl,
+          attachmentType: serverMsg.attachmentType || (attachment.type.startsWith("image/") ? "image" : "file"),
+        });
+      }
     } catch (err) {
       console.error("❌ REST attachment send failed", err);
     }
@@ -465,6 +506,11 @@ const filteredRooms = rooms.filter((room) => {
                              <h3 className="font-semibold text-gray-900 text-[14px] truncate">
                                {otherUser?.name || "User"}
                              </h3>
+                             {room.unreadCount > 0 && (
+                               <div className="bg-green-500 text-white text-[10px] min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1 font-bold">
+                                 {room.unreadCount}
+                               </div>
+                             )}
                         </div>
                         <p className="text-[11px] text-gray-500 truncate uppercase mt-0.5 tracking-wide">
                           {room?.contextType || "PRODUCT"}

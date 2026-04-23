@@ -26,6 +26,16 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const sidebar = useRef(null);
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
+  const [unreadCount, setUnreadCount] = React.useState(0);
+
+  useEffect(() => {
+    const handleSync = (e) => {
+      setUnreadCount(e.detail || 0);
+      window.sidebarUnreadCount = e.detail || 0; // Backup for safety
+    };
+    window.addEventListener('sync_unread_count', handleSync);
+    return () => window.removeEventListener('sync_unread_count', handleSync);
+  }, []);
 
   const confirmLogout = () => {
     Swal.fire({
@@ -165,7 +175,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           <NavItem to="/giftcategory" icon={Layers} label="Gift Category" />
           <NavItem to="/banner" icon={ImageIcon} label="Banner Manager" />
           <NavItem to="/manage-categories" icon={Grid} label="Manage Categories" />
-          <NavItem to="/chat" icon={MessageSquare} label="Messages" />
+          <div className="relative">
+            <NavItem to="/chat" icon={MessageSquare} label="Messages" />
+            {unreadCount > 0 && (
+              <span className="absolute right-6 top-1/2 -translate-y-1/2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* USER PROFILE SECTION */}

@@ -131,9 +131,16 @@ const MobileChat = ({
                     {getInitials(other?.name || "U")}
                   </div>
 
-                  <div>
-                    <p className="font-medium text-sm">{other?.name || "User"}</p>
-                    <p className="text-[11px] text-gray-500">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <p className="font-medium text-sm truncate">{other?.name || "User"}</p>
+                      {room.unreadCount > 0 && (
+                        <div className="bg-green-500 text-white text-[10px] min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1 font-bold">
+                          {room.unreadCount}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-gray-500 truncate">
                       {room?.title || "Chat"}
                     </p>
                   </div>
