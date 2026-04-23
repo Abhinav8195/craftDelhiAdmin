@@ -32,6 +32,11 @@ const Chat = () => {
   const [typingUser, setTypingUser] = useState(false);
   const [totalUnseen, setTotalUnseen] = useState(0);
   const activeRoomRef = useRef(null);
+  const selectedCustomerRef = useRef(null);
+
+  useEffect(() => {
+    selectedCustomerRef.current = selectedCustomer;
+  }, [selectedCustomer]);
 
   const [isMobile] = useState(window.innerWidth <= 768);
 
@@ -110,7 +115,8 @@ const Chat = () => {
       }
 
       // If we are already in this room, mark it as read immediately
-      if (data.roomId === activeRoomRef.current) {
+      const isViewingChat = !isMobile || selectedCustomerRef.current;
+      if (data.roomId === activeRoomRef.current && isViewingChat) {
         if (socketRef.current) {
           socketRef.current.emit("mark_room_read", { roomId: data.roomId });
         }
@@ -439,7 +445,10 @@ const filteredRooms = rooms.filter((room) => {
           messages={messagesByRoom[roomId] || []}
           typingUser={typingUser}
           selectedCustomer={selectedCustomer}
-          setSelectedCustomer={setSelectedCustomer}
+          setSelectedCustomer={(val) => {
+            setSelectedCustomer(val);
+            if (!val) setRoomId(null); // Clear roomId when going back to list
+          }}
           handleRoomSelect={handleRoomSelect}
           newMessage={newMessage}
           setNewMessage={setNewMessage}
