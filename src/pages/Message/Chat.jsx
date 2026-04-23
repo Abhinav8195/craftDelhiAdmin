@@ -124,7 +124,6 @@ const Chat = () => {
     });
 
     socketRef.current.on("unseen_count_updated", (data) => {
-      console.log("📊 Admin Unseen updated:", data);
       const count = data.totalUnseen || 0;
       setTotalUnseen(count);
       
