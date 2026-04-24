@@ -197,7 +197,7 @@ const filteredProducts = products.filter((product) => {
                       className="w-12 h-12 rounded-lg object-cover"
                     />
                   </td>
-                  <td className="p-4 text-[12px]">{product.category_id}</td>
+                  <td className="p-4 text-[12px]">{product?.category_name}</td>
                   <td className="p-4 text-[12px] font-semibold">₹{product.price}</td>
 
                   {/* STATUS */}
