@@ -62,7 +62,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "build/*"
-          target: "/var/www/html/craftDelhiAdmin_new"
+          target: "/var/www/html/craftDelhiAdmin_new/"
 
       # 🔄 Swap folders (zero downtime)
       - name: 🔄 Switch build
@@ -78,12 +78,15 @@ jobs:
             # move current to backup
             mv /var/www/html/craftDelhiAdmin /var/www/html/craftDelhiAdmin_backup || true
 
-            # FIX: move build content up
+            # 🔥 IMPORTANT: flatten build folder
             mv /var/www/html/craftDelhiAdmin_new/build/* /var/www/html/craftDelhiAdmin_new/ || true
             rm -rf /var/www/html/craftDelhiAdmin_new/build
 
-            # switch folder
+            # switch
             mv /var/www/html/craftDelhiAdmin_new /var/www/html/craftDelhiAdmin
+            
+            # reload apache
+            sudo systemctl reload apache2
 
       # ✅ Done
       - name: Deployment success
