@@ -78,13 +78,9 @@ jobs:
             # move current to backup
             mv /var/www/html/craftDelhiAdmin /var/www/html/craftDelhiAdmin_backup || true
 
-            # 🔥 IMPORTANT: flatten build folder
-            mv /var/www/html/craftDelhiAdmin_new/build/* /var/www/html/craftDelhiAdmin_new/ || true
-            rm -rf /var/www/html/craftDelhiAdmin_new/build
-
-            # switch
+            # ✅ direct switch (no flatten needed)
             mv /var/www/html/craftDelhiAdmin_new /var/www/html/craftDelhiAdmin
-            
+
             # reload apache
             sudo systemctl reload apache2
 
