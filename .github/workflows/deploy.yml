@@ -65,15 +65,24 @@ jobs:
           target: "/var/www/html/craftDelhiAdmin_new"
 
       # 🔄 Swap folders (zero downtime)
-      - name: Switch build
+      - name: 🔄 Switch build
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # remove old backup
             rm -rf /var/www/html/craftDelhiAdmin_backup
+
+            # move current to backup
             mv /var/www/html/craftDelhiAdmin /var/www/html/craftDelhiAdmin_backup || true
+
+            # FIX: move build content up
+            mv /var/www/html/craftDelhiAdmin_new/build/* /var/www/html/craftDelhiAdmin_new/ || true
+            rm -rf /var/www/html/craftDelhiAdmin_new/build
+
+            # switch folder
             mv /var/www/html/craftDelhiAdmin_new /var/www/html/craftDelhiAdmin
 
       # ✅ Done
