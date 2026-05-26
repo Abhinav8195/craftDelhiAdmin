@@ -141,7 +141,7 @@ const Home = () => {
             <div className="relative w-full">
               <input
                 type={showPassword ? 'text' : 'password'}
-                className="h-14 px-3 bg-white rounded outline outline-1 outline-slate-200 w-full"
+                className="h-14 pl-3 pr-10 bg-white rounded outline outline-1 outline-slate-200 w-full"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
