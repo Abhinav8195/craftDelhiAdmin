@@ -38,7 +38,8 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("❌ Auth profile fetch failed:", error.message);
-      setUser({ role: 1, name: "Admin" }); 
+      localStorage.removeItem("craftdelhiadmin_token");
+      setUser(null);
     } finally {
       setLoading(false);
     }

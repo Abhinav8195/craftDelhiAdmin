@@ -5,6 +5,20 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
+import axios from 'axios';
+
+// Global Axios Interceptor to handle 401 Unauthorized globally
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.warn("⚠️ Token expired or unauthorized. Logging out...");
+      localStorage.removeItem("craftdelhiadmin_token");
+      window.location.href = "/";
+    }
+    return Promise.reject(error);
+  }
+);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
