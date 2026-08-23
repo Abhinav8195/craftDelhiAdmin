@@ -98,11 +98,36 @@ const Chat = () => {
     socketRef.current.on("message_received", (data) => {
       if (!data?.roomId) return;
   
-      // ignore my own already-added optimistic message
-      if (String(data.senderId) === String(Admin_Id)) return;
+      let incomingSender = data.senderId || (data.sender && data.sender._id) || data.sender || data.userId;
   
       setMessagesByRoom(prev => {
         const roomMessages = prev[data.roomId] || [];
+        
+        // 1. Is there an optimistic message (has tempId) with the exact same text?
+        const optimisticIdx = roomMessages.findIndex(m => m.tempId && String(m.message).trim() === String(data.message).trim());
+        
+        if (optimisticIdx !== -1) {
+          // We found our optimistic message. Replace it with the server's real data
+          // but FORCE the senderId to be Admin_Id so it renders on the right!
+          const newMessages = [...roomMessages];
+          newMessages[optimisticIdx] = { ...data, senderId: Admin_Id };
+          return { ...prev, [data.roomId]: newMessages };
+        }
+
+        // 2. Already exists by _id?
+        if (data._id && roomMessages.some(m => m._id === data._id)) {
+          return prev;
+        }
+
+        // 3. Was it sent by us from another tab/device?
+        if (String(incomingSender) === String(Admin_Id)) {
+          return {
+            ...prev,
+            [data.roomId]: [...roomMessages, { ...data, senderId: Admin_Id }],
+          };
+        }
+
+        // 4. Otherwise, it's a new message from the other user
         return {
           ...prev,
           [data.roomId]: [...roomMessages, data],
