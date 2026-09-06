@@ -33,11 +33,22 @@ jobs:
 
       # ⚙️ Create env
       - name: Create .env
+        shell: bash
+        env:
+          REACT_APP_BASE_URL: ${{ secrets.REACT_APP_BASE_URL }}
+          REACT_APP_ADMIN_ID: ${{ secrets.REACT_APP_ADMIN_ID }}
+          REACT_APP_CHAT_API_BASE: ${{ secrets.REACT_APP_CHAT_API_BASE }}
+          REACT_APP_SOCKET_URL: ${{ secrets.REACT_APP_SOCKET_URL }}
         run: |
-          echo "REACT_APP_BASE_URL=${{ secrets.REACT_APP_BASE_URL }}" >> .env
-          echo "REACT_APP_ADMIN_ID=${{ secrets.REACT_APP_ADMIN_ID }}" >> .env
-          echo "REACT_APP_CHAT_API_BASE=${{ secrets.REACT_APP_CHAT_API_BASE }}" >> .env
-          echo "REACT_APP_SOCKET_URL=${{ secrets.REACT_APP_SOCKET_URL }}" >> .env
+          test -n "$REACT_APP_BASE_URL" || (echo "REACT_APP_BASE_URL is missing" && exit 1)
+          test -n "$REACT_APP_CHAT_API_BASE" || (echo "REACT_APP_CHAT_API_BASE is missing" && exit 1)
+          test -n "$REACT_APP_SOCKET_URL" || (echo "REACT_APP_SOCKET_URL is missing" && exit 1)
+          printf '%s\n' \
+            "REACT_APP_BASE_URL=$REACT_APP_BASE_URL" \
+            "REACT_APP_ADMIN_ID=$REACT_APP_ADMIN_ID" \
+            "REACT_APP_CHAT_API_BASE=$REACT_APP_CHAT_API_BASE" \
+            "REACT_APP_SOCKET_URL=$REACT_APP_SOCKET_URL" \
+            > .env
 
       # 🏗️ Build (ignore warnings in CI)
       - name: Build project

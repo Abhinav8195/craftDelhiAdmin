@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import { FaSearch } from "react-icons/fa";
 import { LuPenLine } from "react-icons/lu";
@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import ProductDelete from "../Product/ProductDelete";
 import { getAdminToken } from "../../utils/auth";
 import { toast } from "react-toastify";
+import { getSellerNameMap } from "../../utils/sellerNames";
 
 const tableContainer = {
   hidden: { opacity: 0 },
@@ -37,22 +38,36 @@ const OrderTable = ({ card1 }) => {
 
   const token = getAdminToken();
 
-  useEffect(() => {
-    fetchOrders();
-  }, [token]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const res = await fetch(
         `${process.env.REACT_APP_BASE_URL}admin/orders-view`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await res.json();
-      if (data.success) setOrders(data.data);
+      if (data.success) {
+        let nextOrders = data.data || [];
+        if (nextOrders.some((order) => !order.seller_name && order.seller_id)) {
+          try {
+            const sellerNames = await getSellerNameMap(token);
+            nextOrders = nextOrders.map((order) => ({
+              ...order,
+              seller_name: order.seller_name || sellerNames.get(String(order.seller_id)) || '',
+            }));
+          } catch (sellerError) {
+            console.warn('Seller names could not be loaded', sellerError);
+          }
+        }
+        setOrders(nextOrders);
+      }
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const toggleDropdown = (index) =>
     setDropdownOpen(dropdownOpen === index ? null : index);
@@ -60,22 +75,18 @@ const OrderTable = ({ card1 }) => {
   // **FIXED STATUS UPDATE**
   const handleSelectStatus = async (orderId, newValue) => {
     try {
-      const selectedOrder = orders.find((o) => o.id === orderId);
-
-      const payload = {
-        ...selectedOrder,
-        payment_status: Number(newValue),
-      };
-
       const res = await fetch(
-        `${process.env.REACT_APP_BASE_URL}order/updatedetails/${orderId}`,
+        `${process.env.REACT_APP_BASE_URL}admin/orderstatus-update`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            order_id: orderId,
+            payment_status: Number(newValue),
+          }),
         }
       );
 
@@ -136,9 +147,8 @@ const OrderTable = ({ card1 }) => {
 
   // FILTER LOGIC
   const filteredOrders = orders.filter((order) => {
-    const matchesSearch = order.order_uid
-      .toLowerCase()
-      .includes(search.toLowerCase());
+    const searchText = `${order.order_uid || ''} ${order.seller_name || ''}`.toLowerCase();
+    const matchesSearch = searchText.includes(search.toLowerCase());
     const matchesStatus =
       filterStatus !== "" ? Number(order.payment_status) === Number(filterStatus) : true;
 
@@ -196,6 +206,7 @@ const OrderTable = ({ card1 }) => {
             <tr>
               {[
                 "Order ID",
+                "Seller Name",
                 "Product ID",
                 "Product Name",
                 "Image",
@@ -219,7 +230,7 @@ const OrderTable = ({ card1 }) => {
           <motion.tbody variants={tableContainer} initial="hidden" animate="show" className="divide-y divide-gray-100">
             {filteredOrders.length === 0 ? (
               <tr>
-                <td colSpan="8" className="text-center py-6 text-gray-500 text-sm font-medium">
+                <td colSpan="9" className="text-center py-6 text-gray-500 text-sm font-medium">
                   🚫 No Orders Found
                 </td>
               </tr>
@@ -231,6 +242,9 @@ const OrderTable = ({ card1 }) => {
                   className="border-b hover:bg-[#f8f6ff] transition duration-200"
                 >
                   <td className="p-4 text-[12px] font-medium text-gray-700">{order.order_uid}</td>
+                  <td className="p-4 text-[12px] font-medium text-gray-700">
+                    {order.seller_name || (order.seller_id ? `Seller ${order.seller_id}` : '—')}
+                  </td>
                   <td className="p-4 text-[12px] text-gray-900">{order.items[0]?.product_id}</td>
                   <td className="p-4 text-[12px] text-gray-900">{order.items[0]?.product?.name}</td>
 
