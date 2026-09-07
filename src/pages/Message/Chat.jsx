@@ -1,18 +1,29 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useContext } from "react";
 import { FiPaperclip,FiSend } from "react-icons/fi";
 import MobileChat from "./MobileChat";
 import { io } from "socket.io-client";
 import axios from "axios";
 import { getAdminToken } from "../../utils/auth";
+import { AuthContext } from "../../AuthContext";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 /* ================= CONFIG ================= */
 
 const API_BASE = process.env.REACT_APP_CHAT_API_BASE;
-const Admin_Id = process.env.REACT_APP_ADMIN_ID;
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
 
 /* ================= COMPONENT ================= */
 
 const Chat = () => {
+  const { user } = useContext(AuthContext);
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const Admin_Id = String(user?.id || process.env.REACT_APP_ADMIN_ID || "");
+  const orderId = searchParams.get("orderId");
+  const requestedRoomId = searchParams.get("roomId");
+  const isOrderHistory = searchParams.get("mode") === "order-history";
+  const requestedOrder = location.state?.orderData;
+  const orderUid = searchParams.get("orderUid") || requestedOrder?.order_uid || orderId;
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -30,7 +41,7 @@ const Chat = () => {
   const [messagesByRoom, setMessagesByRoom] = useState({});
   const [newMessage, setNewMessage] = useState("");
   const [typingUser, setTypingUser] = useState(false);
-  const [totalUnseen, setTotalUnseen] = useState(0);
+  const [, setTotalUnseen] = useState(0);
   const activeRoomRef = useRef(null);
   const selectedCustomerRef = useRef(null);
 
@@ -48,7 +59,11 @@ const Chat = () => {
  
   const fetchRooms = useCallback(async () => {
     const TOKEN = getAdminToken();
-    if (!TOKEN || !Admin_Id) return;
+    if (isOrderHistory) return;
+    if (!TOKEN || !Admin_Id) {
+      setLoadingRooms(false);
+      return;
+    }
  
     try {
       const res = await axios.get(`${API_BASE}/rooms`, {
@@ -62,11 +77,65 @@ const Chat = () => {
     } finally {
       setLoadingRooms(false);
     }
-  }, []); 
+  }, [Admin_Id, isOrderHistory]);
 
   useEffect(() => {
     fetchRooms();
   }, [fetchRooms]);
+
+  useEffect(() => {
+    if (!isOrderHistory || !orderId) return;
+
+    const loadOrderHistory = async () => {
+      const TOKEN = getAdminToken();
+      setLoadingRooms(true);
+      try {
+        const chatResponse = await axios.get(`${API_BASE}/orders/${orderId}/chat`, {
+          headers: { Authorization: `Bearer ${TOKEN}` },
+        });
+        const chatData = chatResponse.data?.data || {};
+        const rawRoom = chatData.room || {};
+        const historyRoomId = String(chatData.roomId || rawRoom._id || "");
+
+        if (!historyRoomId) throw new Error("Order chat room was not found");
+
+        const messagesResponse = await axios.get(
+          `${API_BASE}/orders/${orderId}/messages?page=1&limit=100`,
+          { headers: { Authorization: `Bearer ${TOKEN}` } }
+        );
+        const list = messagesResponse.data?.data || [];
+        const participants = (rawRoom.participants || []).map((participant) => ({
+          ...participant,
+          name: Number(participant.roleId) === 2
+            ? (requestedOrder?.seller_name || "Seller")
+            : "Buyer",
+        }));
+        const room = {
+          ...rawRoom,
+          _id: historyRoomId,
+          title: `Order ${orderUid}`,
+          participants,
+        };
+
+        setRooms([room]);
+        setRoomId(historyRoomId);
+        setSelectedCustomer({ name: `Order ${orderUid} conversation` });
+        setMessagesByRoom({
+          [historyRoomId]: [...list].sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          ),
+        });
+      } catch (error) {
+        console.error("Order chat history failed", error);
+        setRooms([]);
+        setSelectedCustomer({ name: `Order ${orderUid} conversation` });
+      } finally {
+        setLoadingRooms(false);
+      }
+    };
+
+    loadOrderHistory();
+  }, [isOrderHistory, orderId, orderUid, requestedOrder?.seller_name]);
 
   useEffect(() => {
     activeRoomRef.current = roomId;
@@ -76,9 +145,9 @@ const Chat = () => {
 
   useEffect(() => {
     const TOKEN = getAdminToken();
-    if (!TOKEN) return;
+    if (!TOKEN || isOrderHistory) return;
 
-    socketRef.current = io(process.env.REACT_APP_SOCKET_URL, {
+    socketRef.current = io(SOCKET_URL, {
       path: "/chat/socket.io",
       auth: { token: TOKEN },
       transports: ["websocket", "polling"],
@@ -183,7 +252,7 @@ const Chat = () => {
         socketRef.current.disconnect();
       }
     };
-  }, []);
+  }, [Admin_Id, fetchRooms, isMobile, isOrderHistory]);
 
   /* ================= AUTOSCROLL ================= */
 
@@ -193,7 +262,7 @@ const Chat = () => {
 
   /* ================= ROOM SELECT ================= */
 
-  const handleRoomSelect = async (room) => {
+  const handleRoomSelect = useCallback(async (room) => {
     const other = room.participants?.find(
       (p) => String(p.userId) !== String(Admin_Id)
     );
@@ -205,7 +274,7 @@ const Chat = () => {
     const TOKEN = getAdminToken();
 
     try {
-      socketRef.current.emit("join_room", { roomId: room._id });
+      socketRef.current?.emit("join_room", { roomId: room._id });
 
       const res = await axios.get(
         `${API_BASE}/messages?roomId=${room._id}&page=1&limit=50`,
@@ -231,7 +300,15 @@ const Chat = () => {
     } catch (err) {
       console.error("❌ Message load failed", err);
     }
-  };
+  }, [Admin_Id]);
+
+  useEffect(() => {
+    if (isOrderHistory || !requestedRoomId || !rooms.length || roomId === requestedRoomId) return;
+    const requestedRoom = rooms.find(
+      (room) => String(room._id) === String(requestedRoomId)
+    );
+    if (requestedRoom) handleRoomSelect(requestedRoom);
+  }, [handleRoomSelect, isOrderHistory, requestedRoomId, roomId, rooms]);
 
   /* ================= TYPING EMIT ================= */
 
@@ -493,11 +570,12 @@ const filteredRooms = rooms.filter((room) => {
           setAttachmentPreview={setAttachmentPreview}
           setAttachmentName={setAttachmentName}
           sendWithAttachment={handleSendMessage}
+          readOnly={isOrderHistory}
         />
       ) : (
         <div className="w-full max-w-6xl flex rounded-2xl shadow-sm border border-gray-200 h-[80vh] bg-white overflow-hidden">
           {/* Sidebar */}
-          <div className="w-1/3 border-r flex flex-col h-full bg-[#fcfcfc]">
+          {!isOrderHistory && <div className="w-1/3 border-r flex flex-col h-full bg-[#fcfcfc]">
             <div className="px-5 py-6 border-b border-gray-100 flex-shrink-0">
               <h2 className="text-2xl font-semibold text-gray-800 tracking-tight">Messages</h2>
 
@@ -562,10 +640,10 @@ const filteredRooms = rooms.filter((room) => {
                 })
               )}
             </div>
-          </div>
+          </div>}
 
           {/* Chat Area */}
-          <div className="w-2/3 flex flex-col h-full bg-[#f8f9fc]">
+          <div className={`${isOrderHistory ? "w-full" : "w-2/3"} flex flex-col h-full bg-[#f8f9fc]`}>
             {!selectedCustomer ? (
               <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
@@ -579,6 +657,9 @@ const filteredRooms = rooms.filter((room) => {
                 <div className="px-6 py-4 bg-white border-b border-gray-100 flex-shrink-0 flex items-center gap-4 z-10">
                    <div className="flex flex-col">
                       <span className="font-bold text-gray-900 tracking-tight">{selectedCustomer?.name || "User"}</span>
+                      {isOrderHistory && (
+                        <span className="text-[11px] text-gray-500">Read-only buyer and seller order chat</span>
+                      )}
                    </div>
                 </div>
 
@@ -588,9 +669,22 @@ const filteredRooms = rooms.filter((room) => {
                     let lastDate = null;
                     const messages = messagesByRoom[roomId] || [];
 
+                    if (isOrderHistory && messages.length === 0 && !loadingRooms) {
+                      return (
+                        <div className="h-full flex items-center justify-center text-sm text-gray-400">
+                          No messages exist for this order yet.
+                        </div>
+                      );
+                    }
+
                     return messages.map((msg, idx) => {
-                      const isMe =
-                        String(msg.senderId) === String(Admin_Id);
+                      const isMe = isOrderHistory
+                        ? Number(msg.senderRoleId) === 2
+                        : String(msg.senderId) === String(Admin_Id);
+                      const senderLabel = msg.senderName || (
+                        Number(msg.senderRoleId) === 2 ? "Seller" :
+                        Number(msg.senderRoleId) === 3 ? "Buyer" : "Admin"
+                      );
 
                       const msgDate = new Date(
                         msg.createdAt
@@ -623,6 +717,11 @@ const filteredRooms = rooms.filter((room) => {
                             )}
 
                             <div className={`flex flex-col ${isMe ? "items-end" : "items-start"} max-w-[70%]`}>
+                              {isOrderHistory && (
+                                <span className="mb-1 px-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                  {senderLabel}
+                                </span>
+                              )}
                               <div
                                 className={`px-4 py-2.5 rounded-2xl shadow-sm break-words whitespace-pre-wrap text-[14px] leading-relaxed
                                   ${
@@ -684,7 +783,7 @@ const filteredRooms = rooms.filter((room) => {
                 </div>
 
                  {/* Input Bar */}
-                <div className="p-4 bg-white border-t border-gray-100 flex-shrink-0">
+                {!isOrderHistory && <div className="p-4 bg-white border-t border-gray-100 flex-shrink-0">
                   {/* Hidden file input */}
                   <input
                     id="file-upload-desktop"
@@ -768,7 +867,7 @@ const filteredRooms = rooms.filter((room) => {
                       <FiSend size={18} className="translate-y-[1px] -translate-x-[1px]" />
                     </button>
                   </div>
-                </div>
+                </div>}
               </>
             )}
           </div>

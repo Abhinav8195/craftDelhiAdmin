@@ -27,6 +27,7 @@ const MobileChat = ({
   setAttachmentName,
 
   sendWithAttachment,
+  readOnly = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const messagesEndRef = useRef(null);
@@ -166,6 +167,7 @@ const MobileChat = ({
               <span className="font-semibold">
                 {selectedCustomer?.name || "User"}
               </span>
+              {readOnly && <span className="text-[10px] text-gray-500">Read-only order chat</span>}
 
             </div>
           </div>
@@ -176,8 +178,22 @@ const MobileChat = ({
             {(() => {
               let lastDate = null;
 
+              if (readOnly && messages.length === 0) {
+                return (
+                  <p className="py-12 text-center text-sm text-gray-400">
+                    No messages exist for this order yet.
+                  </p>
+                );
+              }
+
               return messages.map((msg, idx) => {
-                const isMe = String(msg.senderId) === String(Admin_Id);
+                const isMe = readOnly
+                  ? Number(msg.senderRoleId) === 2
+                  : String(msg.senderId) === String(Admin_Id);
+                const senderLabel = msg.senderName || (
+                  Number(msg.senderRoleId) === 2 ? "Seller" :
+                  Number(msg.senderRoleId) === 3 ? "Buyer" : "Admin"
+                );
                 const msgDate = new Date(msg.createdAt).toDateString();
                 const showDate = msgDate !== lastDate;
                 lastDate = msgDate;
@@ -197,10 +213,16 @@ const MobileChat = ({
                         </div>
                       )}
 
-                      <div
-                        className={`max-w-[72%] px-3 py-2 rounded-2xl shadow break-words whitespace-pre-wrap
-                        ${isMe ? "bg-blue-600 text-white rounded-br-none" : "bg-white rounded-bl-none"}`}
-                      >
+                      <div className={`max-w-[72%] flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                        {readOnly && (
+                          <span className="mb-1 px-1 text-[9px] font-semibold uppercase tracking-wide text-gray-500">
+                            {senderLabel}
+                          </span>
+                        )}
+                        <div
+                          className={`px-3 py-2 rounded-2xl shadow break-words whitespace-pre-wrap
+                          ${isMe ? "bg-blue-600 text-white rounded-br-none" : "bg-white rounded-bl-none"}`}
+                        >
                         {/* IMAGE (Optimistic or S3 URL) */}
                         {(msg.filePreview || (msg.message && isImageURL(msg.message))) && (
                           <img
@@ -221,6 +243,7 @@ const MobileChat = ({
 
                         <div className="text-[10px] opacity-60 text-right">
                           {formatTime(msg.createdAt)}
+                        </div>
                         </div>
                       </div>
 
@@ -248,7 +271,7 @@ const MobileChat = ({
           {(attachment || attachmentPreview) && (
             <div className="mx-3 mb-1 p-3 bg-white border rounded-xl flex gap-3 items-center">
               {attachmentPreview ? (
-                <img src={attachmentPreview} className="w-16 h-16 rounded-lg object-cover" />
+                <img src={attachmentPreview} alt="Attachment preview" className="w-16 h-16 rounded-lg object-cover" />
               ) : (
                 <span>📄 {attachmentName}</span>
               )}
@@ -267,7 +290,7 @@ const MobileChat = ({
           )}
 
           {/* input */}
-             <div className="p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] border-t bg-white flex gap-2 items-center">
+             {!readOnly && <div className="p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] border-t bg-white flex gap-2 items-center">
 
             <input
               id="mobile-file-upload"
@@ -311,7 +334,7 @@ const MobileChat = ({
             >
               Send
             </button>
-          </div>
+          </div>}
         </div>
       )}
     </div>

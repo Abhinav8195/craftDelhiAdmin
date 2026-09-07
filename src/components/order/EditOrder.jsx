@@ -3,10 +3,12 @@ import image from '../../assets/images/image.png'
 import { IoIosChatbubbles } from "react-icons/io";
 import { getAdminToken } from '../../utils/auth';
 import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
 
 const EditOrder = ({ card1, orderData }) => {
-  console.log("Received Order:", orderData);
   const [loading, setLoading] = useState(false);
+  const [chatLoading, setChatLoading] = useState('');
+  const navigate = useNavigate();
 
   const product = orderData?.items?.[0]?.product || {};
   const token = getAdminToken();
@@ -15,6 +17,7 @@ const EditOrder = ({ card1, orderData }) => {
     order_uid: "",
     product_id: "",
     payment_status: "",
+    order_status: "",
     product_name: "",
     created_at: "",
     quantity: "",
@@ -36,6 +39,7 @@ const EditOrder = ({ card1, orderData }) => {
         order_uid: orderData?.order_uid || "",
         product_id: orderData?.items?.[0]?.product_id || "",
         payment_status: orderData.payment_status ?? 0,
+        order_status: orderData.order_status ?? 0,
         product_name: product?.name || "",
         created_at: orderData?.created_at
           ? new Date(orderData.created_at).toISOString().split("T")[0]
@@ -52,49 +56,75 @@ const EditOrder = ({ card1, orderData }) => {
         }
       });
     }
-  }, [orderData]);
-
-
-
+  }, [orderData, product?.description, product?.name]);
 
   const handleSubmit = async () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}order/updatedetails/${orderData.id}`, {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}admin/orderstatus-update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          order_id: orderData.id,
+          order_status: Number(form.order_status),
           payment_status: Number(form.payment_status),
-          shipping_address_id: orderData.shipping_address_id,
-          order_status: orderData.order_status,
-          payment_method: orderData.payment_method,
-          payment_type: orderData.payment_type,
-          total_amount: orderData.total_amount,
-          tracking_company: orderData.tracking_company || "",
-          tracking_number: orderData.tracking_number || "",
-          tracking_link: orderData.tracking_link || "",
-          buyer_note: form.description,
-          estimated_delivery_from: orderData.estimated_delivery_from || null,
-          estimated_delivery_to: orderData.estimated_delivery_to || null,
-          tracking_status: orderData.tracking_status || "",
         })
       });
 
-      if (!response.ok) throw new Error("Failed to update order");
+      const result = await response.json();
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || "Failed to update order");
+      }
 
       toast.success("Order Updated Successfully 🎉");
-
-      card1(null); // close modal  
+      card1(null);
     } catch (error) {
-      alert("Error Updating Order");
       console.error(error);
+      toast.error(error.message || "Error updating order");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChatWithSeller = async () => {
+    if (!orderData?.id) return;
+    setChatLoading('seller');
+    try {
+      const response = await fetch(`${process.env.REACT_APP_CHAT_API_BASE}/createroom`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          contextType: 'ORDER',
+          contextId: `ORDER_ID_${orderData.id}`,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.roomId) {
+        throw new Error(result.message || 'Unable to open seller chat');
+      }
+      navigate(`/chat?roomId=${encodeURIComponent(result.roomId)}&orderId=${orderData.id}`, {
+        state: { orderData, chatMode: 'seller' },
+      });
+    } catch (error) {
+      toast.error(error.message || 'Unable to open seller chat');
+    } finally {
+      setChatLoading('');
+    }
+  };
+
+  const handleSeeChats = () => {
+    if (!orderData?.id) return;
+    navigate(
+      `/chat?mode=order-history&orderId=${orderData.id}&orderUid=${encodeURIComponent(orderData.order_uid || '')}`,
+      { state: { orderData, chatMode: 'order-history' } }
+    );
   };
 
 
@@ -110,13 +140,22 @@ const EditOrder = ({ card1, orderData }) => {
             {/* Buttons for Chat */}
             <div className="flex gap-2 flex-wrap">
               {/* Chat With Seller Button */}
-              <button className="flex items-center gap-2 p-2 bg-[#024a63] rounded border border-white text-white text-[10px] font-semibold">
+              <button
+                type="button"
+                onClick={handleChatWithSeller}
+                disabled={chatLoading === 'seller'}
+                className="flex items-center gap-2 p-2 bg-[#024a63] rounded border border-white text-white text-[10px] font-semibold disabled:opacity-60"
+              >
                 <IoIosChatbubbles className="text-white text-lg" />
-                Chat With Seller
+                {chatLoading === 'seller' ? 'Opening…' : 'Chat With Seller'}
               </button>
 
               {/* See Chats Button */}
-              <button className="p-2 bg-[#024a63] rounded flex items-center text-white text-[10px] font-semibold">
+              <button
+                type="button"
+                onClick={handleSeeChats}
+                className="p-2 bg-[#024a63] rounded flex items-center text-white text-[10px] font-semibold"
+              >
                 See Chats
               </button>
             </div>
@@ -130,7 +169,7 @@ const EditOrder = ({ card1, orderData }) => {
 
 
         <div className=" bg-white rounded-lg">
-          <div className="grid md:grid-cols-3 gap-3">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Order ID */}
             <div className="flex flex-col gap-1">
               <label className="text-black text-[10px] font-bold uppercase tracking-widest">Order ID</label>
@@ -138,6 +177,16 @@ const EditOrder = ({ card1, orderData }) => {
                 type="text"
                 className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-xs text-black"
                 value={form.order_uid}
+                readOnly
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-black text-[10px] font-bold uppercase tracking-widest">Seller Name</label>
+              <input
+                type="text"
+                className="h-14 px-3 bg-gray-50 rounded border border-[#e0e4f4] text-xs text-black"
+                value={orderData?.seller_name || (orderData?.seller_id ? `Seller ${orderData.seller_id}` : '')}
                 readOnly
               />
             </div>
@@ -169,6 +218,21 @@ const EditOrder = ({ card1, orderData }) => {
   <option value={2}>Refund</option>
   <option value={4}>Cancelled</option>
 </select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-black text-[10px] font-bold uppercase tracking-widest">Order Status</label>
+              <select
+                className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-xs text-black"
+                value={form.order_status ?? ""}
+                onChange={(e) => setForm({ ...form, order_status: Number(e.target.value) })}
+              >
+                <option value={0}>Pending</option>
+                <option value={1}>Accepted</option>
+                <option value={2}>Out for Delivery</option>
+                <option value={3}>Delivered</option>
+                <option value={4}>Cancelled</option>
+              </select>
             </div>
           </div>
 
@@ -211,7 +275,8 @@ const EditOrder = ({ card1, orderData }) => {
                     <td className="p-4">
                       <input
                         type="text"
-                        defaultValue={item?.product?.name}
+                        value={item?.product?.name || ''}
+                        readOnly
                         className="w-full bg-gray-100 focus:bg-white transition-all duration-200 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#024a63] outline-none"
                       />
                     </td>
@@ -220,7 +285,8 @@ const EditOrder = ({ card1, orderData }) => {
                     <td className="p-4">
                       <input
                         type="number"
-                        defaultValue={item.quantity}
+                        value={item.quantity || ''}
+                        readOnly
                         className="w-20 text-center bg-gray-100 focus:bg-white border border-gray-300 rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-[#024a63] outline-none"
                       />
                     </td>
@@ -235,7 +301,8 @@ const EditOrder = ({ card1, orderData }) => {
                         {/* Input */}
                         <input
                           type="number"
-                          defaultValue={item.price}
+                          value={item.price || ''}
+                          readOnly
                           className="
         w-24
         bg-gray-100
@@ -260,7 +327,8 @@ const EditOrder = ({ card1, orderData }) => {
                     <td className="p-4">
                       <input
                         type="text"
-                        defaultValue="20 x 15 x 10 cm"
+                        value={item?.product?.dimension || ''}
+                        readOnly
                         className="w-full bg-gray-100 focus:bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#024a63] outline-none"
                       />
                     </td>
@@ -269,7 +337,8 @@ const EditOrder = ({ card1, orderData }) => {
                     <td className="p-4">
                       <input
                         type="text"
-                        defaultValue="Handmade Craft"
+                        value={item?.product?.category_id || ''}
+                        readOnly
                         className="w-full bg-gray-100 focus:bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#024a63] outline-none"
                       />
                     </td>
@@ -278,6 +347,7 @@ const EditOrder = ({ card1, orderData }) => {
                     <td className="p-4 flex justify-center">
                       <img
                         src={item?.product?.main_image_url || image}
+                        alt={item?.product?.name || 'Product'}
                         className="w-14 h-14 rounded-lg shadow-md border border-gray-200 object-cover hover:scale-105 transition-transform duration-200"
                       />
                     </td>
@@ -305,18 +375,9 @@ const EditOrder = ({ card1, orderData }) => {
             </label>
 
             <textarea
-              className="p-4 bg-white h-28 resize-none rounded border border-[#d9d9d9] text-xs text-black focus:ring-2 focus:ring-[#024a63] outline-none"
-              placeholder="Enter full delivery address..."
+              className="p-4 bg-gray-50 h-28 resize-none rounded border border-[#d9d9d9] text-xs text-black outline-none"
               value={form.shipping_address?.street || ""}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  shipping_address: {
-                    ...form.shipping_address,
-                    street: e.target.value
-                  }
-                })
-              }
+              readOnly
             />
           </div>
 
@@ -327,10 +388,9 @@ const EditOrder = ({ card1, orderData }) => {
             <div className="flex flex-col">
               <label className="text-black text-[10px] font-bold uppercase tracking-widest">State</label>
               <input
-                className="h-12 px-3 bg-white rounded border border-[#e0e4f4] text-xs text-black"
+                className="h-12 px-3 bg-gray-50 rounded border border-[#e0e4f4] text-xs text-black"
                 value={form.shipping_address?.state || ""}
-                onChange={(e) => setForm({ ...form, shipping_address: { ...form.shipping_address, state: e.target.value } })}
-                placeholder="Enter State"
+                readOnly
               />
             </div>
 
@@ -339,10 +399,9 @@ const EditOrder = ({ card1, orderData }) => {
               <label className="text-black text-[10px] font-bold uppercase tracking-widest">City</label>
               <input
                 type="text"
-                className="h-12 px-3 bg-white rounded border border-[#e0e4f4] text-xs text-black"
+                className="h-12 px-3 bg-gray-50 rounded border border-[#e0e4f4] text-xs text-black"
                 value={form.shipping_address?.city || ""}
-                onChange={(e) => setForm({ ...form, shipping_address: { ...form.shipping_address, city: e.target.value } })}
-                placeholder="Enter City"
+                readOnly
               />
             </div>
 
@@ -351,10 +410,9 @@ const EditOrder = ({ card1, orderData }) => {
               <label className="text-black text-[10px] font-bold uppercase tracking-widest">Postal Code</label>
               <input
                 type="text"
-                className="h-12 px-3 bg-white rounded border border-[#e0e4f4] text-xs text-black"
+                className="h-12 px-3 bg-gray-50 rounded border border-[#e0e4f4] text-xs text-black"
                 value={form.shipping_address?.postal_code || ""}
-                onChange={(e) => setForm({ ...form, shipping_address: { ...form.shipping_address, postal_code: e.target.value } })}
-                placeholder="Enter Postal Code"
+                readOnly
               />
             </div>
           </div>
