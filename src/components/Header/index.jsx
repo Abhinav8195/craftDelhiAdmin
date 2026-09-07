@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 const Header = ({ sidebarOpen, setSidebarOpen, pageTitle }) => {
   const [ShowNotification, setShowNotification] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     // Fetch initial unread count
@@ -56,6 +57,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, pageTitle }) => {
         draggable: true,
       });
       setUnreadCount((prev) => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     });
 
     return () => {
@@ -110,6 +112,7 @@ const Header = ({ sidebarOpen, setSidebarOpen, pageTitle }) => {
       <DropdownNotification 
         onClose={() => setShowNotification(false)}
         setUnreadCount={setUnreadCount}
+        refreshTrigger={refreshTrigger}
       />
     )}
    </>

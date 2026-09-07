@@ -46,7 +46,7 @@ const Category = () => {
   // Modal states
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
   const [isSubCatModalOpen, setIsSubCatModalOpen] = useState(false);
-  
+
   // Form states
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingSubcategory, setEditingSubcategory] = useState(null);
@@ -66,7 +66,7 @@ const Category = () => {
       const { data } = await getAllCategories();
       if (data.status) {
         setCategories(data.data);
-        console.log("ok testing",data.data);
+        console.log("ok testing", data.data);
       } else {
         toast.error(data.message || "Failed to fetch categories");
       }
@@ -83,7 +83,7 @@ const Category = () => {
       const { data } = await getSubcategoriesByCategory(categoryId);
       if (data.status) {
         setSubcategories(data.data || []);
-        console.log("ok abc",data.data);
+        console.log("ok abc", data.data);
       } else {
         setSubcategories([]);
         toast.error(data.message || "Failed to fetch subcategories");
@@ -253,7 +253,7 @@ const Category = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-220px)] min-h-[600px]">
-        
+
         {/* ========================================================= */}
         {/* LEFT PANE: Categories */}
         {/* ========================================================= */}
@@ -286,15 +286,14 @@ const Category = () => {
                   <li
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 border ${
-                      selectedCategory?.id === cat.id
+                    className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 border ${selectedCategory?.id === cat.id
                         ? 'bg-blue-50 border-blue-200 text-blue-900 shadow-sm'
                         : 'bg-white border-transparent hover:border-gray-100 hover:bg-gray-50 text-gray-700'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3 truncate">
                       {cat.category_image ? (
-                         <img src={cat.category_image} alt={cat.name} className="w-10 h-10 rounded-lg object-cover shadow-sm" />
+                         <img src={typeof cat.category_image === 'object' ? (cat.category_image?.thumbnail || cat.category_image?.icon || cat.category_image?.full) : cat.category_image} alt={cat.name} className="w-10 h-10 rounded-lg object-cover shadow-sm" />
                       ) : (
                         <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
                           <FolderTree className="w-5 h-5 text-gray-400" />
@@ -302,7 +301,7 @@ const Category = () => {
                       )}
                       <div className="font-medium truncate max-w-[150px]">{cat.name}</div>
                     </div>
-                    
+
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={(e) => {
@@ -313,7 +312,7 @@ const Category = () => {
                             description: cat.description || cat.category_description || '',
                             image: null,
                           });
-                          if (cat.category_image) setCatImagePreview(cat.category_image);
+                          if (cat.category_image) setCatImagePreview(typeof cat.category_image === 'object' ? (cat.category_image?.full || cat.category_image?.thumbnail || cat.category_image?.icon) : cat.category_image);
                           setIsCatModalOpen(true);
                         }}
                         className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
@@ -375,7 +374,7 @@ const Category = () => {
                   <div className="text-center py-16 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
                     <Info className="w-10 h-10 mx-auto mb-3 text-gray-300" />
                     <p>No subcategories found for <span className="font-semibold">{selectedCategory.name}</span>.</p>
-                    <button 
+                    <button
                       onClick={() => setIsSubCatModalOpen(true)}
                       className="mt-4 text-indigo-600 font-medium hover:underline"
                     >
@@ -391,7 +390,7 @@ const Category = () => {
                           <span className="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded-full font-medium">Sub</span>
                         </div>
                         <p className="text-xs text-gray-400 mb-4">ID: #{sub.id}</p>
-                        
+
                         <div className="flex items-center gap-2 border-t border-gray-50 pt-3">
                           <button
                             onClick={() => {

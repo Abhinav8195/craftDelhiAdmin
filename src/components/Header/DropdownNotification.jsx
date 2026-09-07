@@ -5,7 +5,7 @@ import { NotificationService } from '../../services/NotificationService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-const DropdownNotification = ({ onClose, setUnreadCount }) => {
+const DropdownNotification = ({ onClose, setUnreadCount, refreshTrigger }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -22,7 +22,7 @@ const DropdownNotification = ({ onClose, setUnreadCount }) => {
 
   useEffect(() => {
     fetchNotifications();
-  }, []);
+  }, [refreshTrigger]);
 
   const fetchNotifications = async () => {
     try {

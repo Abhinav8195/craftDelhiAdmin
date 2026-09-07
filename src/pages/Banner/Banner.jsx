@@ -176,7 +176,7 @@ const Banner = () => {
 
   return (
     <div className="h-full bg-gray-50/50 p-4 md:p-6 lg:p-8 min-h-screen">
-      
+
       {/* ---------------------------------------------------------------- */}
       {/* Header */}
       {/* ---------------------------------------------------------------- */}
@@ -200,22 +200,22 @@ const Banner = () => {
 
       {loading ? (
         <div className="flex flex-col justify-center items-center h-64">
-           <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
-           <p className="text-gray-500 font-medium">Loading banners...</p>
+          <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
+          <p className="text-gray-500 font-medium">Loading banners...</p>
         </div>
       ) : banners.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm max-w-2xl mx-auto mt-12">
-            <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <ImageIcon className="w-10 h-10 text-indigo-400" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">No Banners Found</h3>
-            <p className="text-gray-500 mb-6">You haven't uploaded any banners yet. Start by adding one!</p>
-            <button 
-              onClick={openAddForm}
-              className="px-6 py-2.5 bg-indigo-50 text-indigo-600 font-bold rounded-xl hover:bg-indigo-100 transition-colors inline-flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" /> Add First Banner
-            </button>
+          <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <ImageIcon className="w-10 h-10 text-indigo-400" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Banners Found</h3>
+          <p className="text-gray-500 mb-6">You haven't uploaded any banners yet. Start by adding one!</p>
+          <button
+            onClick={openAddForm}
+            className="px-6 py-2.5 bg-indigo-50 text-indigo-600 font-bold rounded-xl hover:bg-indigo-100 transition-colors inline-flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" /> Add First Banner
+          </button>
         </div>
       ) : (
         <>
@@ -251,10 +251,10 @@ const Banner = () => {
                       </td>
                       <td className="px-6 py-4 font-semibold text-gray-800">{b.title}</td>
                       <td className="px-6 py-4">
-                         <TypeBadge type={b.type} />
+                        <TypeBadge type={b.type} />
                       </td>
                       <td className="px-6 py-4">
-                         <StatusBadge status={b.status} />
+                        <StatusBadge status={b.status} />
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center gap-2">
@@ -304,7 +304,7 @@ const Banner = () => {
                     <h3 className="font-bold text-gray-900 line-clamp-1 flex-1 pr-2">{b.title}</h3>
                     <TypeBadge type={b.type} />
                   </div>
-                  
+
                   <div className="text-xs text-gray-400 mb-4">ID: #{b.id}</div>
 
                   <div className="flex gap-2 mt-auto border-t border-gray-50 pt-3">
@@ -350,45 +350,45 @@ const Banner = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-             <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Media Type</label>
-                <select
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
-                  value={form.type}
-                  onChange={(e) => setForm({ ...form, type: e.target.value })}
-                >
-                  <option value="image">Image</option>
-                  <option value="video">Video</option>
-                </select>
-             </div>
-             
-             <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">Status</label>
-                <select
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
-                  value={form.status}
-                  onChange={(e) =>
-                    setForm({ ...form, status: Number(e.target.value) })
-                  }
-                >
-                  <option value={1}>Active</option>
-                  <option value={0}>Inactive</option>
-                </select>
-             </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Media Type</label>
+              <select
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value })}
+              >
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Status</label>
+              <select
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                value={form.status}
+                onChange={(e) =>
+                  setForm({ ...form, status: Number(e.target.value) })
+                }
+              >
+                <option value={1}>Active</option>
+                <option value={0}>Inactive</option>
+              </select>
+            </div>
           </div>
 
           <div className="space-y-1">
-             <label className="text-sm font-medium text-gray-700">Media File</label>
-             <div className="relative">
-                <input
-                  type="file"
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-gray-200 rounded-xl bg-gray-50 transition-all cursor-pointer"
-                  onChange={(e) =>
-                    setForm({ ...form, banner: e.target.files[0] })
-                  }
-                />
-             </div>
-             <p className="text-xs text-gray-500 mt-2">Optimal size: 1920x1080px. Max size: 10MB.</p>
+            <label className="text-sm font-medium text-gray-700">Media File</label>
+            <div className="relative">
+              <input
+                type="file"
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-gray-200 rounded-xl bg-gray-50 transition-all cursor-pointer"
+                onChange={(e) =>
+                  setForm({ ...form, banner: e.target.files[0] })
+                }
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">Optimal size: 1920x1080px. Max size: 10MB.</p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-2">
