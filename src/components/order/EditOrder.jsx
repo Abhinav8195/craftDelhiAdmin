@@ -206,18 +206,18 @@ const EditOrder = ({ card1, orderData }) => {
             <div className="flex flex-col gap-1">
               <label className="text-black text-[10px] font-bold uppercase tracking-widest">Payment Status</label>
               <select
-  className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-xs text-black"
-  value={form.payment_status ?? ""}
-  onChange={(e) =>
-    setForm({ ...form, payment_status: Number(e.target.value) })
-  }
->
-  <option value="">Select Status</option>
-  <option value={0}>Pending</option>
-  <option value={1}>Paid</option>
-  <option value={2}>Refund</option>
-  <option value={4}>Cancelled</option>
-</select>
+                className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-xs text-black"
+                value={form.payment_status ?? ""}
+                onChange={(e) =>
+                  setForm({ ...form, payment_status: Number(e.target.value) })
+                }
+              >
+                <option value="">Select Status</option>
+                <option value={0}>Pending</option>
+                <option value={1}>Paid</option>
+                <option value={2}>Refund</option>
+                <option value={4}>Cancelled</option>
+              </select>
             </div>
 
             <div className="flex flex-col gap-1">
