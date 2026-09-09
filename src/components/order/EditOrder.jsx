@@ -4,6 +4,7 @@ import { IoIosChatbubbles } from "react-icons/io";
 import { getAdminToken } from '../../utils/auth';
 import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const EditOrder = ({ card1, orderData }) => {
   const [loading, setLoading] = useState(false);
@@ -346,7 +347,7 @@ const EditOrder = ({ card1, orderData }) => {
                     {/* Image */}
                     <td className="p-4 flex justify-center">
                       <img
-                        src={item?.product?.main_image_url || image}
+                        src={getImageUrl(item?.product?.main_image_url, "thumbnail", image)}
                         alt={item?.product?.name || 'Product'}
                         className="w-14 h-14 rounded-lg shadow-md border border-gray-200 object-cover hover:scale-105 transition-transform duration-200"
                       />

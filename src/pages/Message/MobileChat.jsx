@@ -227,9 +227,9 @@ const MobileChat = ({
                         {(msg.filePreview || (msg.message && isImageURL(msg.message))) && (
                           <img
                             src={msg.filePreview || msg.message}
+                            alt="Shared chat attachment"
                             className="w-40 h-40 rounded-lg object-cover mb-2 cursor-pointer"
                             onClick={() => window.open(msg.filePreview || msg.message, "_blank")}
-                            alt="attachment"
                           />
                         )}
 

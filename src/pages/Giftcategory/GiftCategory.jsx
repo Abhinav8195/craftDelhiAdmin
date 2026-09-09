@@ -11,6 +11,7 @@ import {
   Plus, Trash2, Edit2, Search, Image as ImageIcon, CheckCircle2, XCircle, Gift, Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
@@ -220,7 +221,7 @@ const GiftCategory = () => {
                 {imagePreview ? (
                   <>
                     <img
-                      src={imagePreview}
+                      src={getImageUrl(imagePreview, "thumbnail")}
                       alt="preview"
                       className="h-full w-full object-contain p-2"
                     />
@@ -313,11 +314,11 @@ const GiftCategory = () => {
                 {/* Image Section */}
                 <div className="relative h-48 bg-gray-50 border-b border-gray-100 overflow-hidden flex items-center justify-center">
                   {cat.gift_image ? (
-                    <img
-                      src={cat.gift_image}
-                      alt={cat.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+                      <img
+                        src={getImageUrl(cat.gift_image, "icon")}
+                        alt={cat.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                   ) : (
                     <ImageIcon className="w-12 h-12 text-gray-300" />
                   )}

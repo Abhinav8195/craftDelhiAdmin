@@ -127,10 +127,10 @@ const DropdownNotification = ({ onClose, setUnreadCount, refreshTrigger }) => {
         <div className="flex items-center justify-between px-5 py-4 border-b border-stroke dark:border-strokedark">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Notifications</h2>
           <div className="flex items-center gap-3">
-            <button onClick={handleMarkAllRead} title="Mark all as read" className="text-gray-500 hover:text-blue-500">
+            <button onClick={handleMarkAllRead} title="Mark all as read" aria-label="Mark all notifications as read" className="text-gray-500 hover:text-blue-500">
               <FaCheckDouble size={18} />
             </button>
-            <button onClick={onClose}>
+            <button onClick={onClose} aria-label="Close notifications">
               <IoClose className="text-xl text-gray-700 dark:text-white hover:text-red-500" />
             </button>
           </div>

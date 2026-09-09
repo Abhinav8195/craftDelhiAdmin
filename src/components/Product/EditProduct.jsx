@@ -3,6 +3,7 @@ import image from '../../assets/images/image.png'
 import { getAdminToken } from '../../utils/auth';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { getImageUrl, parseImageList } from '../../utils/imageUrl';
 const EditProduct = ({card1,product}) => {
 
   console.log(product)
@@ -80,7 +81,7 @@ useEffect(() => {
 
       // Gallery mapping
       if (product.gallery_images) {
-        const gallery = product.gallery_images.map(img => ({
+        const gallery = parseImageList(product.gallery_images).map(img => ({
           file: null,
           preview: img
         }));
@@ -178,8 +179,6 @@ const removeHashtag = (tag) => {
   // Main Image
   if (file) {
     formData.append("main_image", file);
-  } else if (product?.main_image_url) {
-    formData.append("main_image_url", product.main_image_url);
   }
 
   // Product Video
@@ -200,8 +199,6 @@ const removeHashtag = (tag) => {
   const newlyUploaded = images.filter(i => i.file);
   if (newlyUploaded.length > 0) {
     newlyUploaded.forEach(img => formData.append("gallery_images", img.file));
-  } else if (product?.gallery_images?.length) {
-    formData.append("gallery_images", JSON.stringify(product.gallery_images));
   }
 
   try {
@@ -274,7 +271,7 @@ useEffect(() => {
 
   // gallery
   if (product.gallery_images) {
-    const mapped = product.gallery_images.slice(0,4).map(img => ({
+    const mapped = parseImageList(product.gallery_images).slice(0,4).map(img => ({
       file: null,
       preview: img
     }));
@@ -360,7 +357,7 @@ useEffect(() => {
         ) : (
           <img
             className="w-[100px] h-[118px] border border-[#ecf0ff] rounded object-cover"
-            src={product?.main_image_url || image}
+            src={getImageUrl(product?.main_image_url, "thumbnail", image)}
             alt="Preview"
           />
         )}
@@ -410,7 +407,7 @@ useEffect(() => {
                     <div className="flex justify-start items-center gap-5 w-full">
                     <img
                         className="w-[100px] h-[118px] border border-[#ecf0ff] object-cover"
-                        src={imagee.preview || image}
+                        src={getImageUrl(imagee.preview, "thumbnail", image)}
                         alt={`Preview ${index + 1}`}
                     />
                     <div className="flex flex-col justify-start items-start gap-2.5 w-full">
@@ -425,7 +422,7 @@ useEffect(() => {
                             />
                         </label>
                         <div className="text-[#3b3b3b] text-xs font-bold font-['Montserrat'] leading-normal">
-                            {imagee ? "Image Selected" : "Choose File"}
+                            {imagee.file || imagee.preview ? "Image Selected" : "Choose File"}
                         </div>
                         </div>
                     </div>

@@ -3,6 +3,7 @@ import Ellipse from "../../assets/images/d1.png";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const indianBanks = [
   "State Bank of India", "Punjab National Bank", "HDFC Bank", "ICICI Bank", "Axis Bank",
@@ -103,7 +104,7 @@ const SellerBank = ({ card1, seller }) => {
 
           {/* Image Not Editable */}
           <div className="cursor-not-allowed">
-            <img className="w-24 h-24 rounded-full object-cover" src={formData.profileImage} alt="" />
+            <img className="w-24 h-24 rounded-full object-cover" src={getImageUrl(formData.profileImage, "thumbnail", Ellipse)} alt="" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

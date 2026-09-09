@@ -40,7 +40,7 @@ const AddPayment = ({ close }) => {
         <div className="self-stretch justify-start items-start gap-[15px] inline-flex">
           <div className="grow shrink basis-0 text-black text-2xl font-bold font-['Montserrat'] leading-loose">Add New Payment</div>
           <div className="w-8 h-8 relative overflow-hidden" onClick={close}>
-            <button className="text-black text-lg"><IoMdCloseCircleOutline size={28} /></button>
+            <button type="button" aria-label="Close payment form" className="text-black text-lg"><IoMdCloseCircleOutline size={28} /></button>
           </div>
         </div>
         <div className="self-stretch h-[1px] border-2 border-[#d9d9d9]"></div>

@@ -3,6 +3,7 @@ import Ellipse from "../../assets/images/d1.png";
 import { IoMdCloudUpload } from "react-icons/io";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getImageUrl } from "../../utils/imageUrl";
 const genderOptions = [
   { label: "Male", value: 0 },
   { label: "Female", value: 1 },
@@ -100,7 +101,7 @@ const SellerEditProfile = ({ card1, seller }) => {
         {/* PROFILE IMAGE (Upload Disabled but UI same) */}
         <div className="flex flex-col sm:flex-row items-center gap-5">
           <div className="cursor-not-allowed ">
-  <img className="w-24 h-24 rounded-full object-cover z-0" src={formData.profileImage} alt="Profile"/>
+  <img className="w-24 h-24 rounded-full object-cover z-0" src={getImageUrl(formData.profileImage, "thumbnail", Ellipse)} alt="Profile"/>
 
 </div>
 

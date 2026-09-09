@@ -19,7 +19,7 @@ const PaymentDelete = ({ close, onDelete }) => {
           <div className="text-black text-lg sm:text-xl md:text-2xl font-bold font-['Montserrat']">
             Delete Payment
           </div>
-          <button className="text-black text-xl font-bold" onClick={close}>
+          <button type="button" aria-label="Close dialog" className="text-black text-xl font-bold" onClick={close}>
             <IoMdCloseCircleOutline size={28} />
           </button>
         </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { Plus, Edit2, Trash2, Image as ImageIcon, Video, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { getImageUrl } from "../../utils/imageUrl";
 
 // Helper Modal Component matching the SaaS theme
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -243,9 +244,9 @@ const Banner = () => {
                       <td className="px-6 py-4">
                         <div className="w-32 h-16 rounded-lg overflow-hidden border border-gray-100 shadow-sm bg-gray-50 flex items-center justify-center">
                           {b.type === "video" ? (
-                            <video src={b.banner} className="w-full h-full object-cover" muted loop autoPlay />
+                            <video src={getImageUrl(b.banner, "full")} className="w-full h-full object-cover" muted loop autoPlay />
                           ) : (
-                            <img src={b.banner} className="w-full h-full object-cover" alt={b.title} />
+                            <img src={getImageUrl(b.banner, "thumbnail")} className="w-full h-full object-cover" alt={b.title} />
                           )}
                         </div>
                       </td>
@@ -289,9 +290,9 @@ const Banner = () => {
               <div key={b.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                 <div className="h-40 bg-gray-50 flex items-center justify-center border-b border-gray-100 relative">
                   {b.type === "video" ? (
-                    <video src={b.banner} className="w-full h-full object-cover" controls />
+                    <video src={getImageUrl(b.banner, "full")} className="w-full h-full object-cover" controls />
                   ) : (
-                    <img src={b.banner} className="w-full h-full object-cover" alt={b.title} />
+                    <img src={getImageUrl(b.banner, "full")} className="w-full h-full object-cover" alt={b.title} />
                   )}
                   {/* Status overlay */}
                   <div className="absolute top-3 right-3 shadow-sm rounded-md overflow-hidden opacity-90">

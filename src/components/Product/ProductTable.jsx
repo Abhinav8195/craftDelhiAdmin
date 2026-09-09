@@ -9,6 +9,7 @@ import ProductDelete from "./ProductDelete";
 import Sample from "../../assets/images/sample.png";
 import { toast } from "react-toastify";
 import { getAdminToken } from "../../utils/auth";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const tableContainer = {
   hidden: { opacity: 0 },
@@ -192,7 +193,7 @@ const filteredProducts = products.filter((product) => {
                   <td className="p-4 text-[12px] text-gray-900">{product.name}</td>
                   <td className="p-4">
                     <img
-                      src={product.main_image_url || Sample}
+                      src={getImageUrl(product.main_image_url, "icon", Sample)}
                       alt="product"
                       className="w-12 h-12 rounded-lg object-cover"
                     />

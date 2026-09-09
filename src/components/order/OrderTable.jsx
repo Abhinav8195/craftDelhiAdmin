@@ -8,6 +8,7 @@ import ProductDelete from "../Product/ProductDelete";
 import { getAdminToken } from "../../utils/auth";
 import { toast } from "react-toastify";
 import { getSellerNameMap } from "../../utils/sellerNames";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const tableContainer = {
   hidden: { opacity: 0 },
@@ -249,7 +250,7 @@ const OrderTable = ({ card1 }) => {
                   <td className="p-4 text-[12px] text-gray-900">{order.items[0]?.product?.name}</td>
 
                   <td className="p-4">
-                    <img src={order.items[0]?.product?.main_image_url} alt="product" className="w-12 h-12 rounded-lg object-cover" />
+                    <img src={getImageUrl(order.items[0]?.product?.main_image_url, "icon")} alt="product" className="w-12 h-12 rounded-lg object-cover" />
                   </td>
 
                   <td className="p-4 text-[12px] text-gray-900">

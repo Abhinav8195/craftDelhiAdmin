@@ -3,6 +3,7 @@ import Ellipse from "../../assets/images/d1.png";
 import { IoMdCloudUpload } from "react-icons/io";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const SellerStoreinfo = ({ card1, seller }) => {
   const [errors, setErrors] = useState({});
@@ -96,7 +97,7 @@ const SellerStoreinfo = ({ card1, seller }) => {
           <div className="cursor-not-allowed ">
   <img
                 className="w-24 h-24 rounded-full object-cover"
-                src={formData.storeImage || Ellipse}
+                src={getImageUrl(formData.storeImage, "thumbnail", Ellipse)}
                 alt="Store"
               />
 

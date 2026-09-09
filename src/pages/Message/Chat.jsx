@@ -860,6 +860,8 @@ const filteredRooms = rooms.filter((room) => {
                     />
 
                     <button
+                      type="button"
+                      aria-label="Send message"
                       onClick={handleSendMessage}
                       disabled={!newMessage.trim() && !attachment}
                       className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white w-9 h-9 rounded-full shadow-sm transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0"

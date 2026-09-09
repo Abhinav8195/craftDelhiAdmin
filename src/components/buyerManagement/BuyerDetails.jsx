@@ -2,6 +2,7 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 import { FaUserCheck } from "react-icons/fa";
 import { FaTrash } from "react-icons/fa6";
 import { MdPauseCircle } from "react-icons/md";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const BuyerDetails = ({ user, close }) => {
 
@@ -47,7 +48,7 @@ const BuyerDetails = ({ user, close }) => {
 
       <div className="w-full flex justify-between items-center">
         <h2 className="text-black text-2xl font-bold">Profile View</h2>
-        <button className="text-2xl" onClick={close}><IoMdCloseCircleOutline size={28} /></button>
+        <button type="button" aria-label="Close buyer details" className="text-2xl" onClick={close}><IoMdCloseCircleOutline size={28} /></button>
       </div>
 
       <div className="w-full border-t-2 border-[#d9d9d9]"></div>
@@ -58,7 +59,7 @@ const BuyerDetails = ({ user, close }) => {
 
         <img
           className="w-16 h-16 rounded-full border border-gray-400"
-          src={user.profileImage || "https://www.cielhr.com/wp-content/uploads/2020/10/dummy-image.jpg"}
+          src={getImageUrl(user.profileImage, "thumbnail", "https://www.cielhr.com/wp-content/uploads/2020/10/dummy-image.jpg")}
           alt={user.name}
         />
 

@@ -72,7 +72,7 @@ const [customReason, setCustomReason] = useState("");
         {/* HEADER */}
         <div className="flex justify-between items-center">
           <div className="text-black text-2xl font-bold">Trash Account</div>
-          <button onClick={close}>
+          <button type="button" aria-label="Close dialog" onClick={close}>
             <IoMdCloseCircleOutline size={28} />
           </button>
         </div>

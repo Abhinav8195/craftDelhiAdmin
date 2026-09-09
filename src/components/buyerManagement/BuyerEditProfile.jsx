@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { getAdminToken } from "../../utils/auth";
 import { toast } from "react-toastify";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const BuyerEditProfile = ({ buyer, card1 }) => {
   const token = getAdminToken();
@@ -80,7 +81,7 @@ const BuyerEditProfile = ({ buyer, card1 }) => {
         <div className="flex justify-left mb-6">
           <img
             className="w-24 h-24 rounded-full object-cover border border-gray-400"
-            src={buyer?.profileImage || "https://www.cielhr.com/wp-content/uploads/2020/10/dummy-image.jpg"}
+            src={getImageUrl(buyer?.profileImage, "thumbnail", "https://www.cielhr.com/wp-content/uploads/2020/10/dummy-image.jpg")}
             alt="Profile"
           />
         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getImageUrl } from '../../utils/imageUrl';
 import { toast } from 'react-toastify';
 import {
   Plus, Edit2, Trash2, ChevronRight,
@@ -293,7 +294,7 @@ const Category = () => {
                   >
                     <div className="flex items-center gap-3 truncate">
                       {cat.category_image ? (
-                         <img src={typeof cat.category_image === 'object' ? (cat.category_image?.thumbnail || cat.category_image?.icon || cat.category_image?.full) : cat.category_image} alt={cat.name} className="w-10 h-10 rounded-lg object-cover shadow-sm" />
+                          <img src={getImageUrl(cat.category_image, "icon")} alt={cat.name} className="w-10 h-10 rounded-lg object-cover shadow-sm" />
                       ) : (
                         <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
                           <FolderTree className="w-5 h-5 text-gray-400" />
@@ -458,7 +459,7 @@ const Category = () => {
               {catImagePreview && (
                 <div className="relative group">
                   <img
-                    src={catImagePreview}
+                    src={getImageUrl(catImagePreview, "thumbnail")}
                     alt="Preview"
                     className="w-20 h-20 object-cover rounded-lg border border-gray-200"
                   />

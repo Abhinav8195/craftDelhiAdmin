@@ -72,7 +72,7 @@ const [customReason, setCustomReason] = useState("");
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6">
           <div className="text-[#1b1b1b] text-2xl font-bold tracking-tight">Reject Product</div>
-          <button onClick={close} className="text-gray-400 hover:text-rose-500 transition-colors">
+          <button type="button" aria-label="Close dialog" onClick={close} className="text-gray-500 hover:text-rose-600 transition-colors">
             <IoMdCloseCircleOutline size={32} />
           </button>
         </div>
