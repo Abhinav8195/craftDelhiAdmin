@@ -4,6 +4,7 @@ import {
   MagnifyingGlassIcon,
   PaperClipIcon,
 } from "@heroicons/react/24/outline";
+import { validateChatAttachment } from "../../utils/chatReliability";
 
 const MobileChat = ({
   rooms,
@@ -28,17 +29,19 @@ const MobileChat = ({
 
   sendWithAttachment,
   readOnly = false,
+  isUploading = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const messagesEndRef = useRef(null);
 
-  const filteredRooms = rooms.filter((room) =>
-    (room?.participants?.find(
+  const filteredRooms = rooms.filter((room) => {
+    const otherName = room?.participants?.find(
       (p) => String(p.userId) !== String(Admin_Id)
-    )?.name || "User")
+    )?.name || "User";
+    return `${otherName} ${room?.lastMessage || ""} ${room?.title || ""}`
       .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+      .includes(searchTerm.toLowerCase());
+  });
 
   const getInitials = (name = "U") => {
     const parts = name.trim().split(" ");
@@ -142,7 +145,7 @@ const MobileChat = ({
                       )}
                     </div>
                     <p className="text-[11px] text-gray-500 truncate">
-                      {room?.title || "Chat"}
+                      {room?.lastMessage || room?.title || "No messages yet"}
                     </p>
                   </div>
                 </div>
@@ -300,6 +303,12 @@ const MobileChat = ({
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (!file) return;
+                const validationError = validateChatAttachment(file);
+                if (validationError) {
+                  window.alert(validationError);
+                  e.target.value = "";
+                  return;
+                }
 
                 setAttachment(file);
                 setAttachmentName(file.name);
@@ -329,7 +338,8 @@ const MobileChat = ({
             />
 
             <button
-              onClick={sendWithAttachment}
+                    onClick={sendWithAttachment}
+                    disabled={isUploading || (!newMessage.trim() && !attachment)}
               className="px-4 py-2 rounded-full bg-blue-600 text-white"
             >
               Send

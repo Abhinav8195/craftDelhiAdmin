@@ -6,6 +6,7 @@ import axios from "axios";
 import { getAdminToken } from "../../utils/auth";
 import { AuthContext } from "../../AuthContext";
 import { useLocation, useSearchParams } from "react-router-dom";
+import { compareChatMessages, mergeChatMessage, validateChatAttachment } from "../../utils/chatReliability";
 
 /* ================= CONFIG ================= */
 
@@ -27,6 +28,7 @@ const Chat = () => {
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const handleRoomSelectRef = useRef(null);
 
   const [rooms, setRooms] = useState([]);
   const roomsRef = useRef([]);
@@ -54,6 +56,7 @@ const Chat = () => {
   const [attachment, setAttachment] = useState(null);
   const [attachmentPreview, setAttachmentPreview] = useState(null);
   const [attachmentName, setAttachmentName] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
 
   /* ================= FETCH ROOMS ================= */
  
@@ -121,9 +124,7 @@ const Chat = () => {
         setRoomId(historyRoomId);
         setSelectedCustomer({ name: `Order ${orderUid} conversation` });
         setMessagesByRoom({
-          [historyRoomId]: [...list].sort(
-            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-          ),
+          [historyRoomId]: [...list].sort(compareChatMessages),
         });
       } catch (error) {
         console.error("Order chat history failed", error);
@@ -158,6 +159,13 @@ const Chat = () => {
 
     socketRef.current.on("connect", () => {
       console.log("✅ Socket connected:", socketRef.current.id);
+      fetchRooms();
+      socketRef.current.emit("get_unseen_count");
+      if (activeRoomRef.current) {
+        socketRef.current.emit("join_room", { roomId: activeRoomRef.current });
+        const currentRoom = roomsRef.current.find((room) => room._id === activeRoomRef.current);
+        if (currentRoom) handleRoomSelectRef.current?.(currentRoom);
+      }
     });
 
     socketRef.current.on("connect_error", (err) => {
@@ -197,10 +205,7 @@ const Chat = () => {
         }
 
         // 4. Otherwise, it's a new message from the other user
-        return {
-          ...prev,
-          [data.roomId]: [...roomMessages, data],
-        };
+        return { ...prev, [data.roomId]: mergeChatMessage(roomMessages, data) };
       });
   
       // If this room isn't in our current list, refresh rooms
@@ -283,9 +288,7 @@ const Chat = () => {
 
       const list = res.data?.data || [];
 
-      const sorted = [...list].sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-      );
+      const sorted = [...list].sort(compareChatMessages);
 
       setMessagesByRoom(prev => ({
         ...prev,
@@ -301,6 +304,7 @@ const Chat = () => {
       console.error("❌ Message load failed", err);
     }
   }, [Admin_Id]);
+  handleRoomSelectRef.current = handleRoomSelect;
 
   useEffect(() => {
     if (isOrderHistory || !requestedRoomId || !rooms.length || roomId === requestedRoomId) return;
@@ -345,6 +349,7 @@ const Chat = () => {
               senderId: Admin_Id,
               createdAt: new Date(),
               tempId,
+              status: "sending",
             },
           ],
         };
@@ -361,13 +366,24 @@ const Chat = () => {
       } else {
         const TOKEN = getAdminToken();
         try {
-          await axios.post(
+          const response = await axios.post(
             `${API_BASE}/message`,
             { roomId, message: messageText, tempId },
             { headers: { Authorization: `Bearer ${TOKEN}` } }
           );
+          const serverMessage = response.data?.data;
+          if (serverMessage) setMessagesByRoom((prev) => ({
+            ...prev,
+            [roomId]: mergeChatMessage(prev[roomId] || [], { ...serverMessage, tempId }),
+          }));
         } catch (err) {
           console.error("❌ REST send failed", err);
+          setMessagesByRoom((prev) => ({
+            ...prev,
+            [roomId]: (prev[roomId] || []).map((message) =>
+              message.tempId === tempId ? { ...message, status: "failed" } : message
+            ),
+          }));
         }
       }
     }
@@ -381,7 +397,7 @@ const Chat = () => {
   /* ================= SEND ATTACHMENT ================= */
 
   const handleSendAttachment = async () => {
-    if (!attachment || !roomId) return;
+    if (!attachment || !roomId || isUploading) return;
 
     const TOKEN = getAdminToken();
     const formData = new FormData();
@@ -391,6 +407,8 @@ const Chat = () => {
     // add optimistically in UI
     const fileNameStored = attachmentName;
     const filePrevStored = attachmentPreview;
+    const tempId = `file-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    formData.append("tempId", tempId);
 
     setMessagesByRoom(prev => {
       const roomMessages = prev[roomId] || [];
@@ -403,6 +421,8 @@ const Chat = () => {
             fileName: fileNameStored,
             filePreview: filePrevStored,
             createdAt: new Date(),
+            tempId,
+            status: "sending",
           },
         ],
       };
@@ -414,6 +434,7 @@ const Chat = () => {
     setAttachmentName("");
 
     try {
+      setIsUploading(true);
       const res = await axios.post(
         `${API_BASE}/message`,
         formData,
@@ -427,18 +448,26 @@ const Chat = () => {
 
       const serverMsg = res.data?.data || res.data || {};
       const persistentUrl = serverMsg.attachmentUrl || serverMsg.message || serverMsg.fileUrl || serverMsg.filePath;
-
-      if (socketRef.current && socketRef.current.connected) {
-        socketRef.current.emit("send_message", {
-          roomId,
+      setMessagesByRoom((prev) => ({
+        ...prev,
+        [roomId]: mergeChatMessage(prev[roomId] || [], {
+          ...serverMsg,
+          tempId,
           fileName: fileNameStored,
           filePreview: persistentUrl || filePrevStored,
-          message: persistentUrl,
-          attachmentType: serverMsg.attachmentType || (attachment.type.startsWith("image/") ? "image" : "file"),
-        });
-      }
+          status: "sent",
+        }),
+      }));
     } catch (err) {
       console.error("❌ REST attachment send failed", err);
+      setMessagesByRoom((prev) => ({
+        ...prev,
+        [roomId]: (prev[roomId] || []).map((message) =>
+          message.tempId === tempId ? { ...message, status: "failed" } : message
+        ),
+      }));
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -508,10 +537,12 @@ const filteredRooms = rooms.filter((room) => {
 
   const name = other?.name || "";
   const title = room?.title || "";
+  const lastMessage = room?.lastMessage || "";
 
   return (
     name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    title.toLowerCase().includes(searchTerm.toLowerCase())
+    title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
   );
 });
 
@@ -571,6 +602,7 @@ const filteredRooms = rooms.filter((room) => {
           setAttachmentName={setAttachmentName}
           sendWithAttachment={handleSendMessage}
           readOnly={isOrderHistory}
+          isUploading={isUploading}
         />
       ) : (
         <div className="w-full max-w-6xl flex rounded-2xl shadow-sm border border-gray-200 h-[80vh] bg-white overflow-hidden">
@@ -632,7 +664,7 @@ const filteredRooms = rooms.filter((room) => {
                              )}
                         </div>
                         <p className="text-[11px] text-gray-500 truncate uppercase mt-0.5 tracking-wide">
-                          {room?.contextType || "PRODUCT"}
+                          {room?.lastMessage || room?.title || "No messages yet"}
                         </p>
                       </div>
                     </div>
@@ -752,6 +784,7 @@ const filteredRooms = rooms.filter((room) => {
                               </div>
                               <div className="text-[10px] mt-1 text-gray-400">
                                 {formatTime(msg.createdAt)}
+                                {isMe && msg.status && ` · ${msg.status === "sending" ? "Sending…" : msg.status === "failed" ? "Failed" : "Sent"}`}
                               </div>
                             </div>
                             
@@ -793,6 +826,12 @@ const filteredRooms = rooms.filter((room) => {
                     onChange={(e) => {
                       const file = e.target.files[0];
                       if (!file) return;
+                      const validationError = validateChatAttachment(file);
+                      if (validationError) {
+                        window.alert(validationError);
+                        e.target.value = "";
+                        return;
+                      }
 
                       setAttachment(file);
                       setAttachmentName(file.name);
@@ -863,7 +902,7 @@ const filteredRooms = rooms.filter((room) => {
                       type="button"
                       aria-label="Send message"
                       onClick={handleSendMessage}
-                      disabled={!newMessage.trim() && !attachment}
+                      disabled={isUploading || (!newMessage.trim() && !attachment)}
                       className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white w-9 h-9 rounded-full shadow-sm transition-transform active:scale-95 disabled:opacity-50 flex-shrink-0"
                     >
                       <FiSend size={18} className="translate-y-[1px] -translate-x-[1px]" />
