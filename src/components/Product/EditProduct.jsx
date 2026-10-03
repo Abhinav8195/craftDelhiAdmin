@@ -25,6 +25,8 @@ const EditProduct = ({card1,product}) => {
     const [fileName, setFileName] = useState("No file chosen");
     const [price, setPrice] = useState("");
     const [category, setCategory] = useState("");
+    const [subcategory, setSubcategory] = useState("");
+    const [subcategories, setSubcategories] = useState([]);
     const [quantity, setQuantity] = useState("");
     const [dimensions, setDimensions] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,12 +58,37 @@ const EditProduct = ({card1,product}) => {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    if (category) {
+      const fetchSubcategories = async () => {
+        try {
+          const res = await axios.get(
+            `${process.env.REACT_APP_BASE_URL}categories/subcategories/${category}`,
+            { headers: { Authorization: `${token}` } }
+          );
+          if (res.data.status) {
+            setSubcategories(res.data.data);
+          } else {
+            setSubcategories([]);
+          }
+        } catch (err) {
+          setSubcategories([]);
+        }
+      };
+      fetchSubcategories();
+    } else {
+      setSubcategories([]);
+      setSubcategory("");
+    }
+  }, [category, token]);
+
 useEffect(() => {
     if (product) {
       setProductName(product.name || "");
       setPrice(product.price || "");
       setDescription(product.description || "");
-      setCategory(product.category_id || "");
+      setCategory(product.parent_category_id || product.category_id || "");
+      setSubcategory(product.subcategory_id || "");
       setQuantity(product.stock || "");
       // Parse hashtags from product.hashtags if available
       let parsedHashtags = [];
@@ -164,7 +191,10 @@ const removeHashtag = (tag) => {
   formData.append("name", productName);
   formData.append("price", price);
   formData.append("description", description);
-  formData.append("category_id", category);
+  
+  const finalCategoryId = subcategory || category;
+  formData.append("category_id", finalCategoryId);
+  
   formData.append("stock", quantity);
   formData.append("dimension", dimensions);
   formData.append("package_weight", packageWeight);
@@ -240,7 +270,8 @@ useEffect(() => {
   setProductName(product.name || "");
   setPrice(product.price || "");
   setDescription(product.description || "");
-  setCategory(product.category_id || "");
+  setCategory(product.parent_category_id || product.category_id || "");
+  setSubcategory(product.subcategory_id || "");
   setQuantity(product.stock || "");
   setPackageWeight(product.package_weight || "");
   setUnit(product.weight_type || "gram");
@@ -475,7 +506,10 @@ useEffect(() => {
       <div className="flex gap-2">
         <select
           value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setSubcategory("");
+          }}
           className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-black text-xs w-full"
         >
           <option value="">Select Category</option>
@@ -485,6 +519,27 @@ useEffect(() => {
         </select>
       </div>
     </div>
+
+    {category && (
+      <div className="space-y-2 mt-4">
+        <h3 className="text-black text-[10px] font-bold uppercase tracking-widest">
+          Subcategory
+        </h3>
+      
+        <div className="flex gap-2">
+          <select
+            value={subcategory}
+            onChange={(e) => setSubcategory(e.target.value)}
+            className="h-14 px-3 bg-white rounded border border-[#e0e4f4] text-black text-xs w-full"
+          >
+            <option value="">Select Subcategory</option>
+            {subcategories.map(sub => (
+              <option key={sub.id} value={sub.id}>{sub.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    )}
     
             </div>
     
